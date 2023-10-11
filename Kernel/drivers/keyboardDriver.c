@@ -17,9 +17,8 @@ const unsigned char ascii[TOTAL_SCANCODES][2] = {
 
 static int shiftActivated = 0;
 static int capslockActivated = 0;
-static char altTouched = 0; 
 static unsigned char character;
-
+static char ctrlActivated = 0;
 
 /**
  * @brief Handler de la interrupción de teclado. Retorna el valor ASCII obtenido del buffer en el mapa de
@@ -47,6 +46,11 @@ unsigned char scanCodeToASCII(unsigned char scanCode) {
             return ascii[scanCode][!getShift()];
         }
     }
+    /*if( scancode de D & ctrlActivated)
+        excep
+    */
+    
+
     return ascii[scanCode][getShift()];
 }
 
@@ -56,9 +60,6 @@ unsigned char scanCodeToASCII(unsigned char scanCode) {
  * @param scanCode Valor leído del mapa de entrada y salida.
  */
 void checkConditions(unsigned char scanCode) {
-    if (scanCode == ALT_KEY){
-        altTouched = 1; 
-    } 
     if(scanCode == SHFT_DOWN || scanCode == RSHFT_DOWN) {
         shiftActivated = 1;
     }
@@ -67,7 +68,12 @@ void checkConditions(unsigned char scanCode) {
     }
     else if(scanCode == CAPSLOCK_DOWN) {
         capslockActivated = !capslockActivated;
-    }
+    } 
+    //PARA CTRL+D y CTRL+C
+    else if ( scanCode== CTRL_KEY_DOWN ) 
+        ctrlActivated = 1;
+    else if ( scanCode== CTRL_KEY_UP ) 
+        ctrlActivated = 0;
 }
 
 /**
@@ -97,56 +103,4 @@ int getShift() {
  */
 int getCapslock() {
     return capslockActivated;
-}
-
-/**
- * @brief Retorna un valor booleano si la tecla ALT fue usada recientemente.
- * 
- * @return Valor booleano (1 o 0) si la tecla fue usada recientemente.
- */
-char getAltTouched(){ return altTouched;}
-
-/**
- * @brief Reinicia al valor falso a la variable booleana de si la tecla ALT fue usada recientemente.
- * 
- */
-void resetAltTouched(){ altTouched = 0;}
-
-/**
- * @brief Actualiza los valores del vector de teclas utilizada para el minijuego.
- * 
- * @param up Vector de caracteres para las teclas utilizadas para el minijuego.
- */
-void getKeyboardState(char * up) {
-   int c = character;
-    switch (c)
-    {
-        case UPL_KEY:
-            up[1] = 1;
-            break;
-        case DOWNL_KEY:
-            up[2] = 1;
-            break;
-        case UPR_KEY:
-            up[3] = 1;
-            break;
-        case DOWNR_KEY:
-            up[4] = 1;
-            break;
-        case BREAK_UPL_KEY:
-            up[1] = 0;
-            break;
-        case BREAK_DOWNL_KEY:
-            up[2] = 0;
-            break;
-        case BREAK_UPR_KEY:
-            up[3] = 0;
-            break;
-        case BREAK_DOWNR_KEY:
-            up[4] = 0;
-            break;
-        case ESC_KEY:
-            up[0] = 1;
-            break;
-    }
 }

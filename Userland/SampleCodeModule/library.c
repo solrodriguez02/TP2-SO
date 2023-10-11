@@ -44,15 +44,6 @@ void getInput(char * buff){
     buff[buffidx] = '\0';
 }
 
-/**
- * @brief Retorna el vector de registros.
- * 
- * @return Vector que contiene los valores de los registros.
- */
-long int * getRegisters() {
-    return syscall_getRegisters();
-}
-
 // ------------------------------------- ESCRITURA ------------------------------------- //
 
 /**
@@ -197,13 +188,6 @@ void sleep(int seconds){
 }
 
 /**
- * @brief Reproduce un sonido de frecuencia 1000Hz durante un corto instante de tiempo.
- */
-void beep() {
-    syscall_beep(1000,10);
-}
-
-/**
  * @brief Carga el segundo buffer guardado.
  */
 void loadScreen() {
@@ -331,32 +315,4 @@ int strcmp(const char* s1, const char* s2){
         return 0;
     }
     return 1;
-}
-
-// ------------------------------------- FIGURES ------------------------------------- //
-
-/**
- * @brief Dibuja sobre la pantalla un círculo centrado en un par ordenado (x,y) con cierto radio y color.
- * 
- * @param x_centre Posición horizontal en la cual el círculo está centrado.
- * @param y_centre Posición vertical en la cual el círculo está centrado.
- * @param r Radio del círculo.
- * @param color Color del círculo.
- */
-void drawCircle(int x_centre, int y_centre, int r, uint8_t color) {
-    syscall_drawCircle(x_centre, y_centre, r, color);
-}
-
-/**
- * @brief Dibuja sobre la pantalla un rectángulo que comienza en la esquina inferior izquierda, de cierta 
- * altura, ancho y color.
- * 
- * @param x Posición izquierda donde comienza el rectángulo.
- * @param y Posición inferior donde comienza el rectángulo.
- * @param h Altura del rectángulo.
- * @param w Ancho del rectángulo.
- * @param color Color del rectángulo.
- */
-void drawRectangle(int x, int y, int h, int w, uint8_t color) {
-    syscall_drawRectangle(x, y, h, w, color);
 }

@@ -6,6 +6,7 @@
 #include <time.h>
 #include <clock.h>
 
+//#include "MemoryManager.h"
 extern char buffer;
 extern long int registers_space[];
 
@@ -74,20 +75,6 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 4:
             timeToStr((char*)param1);
             break;     
-        case 5: 
-            if (getAltTouched()){
-                return (intptr_t)registers_space;      
-            }
-            return 0;
-        case 6:
-            beep(param1,param2);
-            break;
-        case 7:
-            drawCircle(param1, param2, param3, param4);
-            break;
-        case 8:
-            drawRectangle(param1, param2, param3, param4, param5);
-            break;
         case 9:
             loadScreen();         
             break;
@@ -97,9 +84,10 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 11:
             getKeyboardState((char*)param1);
             break;
-        case 12:
-            drawCharAt(param1, param4, param5, param2, param3);            
+        case 6:
+            beep(param1,param2);
             break;
+// ARR DE PUNTEROS A FUN
 	}
 	return 0;
 }

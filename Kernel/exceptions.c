@@ -4,13 +4,11 @@
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPERATION_ID 6
-#define REGISTERS_COUNT 17
 #define WHITE 0xFFFFFF
 #define BLACK 0x000000
 #define RED 0xFF0000
 #define LIGHT_RED 0xFF6666
 
-extern long int registers_space[];
 
 /**
  * @brief Escribe sobre la pantalla el mensaje de error para la excepción de divisón por cero.
@@ -43,25 +41,5 @@ void exceptionDispatcher(int exception) {
 		invalid_operation();
 	}
 	drawNextLine();
-	drawString("The registers and RIP values in the moment the error occured are:", RED, BLACK);
-	char * register_names[REGISTERS_COUNT] = {"RAX", "RBX", "RCX", "RDX", "RDI", "RSI", 
-    "RBP", "RSP", "R8 ", "R9 ", "R10", "R11", "R12", "R13", "R14", "R15", "RIP"};
-	//uint64_t* register_values = getRegistersSpace();
-	char buffer[20];
-	int i;
-    for (i=0; i<REGISTERS_COUNT; i++) {
-        drawNextLine();
-        drawString(register_names[i], LIGHT_RED, BLACK);
-        drawString(" = ", WHITE, BLACK);
-        numToStr(registers_space[i], 16, buffer);
-        drawString(buffer, WHITE, BLACK);
-        drawChar('h', WHITE, BLACK);
-    }
-
-	drawNextLine();
-	drawString("Press 'Enter' to reload the Shell.", WHITE, BLACK);
-	waitForEnter();
-	drawNextLine();
-	resetAltTouched();
 }
 

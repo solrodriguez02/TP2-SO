@@ -4,13 +4,10 @@ GLOBAL syscall_nextLine
 GLOBAL syscall_wait
 GLOBAL syscall_time
 GLOBAL syscall_beep
-GLOBAL syscall_drawCircle
-GLOBAL syscall_drawRectangle
 GLOBAL syscall_loadScreen
 GLOBAL syscall_enableDoubleBuffer
 GLOBAL syscall_getKeyboardState
 GLOBAL syscall_writeAt
-GLOBAL syscall_getRegisters
 
 section .text
 
@@ -55,41 +52,11 @@ syscall_time:
 	popf
 	ret
 
-syscall_getRegisters:
-	pushf
-	mov rdi,5	    ; syscall for getRegisters 
-	int 80h
-	popf
-	ret
-
 syscall_beep:
 	pushf
 	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 6
-	int 80h
-	popf
-	ret
-
-syscall_drawCircle:
-	pushf
-	mov r8, rcx		; pasaje de parametros
-	mov rcx, rdx  
-	mov rdx, rsi 
-	mov rsi, rdi
-	mov rdi, 7 		; syscall for drawCircle
-	int 80h
-	popf
-	ret
-
-syscall_drawRectangle:
-	pushf
-	mov r9, r8		 ; pasaje de parametros
-	mov r8, rcx	
-	mov rcx, rdx  
-	mov rdx, rsi 
-	mov rsi, rdi
-	mov rdi, 8 		 ; syscall for drawRectangle
 	int 80h
 	popf
 	ret

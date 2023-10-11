@@ -15,7 +15,6 @@
 
 int getChar();
 void getInput(char * buffer);
-long int * getRegisters();
 
 int putCharAt(char c, int x, int y);
 int putChar(char c, int FGColor);
@@ -24,7 +23,6 @@ int print(char * string, int FGColor);
 int printf(const char * format, ...);
 
 void sleep(int seconds);
-void beep();
 void loadScreen();
 void enableDoubleBuffer(int enable);
 
@@ -34,8 +32,5 @@ void getTime(char * timeStr);
 void getKeyboardState(char * keys);
 
 int strcmp (const char* s1, const char* s2);
-
-void drawCircle(int x, int y, int r, uint8_t color);
-void drawRectangle(int x, int y, int h, int w, uint8_t color);
 
 #endif
