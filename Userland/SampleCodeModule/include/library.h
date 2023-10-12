@@ -1,7 +1,8 @@
 #ifndef _LIBRARY_H_
 #define _LIBRARY_H_
 
-#include <syscalls.h>
+#include "sysWrappers.h"
+
 
 #define WHITE 0xFF
 #define BACKGROUNG_COLOR 0x00
@@ -13,23 +14,15 @@
 #define SCREEN_WIDTH 1018
 #define COMMAND_MAX_SIZE 15
 
-int getChar();
 void getInput(char * buffer);
 
-int putCharAt(char c, int x, int y);
-int putChar(char c, int FGColor);
 int printAt(char * string, int x, int y);
 int print(char * string, int FGColor);
 int printf(const char * format, ...);
 
-void sleep(int seconds);
-void loadScreen();
-void enableDoubleBuffer(int enable);
 
 void numToStr(long int num, int base, char * buffer);
 int strToNum(char* num);
-void getTime(char * timeStr);
-void getKeyboardState(char * keys);
 
 int strcmp (const char* s1, const char* s2);
 

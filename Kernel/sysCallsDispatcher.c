@@ -5,10 +5,11 @@
 #include <keyboardDriver.h>
 #include <time.h>
 #include <clock.h>
+#include "MemoryManager.h"
 
-//#include "MemoryManager.h"
 extern char buffer;
 
+extern MemoryManagerADT memoryManager;
 
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
@@ -87,7 +88,12 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 12:
             drawCharAt(param1, param4, param5, param2, param3);            
             break;
-// ARR DE PUNTEROS A FUN
+        case 13:
+            return allocMemory(memoryManager, param1);
+        case 14:
+            freeMemory(memoryManager,(void *) param1);
+            break;
+
 	}
 	return 0;
 }

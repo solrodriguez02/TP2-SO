@@ -7,7 +7,8 @@ GLOBAL syscall_beep
 GLOBAL syscall_loadScreen
 GLOBAL syscall_enableDoubleBuffer
 GLOBAL syscall_writeAt
-
+GLOBAL syscall_malloc
+GLOBAL syscall_free
 section .text
 
 syscall_read:
@@ -86,4 +87,19 @@ syscall_writeAt:
     int 80h
     popf
     ret
-	
+
+syscall_malloc:
+	pushf 
+	mov rsi, rdi
+	mov rdi, 13 	 ; syscall for malloc
+	int 80h
+	popf
+	ret
+
+syscall_free:
+	pushf 
+	mov rsi, rdi
+	mov rdi, 14 	 ; syscall for free
+	int 80h
+	popf
+	ret

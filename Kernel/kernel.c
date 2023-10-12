@@ -4,6 +4,7 @@
 #include <videodriver.h>
 #include <naiveConsole.h>
 #include <idtLoader.h>
+#include "MemoryManager.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -16,6 +17,8 @@ static const uint64_t PageSize = 0x1000;
 
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
+
+MemoryManagerADT memoryManager;
 
 typedef int (*EntryPoint)();
 
@@ -85,6 +88,27 @@ int main() {
 	//Elige escribir directo en pantalla.
 	setScreenBuffer(1);	
 	drawTopLine();
+	
+	memoryManager= createMemoryManager();
+	char * space = allocMemory(memoryManager,20);
+
+	// Escribe en la heapppp
+	numToStr(endOfKernel,16,space);
+	drawString( space, 0XFF00FF, 0X000000 );
+	
+	space[10]='a';
+	space[11]='b';
+	space[12]=0;
+
+	drawString( space+10, 0XFF00FF, 0X000000 );
+	// Libera	
+	freeMemory(memoryManager, space);
+	space = allocMemory(memoryManager,20);
+	drawString( space+10, 0XFF00FF, 0X000000 );
+
+
+	space = allocMemory(memoryManager,2000);
+	drawString( space+10, 0XFF00FF, 0X000000 );
 
 	// Llamado a la Shell.
 	((EntryPoint)sampleCodeModuleAddress)();
