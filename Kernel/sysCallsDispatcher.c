@@ -8,7 +8,7 @@
 
 //#include "MemoryManager.h"
 extern char buffer;
-extern long int registers_space[];
+
 
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
@@ -69,23 +69,23 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             drawNextLine();
             break;
         case 3:
-        	_sti();
+        	_sti(); // esto creo q desactiva las interrup => ojo
             wait(param1);
             break;
         case 4:
             timeToStr((char*)param1);
             break;     
+        case 6:
+            beep(param1,param2);
+            break;
         case 9:
             loadScreen();         
             break;
         case 10:
             enableDoubleBuffer(param1);            
             break;
-        case 11:
-            getKeyboardState((char*)param1);
-            break;
-        case 6:
-            beep(param1,param2);
+        case 12:
+            drawCharAt(param1, param4, param5, param2, param3);            
             break;
 // ARR DE PUNTEROS A FUN
 	}

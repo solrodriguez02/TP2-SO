@@ -285,14 +285,6 @@ void getTime(char * timeStr) {
     syscall_time(timeStr);
 }
 
-/**
- * @brief Actualiza los valores del vector de teclas utilizada para el minijuego.
- * 
- * @param keys Vector de caracteres para las teclas utilizadas para el minijuego.
- */
-void getKeyboardState(char * keys) {
-    return syscall_getKeyboardState(keys);
-}
 
 // ------------------------------------- BOOLEANOS ------------------------------------- //
 

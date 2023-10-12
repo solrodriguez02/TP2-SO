@@ -6,7 +6,6 @@ GLOBAL syscall_time
 GLOBAL syscall_beep
 GLOBAL syscall_loadScreen
 GLOBAL syscall_enableDoubleBuffer
-GLOBAL syscall_getKeyboardState
 GLOBAL syscall_writeAt
 
 section .text
@@ -72,14 +71,6 @@ syscall_enableDoubleBuffer:
 	pushf 
 	mov rsi, rdi
 	mov rdi, 10 	 ; syscall for pixel
-	int 80h
-	popf
-	ret
-
-syscall_getKeyboardState:
-	pushf 
-	mov rsi, rdi
-	mov rdi, 11 	  ; syscall for getKeyboardState
 	int 80h
 	popf
 	ret

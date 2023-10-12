@@ -12,6 +12,5 @@ extern void syscall_beep(uint32_t freq, uint32_t time);
 extern void syscall_loadScreen();
 extern void syscall_enableDoubleBuffer(int enable);
 extern void syscall_time(char * timeStr);
-extern void syscall_getKeyboardState(char * keys);
 
 #endif
