@@ -6,16 +6,15 @@
 typedef struct MemoryManagerCDT {
     unsigned char bitmap[NUM_BLOCKS];
 	//para el test
-	char * user_adress;
+	void * user_adress;
 } MemoryManagerCDT;
 
 
 MemoryManagerADT createMemoryManager() {
-	// creo array 
+	
     MemoryManagerADT memoryManager = (MemoryManagerADT) ADRESS_MEM_FOR_MMANAGER;
 	
-	// para el test 
-	memoryManager->user_adress = ADRESS_MEM_FOR_USER;
+	memoryManager->user_adress = (void*) ADRESS_MEM_FOR_USER;
 
 	for ( int i=0; i<NUM_BLOCKS; i++)
 		memoryManager->bitmap[i] = FREE_BLOCK; 
@@ -46,7 +45,7 @@ void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t me
 			//char * allocation =  ADRESS_MEM_FOR_USER+ BLOCK_SIZE * location;
 
 			//* para test
-			char * allocation = memoryManager->user_adress + BLOCK_SIZE * location;
+			void * allocation = memoryManager->user_adress + BLOCK_SIZE * location;
 
 			// Mark the blocks as used
 			memoryManager->bitmap[location++] = BOUNDARY_BLOCK;
@@ -67,14 +66,14 @@ void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t me
 
 void freeMemory(MemoryManagerADT const restrict memoryManager, void *const restrict memoryToFree ){
 
-	if (memoryToFree == NULL || (char *) memoryToFree < memoryManager->user_adress)
+	if (memoryToFree == NULL || memoryToFree < memoryManager->user_adress)
 		return;
 
 	// Convert pointer to block index
 	//int block = (int)(memoryToFree - ADRESS_MEM_FOR_USER) / BLOCK_SIZE;
 
 	//* para test
-	int block = (int)( (char *)memoryToFree - memoryManager->user_adress);
+	int block = (int)( memoryToFree - memoryManager->user_adress);
 
 	// Ensure this is the start of the allocation
 	if ( ( block % BLOCK_SIZE) != 0 )

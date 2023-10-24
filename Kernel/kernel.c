@@ -90,10 +90,13 @@ int main() {
 	drawTopLine();
 	
 	memoryManager= createMemoryManager();
+
 	char * space = allocMemory(memoryManager,20);
 
 	// Escribe en la heapppp
-	numToStr(endOfKernel,16,space);
+	// cheq ultima direccion kernel
+	void * ans = getStackBase();
+	numToStr((uint64_t)&ans ,16,space);
 	drawString( space, 0XFF00FF, 0X000000 );
 	
 	space[10]='a';
