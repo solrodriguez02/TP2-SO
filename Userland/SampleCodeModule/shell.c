@@ -48,13 +48,24 @@ void loadModule(char * name, char * description, void (*function)(void)) {
     modulesCount++;
 }
 
+
+void enter(){
+    while (1)
+    {
+         printf("--------------------------------------xxxxxxx------------");    
+    }
+    
+}
+
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
  */
 void loadAllModules() {
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp);
     loadModule("clear", "Clears the screen of the shell", &clear);
+    loadModule("enter", "Prueba enters",&enter);
 }
+
 
 /**
  * @brief Función que llama al módulo correspondiente dependiendo del parámetro ingresado. En caso de
