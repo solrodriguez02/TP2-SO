@@ -45,10 +45,10 @@ void initializeScheduler(){
 void * scheduler(void * stackPointer){
     
     PCB[lastSelected]->stackPointer = stackPointer;
-    int i= lastSelected+1;
+    int i;
     // puedo apuntar a ese ultimo nodo seleccio
 
-    for ( i=1; i!=0; i++ ){
+    for ( i=lastSelected+1; i!=lastSelected; i++ ){
         if ( i==MAX_SIZE_PCB){
             i=0;
             continue;
