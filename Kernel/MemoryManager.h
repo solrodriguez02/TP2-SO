@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define ADRESS_MEM_FOR_MMANAGER 0x35A000
+#define ADRESS_MEM_FOR_MMANAGER 0x35A000 // 0x700000
 #define ADRESS_MEM_FOR_USER 0X710000
 #define MEM_AVAILABLE 1048576	// byTes DISPO PARA EL USER, 2^20, hasta 2^25 puedo tranquilamente, solo q voy a iterar + 
 

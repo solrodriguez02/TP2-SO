@@ -152,8 +152,10 @@ syscallsHandler:
 _irq00Handler:
 	pushState
 
+	mov rsi, rsp
 	mov rdi, 0 ; numero de interrupción para el timer (IRQ0)
 	call irqDispatcher
+	mov rsp, rax
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h

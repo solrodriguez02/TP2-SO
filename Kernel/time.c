@@ -1,12 +1,19 @@
 #include <time.h>
+#include "scheduler.h"
 
 static unsigned long ticks = 0;
 
 /**
  * @brief Handler para la interrupción del Timer Tick. Incrementa constantemente el valor de ticks.
+ *! wasForced para sys bloq? 
  */
-void timer_handler() {
+void * timer_handler(void * stackPointer) {
 	ticks++;
+	/*
+	if ( ticks%50 == 0 )
+		return scheduler( stackPointer );
+		*/
+	return stackPointer;
 }
 
 /**
@@ -26,4 +33,3 @@ int ticks_elapsed() {
 int seconds_elapsed() {
 	return ticks / 18;
 }
-

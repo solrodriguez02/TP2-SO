@@ -5,6 +5,7 @@
 #include <naiveConsole.h>
 #include <idtLoader.h>
 #include "MemoryManager.h"
+#include "scheduler.h" 
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -82,6 +83,10 @@ void * initializeKernelBinary() {
 
 int main() {	
 
+	// la cre o antes asi no lo puede interrumpir 
+	memoryManager= createMemoryManager();
+	initializeScheduler();
+	
 	// Carga de descriptores del IDT.
 	load_idt(); 	
 	
@@ -89,7 +94,7 @@ int main() {
 	setScreenBuffer(1);	
 	drawTopLine();
 	
-	memoryManager= createMemoryManager();
+	// mem 
 
 	char * space = allocMemory(memoryManager,20);
 
@@ -99,6 +104,8 @@ int main() {
 	numToStr((uint64_t)&ans ,16,space);
 	drawString( space, 0XFF00FF, 0X000000 );
 	
+	numToStr((uint64_t)&bss ,16,space);
+	drawString( space, 0X0000FF, 0X000000 );
 	space[10]='a';
 	space[11]='b';
 	space[12]=0;

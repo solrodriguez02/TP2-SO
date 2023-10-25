@@ -3,7 +3,7 @@
 #include <keyboardDriver.h>
 #include <clock.h>
 
-static void int_20();
+static void * int_20(void * stackPointer);
 static void int_21();
 static void int_28();
 
@@ -17,11 +17,10 @@ char buffer;
  * 
  * @param irq Número de la interrupción ocurrida.
  */
-void irqDispatcher(uint64_t irq) {
+void * irqDispatcher(uint64_t irq, void * stackPointer) {
 	switch (irq) {
 		case 0:
-			int_20();
-			break;
+			return int_20(stackPointer);
         case 1:
             int_21();
             break;
@@ -29,14 +28,17 @@ void irqDispatcher(uint64_t irq) {
 			int_28();
 			break;
 	}
-	return;
+	return 0;
 }
 
 /**
  * @brief Función correspondiente a la interrupción número 20h, sobre el Timer Tick.
  */
-void int_20() {
-	timer_handler();
+void * int_20(void * stackPointer) {
+	// 1 pues sys no bloquante
+	// ya sys fue llamada con int => = interrup
+	// => stack tmb cargado 
+	return timer_handler(stackPointer);
 }
 
 /**
