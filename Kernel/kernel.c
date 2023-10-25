@@ -85,6 +85,9 @@ int main() {
 
 	// la cre o antes asi no lo puede interrumpir 
 	memoryManager= createMemoryManager();
+	
+	//creo proceso 
+	
 	initializeScheduler();
 	
 	// Carga de descriptores del IDT.

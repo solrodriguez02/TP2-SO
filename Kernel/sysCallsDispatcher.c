@@ -9,7 +9,7 @@
 
 extern char buffer;
 
-extern MemoryManagerADT memoryManager;
+extern MemoryManagerADT memoryManager; 
 
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
