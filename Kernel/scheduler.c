@@ -6,6 +6,7 @@
 #define RUNNING 2
 #define READY 1 
 #define BLOCKED 0
+#define TERMINATED 3
 
 uint16_t nextPid; 
 uint16_t lastSelected;
@@ -44,10 +45,7 @@ void initializeScheduler(){
 
 void * scheduler(void * stackPointer){
     
-    PCB[0]->stackPointer = stackPointer;
 
-    
-    /*
     PCB[lastSelected]->stackPointer = stackPointer;
     int i=lastSelected +1;
     // puedo apuntar a ese ultimo nodo seleccio
@@ -70,14 +68,25 @@ void * scheduler(void * stackPointer){
     lastSelected = i;
     
     return PCB[lastSelected]->stackPointer;
-    */
-    return stackPointer;
 }
 
 int deleteFromScheduler(uint16_t pid){
-    //= si killed 
+    for(int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->state = TERMINATED;
+            return;
+        }
+    }
 }
 
 int addToScheduler(void * stackPointer){
-
+    
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->state == TERMINATED){
+            PCB[i]->pid = nextPid++;
+            PCB[i]->priority = 1;
+            PCB[i]->stackPointer = stackPointer;
+            PCB[i]->state = READY;
+        }
+    }
 }

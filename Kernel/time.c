@@ -9,10 +9,8 @@ static unsigned long ticks = 0;
  */
 void * timer_handler(void * stackPointer) {
 	ticks++;
-	/*
 	if ( ticks%50 == 0 )
 		return scheduler( stackPointer );
-		*/
 	return stackPointer;
 }
 
