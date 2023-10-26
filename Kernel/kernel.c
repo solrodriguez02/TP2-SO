@@ -97,7 +97,8 @@ int main() {
 	// Carga de descriptores del IDT.
 	load_idt(); 	
 	
-	
+	execve(sampleCodeModuleAddress);
+	forceTimerInt();
 	
 	// LAS SYS ESTAN DESACTIVADAASS
 	// sin PushState
@@ -128,13 +129,12 @@ int main() {
 	space = allocMemory(2000);
 	drawString( space+10, 0XFF00FF, 0X000000 );
 
-	// Llamado a la Shell.
-	//((EntryPoint)sampleCodeModuleAddress)();
 	
 	//!deberia deshabili desp
 	//*sino puedo poner int 20h
 	
-	execve(sampleCodeModuleAddress);
-	forceTimerInt();
+	
+	// Llamado a la Shell.
+	((EntryPoint)sampleCodeModuleAddress)();
 	
 }
