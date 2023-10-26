@@ -6,6 +6,7 @@
 #include <time.h>
 #include <clock.h>
 #include "MemoryManager.h"
+#include "scheduler.h"
 
 extern char buffer;
 
@@ -91,7 +92,10 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 14:
             freeMemory((void *) param1);
             break;
-
-	}
+        case 15:
+            return getPid();
+        case 16:
+            return getStatus(param1);
+    }
 	return 0;
 }

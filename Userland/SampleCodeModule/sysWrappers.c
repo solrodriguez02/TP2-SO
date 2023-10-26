@@ -96,3 +96,13 @@ void free(void * ptr){
         return;
     syscall_free(ptr);
 }
+
+// -------------------------------------- PROCESSES ------------------------------------- //
+
+int getPid(){
+    return syscall_getpid();
+} 
+
+int getStatus(int pid){
+    return syscall_getstatus(pid);
+}

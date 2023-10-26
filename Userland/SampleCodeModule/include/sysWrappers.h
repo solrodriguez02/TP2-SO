@@ -14,3 +14,8 @@ void getTime(char * timeStr);
 
 void * malloc(unsigned int size); 
 void free(void * ptr);
+
+extern int syscall_getpid();
+extern int syscall_getstatus(int pid);
+int getPid();
+int getStatus(int pid);
