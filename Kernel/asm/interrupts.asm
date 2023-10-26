@@ -1,4 +1,4 @@
-
+GLOBAL forceTimerInt
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
@@ -147,6 +147,10 @@ syscallsHandler:
 	popf
 	iretq
 
+
+forceTimerInt:
+	int 0x20
+	ret
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:

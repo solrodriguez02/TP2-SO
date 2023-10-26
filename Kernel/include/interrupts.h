@@ -27,4 +27,6 @@ void picSlaveMask(uint8_t mask);
 
 void haltcpu(void);
 
+void forceTimerInt(void);
+
 #endif
