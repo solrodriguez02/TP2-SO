@@ -2,6 +2,12 @@
 #include <library.h>
 #include <stdint.h>
 
+
+#define RUNNING 2
+#define READY 1 
+#define BLOCKED 0
+#define TERMINATED 3
+
 /**
  * @brief Estructura que contiene el nombre, la descripción y la dirección de la función correspondinte al módulo.
  */
@@ -57,6 +63,22 @@ void enter(){
     
 }
 
+void getDefinedStatus(){
+    int status =  getStatus(7449);
+    switch(status){
+        case RUNNING:
+            printf("proceso running\n");
+        case READY:
+            printf("proceso ready\n");
+        case BLOCKED:
+            printf("proceso bloqueado\n");
+    }
+}
+
+void getCurrentPid(){
+    printf("El pid: %d\n", getPid());
+}
+
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
  */
@@ -64,6 +86,8 @@ void loadAllModules() {
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp);
     loadModule("clear", "Clears the screen of the shell", &clear);
     loadModule("enter", "Prueba enters",&enter);
+    loadModule("getPid", "Returns current process PID", &getCurrentPid);
+    loadModule("getstatus", "get status from process", &getDefinedStatus);
 }
 
 

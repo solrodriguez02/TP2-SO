@@ -9,6 +9,9 @@ GLOBAL syscall_enableDoubleBuffer
 GLOBAL syscall_writeAt
 GLOBAL syscall_malloc
 GLOBAL syscall_free
+GLOBAL syscall_getpid
+GLOBAL syscall_getstatus
+
 section .text
 
 syscall_read:
@@ -100,6 +103,21 @@ syscall_free:
 	pushf 
 	mov rsi, rdi
 	mov rdi, 14 	 ; syscall for free
+	int 80h
+	popf
+	ret
+
+syscall_getpid:
+	pushf	
+	mov rdi, 15
+	int 80h
+	popf
+	ret
+
+syscall_getstatus:
+	pushf
+	mov rsi, rdi
+	mov rdi, 16
 	int 80h
 	popf
 	ret

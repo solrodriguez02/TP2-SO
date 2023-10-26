@@ -11,18 +11,6 @@
 uint16_t nextPid; 
 uint16_t lastSelected;
 
-typedef struct pcbEntryCDT
-{
-    uint16_t pid; 
-    void * stackPointer;
-    uint8_t state;
-    uint8_t priority;
-} pcbEntryCDT;
-
-typedef struct pcbEntryCDT * pcbEntryADT;
-
-pcbEntryADT PCB[MAX_SIZE_PCB]; 
-
 // ticks no modu => block 
 
 void blockRunningProcess(){
@@ -47,6 +35,7 @@ void * scheduler(void * stackPointer){
     
 
     PCB[lastSelected]->stackPointer = stackPointer;
+    /*
     int i=lastSelected +1;
     // puedo apuntar a ese ultimo nodo seleccio
     while ( i!=lastSelected ) {
@@ -66,7 +55,7 @@ void * scheduler(void * stackPointer){
     PCB[lastSelected]->state = READY;
     PCB[i]->state = RUNNING;
     lastSelected = i;
-    
+    */
     return PCB[lastSelected]->stackPointer;
 }
 
@@ -74,19 +63,34 @@ int deleteFromScheduler(uint16_t pid){
     for(int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
-            return;
+            return 1;
         }
     }
+    return 0;
 }
 
 int addToScheduler(void * stackPointer){
-    
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             PCB[i]->pid = nextPid++;
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
+            return 1;
         }
     }
+    return 0;
+}
+
+int getPid(){
+    return PCB[lastSelected]->pid;
+}
+
+int getStatus(int pid){
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return PCB[i]->state;
+        }
+    }
+    return -1;
 }
