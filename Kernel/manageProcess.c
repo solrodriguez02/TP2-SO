@@ -50,5 +50,5 @@ void execve(void * ptrFunction ){
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
 
-    addToScheduler( p->rsp );
+    addToScheduler( p->rsp, topMem);
 }

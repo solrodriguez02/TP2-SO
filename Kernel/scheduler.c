@@ -16,22 +16,32 @@ uint16_t lastSelected;
 // ticks no modu => block 
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 
-void blockRunningProcess(){
+void blockProcess(int pid, uint16_t blockReason){
     // sys bloq => 1º modif PCB.state
     //             2º fuerzo interr
-    PCB[lastSelected]->state = BLOCKED;
-    // aviso q info espera en struct
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->state = BLOCKED;
+            // aviso q info espera en struct
+            PCB[i]->blockReason = blockReason;
+        }
+    }
+}
+
+void unblockProcess(int pid){
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->state = BLOCKED;
+            // aviso q info espera en struct
+                    }
+    }
+    PCB[lastSelected]->state = READY;
 }
 
 void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
 
-/*
-        PCB[0]->pid = nextPid++;
-        PCB[0]->priority = 1;
-        PCB[0]->state = TERMINATED; 
-*/
         PCB[0] = allocMemory( SIZE_ENTRY );
         PCB[1] = PCB[0]+24;
         PCB[0]->state = TERMINATED;
@@ -74,25 +84,24 @@ void * scheduler(void * stackPointer){
     
     return PCB[lastSelected]->stackPointer;
 }
-/*
-//para syscall bloqueante
-void blockRunningProcess(){
 
-}
-*/
-
+//flujo de estados:
+// INIT (PID = PARENTPID = 1)
+// Arranca en running pero despues siempre
 int deleteFromScheduler(uint16_t pid){
     for(int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
+            freeMemory(PCB[i]->baseMemAllocated);
             return 1;
         }
     }
     return 0;
 }
 
-int addToScheduler(void * stackPointer){
-    
+
+int addToScheduler(void * stackPointer, void * baseMemAllocated){
+
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO
@@ -100,6 +109,7 @@ int addToScheduler(void * stackPointer){
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
+            PCB[i]->baseMemAllocated = baseMemAllocated;
             return 1;
         }
     }
@@ -109,7 +119,7 @@ int addToScheduler(void * stackPointer){
 int getPid(){
     return PCB[lastSelected]->pid;
 }
-
+    
 int getStatus(int pid){
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
@@ -117,4 +127,10 @@ int getStatus(int pid){
         }
     }
     return -1;
+}
+
+int nopProcess(){
+    while(1){
+        _hlt();
+    }
 }
