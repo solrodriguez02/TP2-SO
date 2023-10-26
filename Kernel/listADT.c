@@ -147,9 +147,6 @@ void map(listADT list, elemType (* function)(elemType elem1)){
     }
 }
 
-static elemType doble(elemType elem){
-    return elem * 2;
-}
 static elemType equals(elemType elem1, elemType elem2){
     return elem1 == elem2;
 }

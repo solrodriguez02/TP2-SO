@@ -14,6 +14,7 @@ uint16_t nextPid;
 uint16_t lastSelected;
 
 // ticks no modu => block 
+pcbEntryADT PCB[MAX_SIZE_PCB]; 
 
 void blockRunningProcess(){
     // sys bloq => 1º modif PCB.state
@@ -68,12 +69,10 @@ void * scheduler(void * stackPointer){
     PCB[lastSelected]->state = READY;
     PCB[i]->state = RUNNING;
     lastSelected = i;
-    */
+    
     return PCB[lastSelected]->stackPointer;
     */
    return PCB[lastSelected]->stackPointer;
-   PCB[0]->state = RUNNING;
-   return PCB[0]->stackPointer;
 }
 /*
 //para syscall bloqueante
@@ -93,6 +92,8 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 int addToScheduler(void * stackPointer){
+    PCB[0]->stackPointer = stackPointer;
+    return nextPid; 
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             PCB[i]->pid = nextPid;
