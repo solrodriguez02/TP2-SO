@@ -18,18 +18,18 @@ typedef struct MemoryManagerCDT *MemoryManagerADT;
 
 
 // podria en reali elegir desde la fun el espacio / mem para el mem man, osea memoryForMemoryManager es inne
-MemoryManagerADT createMemoryManager();
+void createMemoryManager();
 
-void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t memoryToAllocate);
+void *allocMemory(const size_t memoryToAllocate);
 
 
-void freeMemory(MemoryManagerADT const restrict memoryManager, void *const restrict memoryToFree );
+void freeMemory(void *const restrict memoryToFree );
 
-unsigned int getOccupiedMemory(MemoryManagerADT const restrict memoryManager);
+unsigned int getOccupiedMemory();
 
-unsigned int getTotalMemory(MemoryManagerADT const restrict memoryManager);
+unsigned int getTotalMemory();
 
-unsigned int getFreeMemory(MemoryManagerADT const restrict memoryManager);
+unsigned int getFreeMemory();
 
 
 #endif

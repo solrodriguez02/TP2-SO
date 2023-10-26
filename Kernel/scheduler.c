@@ -6,6 +6,7 @@
 #define RUNNING 2
 #define READY 1 
 #define BLOCKED 0
+#define TERMINATED 3
 
 uint16_t nextPid; 
 uint16_t lastSelected;
@@ -35,22 +36,28 @@ void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
 
+/*
         PCB[0]->pid = nextPid++;
         PCB[0]->priority = 1;
-        PCB[0]->state = RUNNING; 
-
-        PCB[1]->state = BLOCKED; 
+        PCB[0]->state = TERMINATED; 
+*/
+        PCB[0]->state = TERMINATED;
+        PCB[1]->state = TERMINATED; 
+        //PCB[1]->state = BLOCKED; 
 }
 
 void * scheduler(void * stackPointer){
     
     PCB[lastSelected]->stackPointer = stackPointer;
+    /*
     int i;
     // puedo apuntar a ese ultimo nodo seleccio
 
     for ( i=lastSelected+1; i!=lastSelected; i++ ){
         if ( i==MAX_SIZE_PCB){
             i=0;
+            if ( i==lastSelected)
+                break;
             continue;
         }
         if ( PCB[i]->state==READY)
@@ -66,7 +73,9 @@ void * scheduler(void * stackPointer){
     lastSelected = i;
     
     return PCB[lastSelected]->stackPointer;
-    
+    */
+   PCB[0]->state = RUNNING;
+   return stackPointer;
 }
 /*
 //para syscall bloqueante
@@ -76,9 +85,33 @@ void blockRunningProcess(){
 */
 
 int deleteFromScheduler(uint16_t pid){
-    //= si killed 
+    for(int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->state = TERMINATED;
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int addToScheduler(void * stackPointer){
-
+    int i=0; 
+     PCB[i]->pid = nextPid;
+            PCB[i]->priority = 1;
+            PCB[i]->stackPointer = stackPointer;
+            PCB[i]->state = RUNNING;
+    /*
+    int i; 
+    for ( i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->state == TERMINATED){
+            PCB[i]->pid = nextPid;
+            PCB[i]->priority = 1;
+            PCB[i]->stackPointer = stackPointer;
+            PCB[i]->state = READY;
+        }
+    }
+    if ( i == MAX_SIZE_PCB)
+        return -1;
+        */
+    return nextPid++;
 }

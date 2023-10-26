@@ -1,6 +1,7 @@
 #include "MemoryManager.h"
 
 
+MemoryManagerADT memoryManager; 
 
 // no genera mucha fragmentacion externa? 
 typedef struct MemoryManagerCDT {
@@ -10,19 +11,18 @@ typedef struct MemoryManagerCDT {
 } MemoryManagerCDT;
 
 
-MemoryManagerADT createMemoryManager() {
+void createMemoryManager() {
 	
-    MemoryManagerADT memoryManager = (MemoryManagerADT) ADRESS_MEM_FOR_MMANAGER;
+    memoryManager = (MemoryManagerADT) ADRESS_MEM_FOR_MMANAGER;
 	
 	memoryManager->user_adress = (void*) ADRESS_MEM_FOR_USER;
 
 	for ( int i=0; i<NUM_BLOCKS; i++)
 		memoryManager->bitmap[i] = FREE_BLOCK; 
 	
-	return memoryManager;
 }
 
-void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t memoryToAllocate) {
+void *allocMemory(const size_t memoryToAllocate) {
 	
 	if ( memoryToAllocate > MEM_AVAILABLE )
 		return NULL;
@@ -64,7 +64,7 @@ void *allocMemory(MemoryManagerADT const restrict memoryManager, const size_t me
 
 }
 
-void freeMemory(MemoryManagerADT const restrict memoryManager, void *const restrict memoryToFree ){
+void freeMemory(void *const restrict memoryToFree ){
 
 	if (memoryToFree == NULL || memoryToFree < memoryManager->user_adress)
 		return;
@@ -95,7 +95,7 @@ void freeMemory(MemoryManagerADT const restrict memoryManager, void *const restr
 
 }
 
-static unsigned int getOccupiedBlocks(MemoryManagerADT const restrict memoryManager){
+static unsigned int getOccupiedBlocks(){
 	int i=0, occupied=0;
 	while ( i<NUM_BLOCKS ){
 		if ( memoryManager->bitmap[i] != FREE_BLOCK )
@@ -106,14 +106,14 @@ static unsigned int getOccupiedBlocks(MemoryManagerADT const restrict memoryMana
 }
 
 // in bytes
-unsigned int getOccupiedMemory(MemoryManagerADT const restrict memoryManager){
+unsigned int getOccupiedMemory(){
 	return getOccupiedBlocks(memoryManager) *BLOCK_SIZE;
 } 
 
-unsigned int getTotalMemory(MemoryManagerADT const restrict memoryManager){
+unsigned int getTotalMemory(){
 	return MEM_AVAILABLE;
 }
 
-unsigned int getFreeMemory(MemoryManagerADT const restrict memoryManager){
+unsigned int getFreeMemory(){
 	return ( NUM_BLOCKS - getOccupiedBlocks(memoryManager) ) *BLOCK_SIZE;
 } 

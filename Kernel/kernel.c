@@ -6,6 +6,7 @@
 #include <idtLoader.h>
 #include "MemoryManager.h"
 #include "scheduler.h" 
+#include "manageProcess.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -18,8 +19,6 @@ static const uint64_t PageSize = 0x1000;
 
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
-
-MemoryManagerADT memoryManager;
 
 typedef int (*EntryPoint)();
 
@@ -84,26 +83,34 @@ void * initializeKernelBinary() {
 int main() {	
 
 	// la cre o antes asi no lo puede interrumpir 
-	memoryManager= createMemoryManager();
-	
-	//creo proceso 
+	createMemoryManager();
 	
 	initializeScheduler();
-	
-	// Carga de descriptores del IDT.
-	load_idt(); 	
 	
 	//Elige escribir directo en pantalla.
 	setScreenBuffer(1);	
 	drawTopLine();
+
+	//!creo proceso 
 	
+
+
+	// Carga de descriptores del IDT.
+	load_idt(); 	
+	
+	execve((EntryPoint)sampleCodeModuleAddress);
+	
+	
+	// LAS SYS ESTAN DESACTIVADAASS
+	// sin PushState
 	// mem 
 
-	char * space = allocMemory(memoryManager,20);
+	char * space = allocMemory(20);
 
 	// Escribe en la heapppp
 	// cheq ultima direccion kernel
 	void * ans = getStackBase();
+	//ans = ;
 	numToStr((uint64_t)&ans ,16,space);
 	drawString( space, 0XFF00FF, 0X000000 );
 	
@@ -115,16 +122,17 @@ int main() {
 
 	drawString( space+10, 0XFF00FF, 0X000000 );
 	// Libera	
-	freeMemory(memoryManager, space);
-	space = allocMemory(memoryManager,20);
+	freeMemory(space);
+	space = allocMemory(20);
 	drawString( space+10, 0XFF00FF, 0X000000 );
 
 
-	space = allocMemory(memoryManager,2000);
+	space = allocMemory(2000);
 	drawString( space+10, 0XFF00FF, 0X000000 );
 
 	// Llamado a la Shell.
-	((EntryPoint)sampleCodeModuleAddress)();
-
+	//((EntryPoint)sampleCodeModuleAddress)();
+	
+	while(1);
 	return 0;
 }

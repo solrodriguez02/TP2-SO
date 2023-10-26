@@ -9,8 +9,6 @@
 
 extern char buffer;
 
-extern MemoryManagerADT memoryManager; 
-
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
  * 
@@ -89,9 +87,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             drawCharAt(param1, param4, param5, param2, param3);            
             break;
         case 13:
-            return allocMemory(memoryManager, param1);
+            return allocMemory(param1);
         case 14:
-            freeMemory(memoryManager,(void *) param1);
+            freeMemory((void *) param1);
             break;
 
 	}
