@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#define SIZE_ENTRY 12
 typedef struct pcbEntryCDT
 {
     uint16_t pid; 

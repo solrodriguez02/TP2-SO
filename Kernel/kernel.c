@@ -99,7 +99,8 @@ int main() {
 	load_idt(); 	
 	
 	
-	//forceTimerInt();
+	//! para forzar int 0x20 para syscalls
+	forceTimerInt();
 	
 	// LAS SYS ESTAN DESACTIVADAASS
 	// sin PushState

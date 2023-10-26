@@ -1,6 +1,6 @@
 #include "scheduler.h"
 #include <stdio.h>
-
+#include "MemoryManager.h"
 #define MAX_SIZE_PCB 2
 
 #define RUNNING 2
@@ -32,9 +32,11 @@ void initializeScheduler(){
         PCB[0]->priority = 1;
         PCB[0]->state = TERMINATED; 
 */
+        PCB[0] = allocMemory( SIZE_ENTRY );
+        PCB[1] = PCB[0]+24;
         PCB[0]->state = TERMINATED;
         PCB[1]->state = TERMINATED; 
-        //PCB[1]->state = BLOCKED; 
+        
 }
 
 void * scheduler(void * stackPointer){
@@ -42,12 +44,11 @@ void * scheduler(void * stackPointer){
     // identificio rsp del kernel para no guardarlo 
     if ( stackPointer < (void *) KERNEL_STACK_BASE){
         PCB[0]->state = RUNNING; 
-        return (void *)0x710f60;
+        //return (void *)0x710f60;
         return PCB[0]->stackPointer;
-    } else
+    } 
       
     PCB[lastSelected]->stackPointer = stackPointer;
-    /*
     int i;
     // puedo apuntar a ese ultimo nodo seleccio
 
@@ -62,17 +63,16 @@ void * scheduler(void * stackPointer){
             break;
     }
 
+    // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && PCB[lastSelected]->state == BLOCKED)
-        return NULL; 
+        return 0x0; 
     // Si es el =, se van a pisar => evi comparacion 
-    
+     
     PCB[lastSelected]->state = READY;
     PCB[i]->state = RUNNING;
     lastSelected = i;
     
     return PCB[lastSelected]->stackPointer;
-    */
-   return PCB[lastSelected]->stackPointer;
 }
 /*
 //para syscall bloqueante
@@ -92,10 +92,10 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 int addToScheduler(void * stackPointer){
-    PCB[0]->stackPointer = stackPointer;
-    return nextPid; 
+    
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
+            //* CREAR NODO
             PCB[i]->pid = nextPid;
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
