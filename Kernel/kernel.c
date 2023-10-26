@@ -7,6 +7,7 @@
 #include "MemoryManager.h"
 #include "scheduler.h" 
 #include "manageProcess.h"
+#include <interrupts.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -93,12 +94,9 @@ int main() {
 
 	//!creo proceso 
 	
-
-
 	// Carga de descriptores del IDT.
 	load_idt(); 	
 	
-	execve((EntryPoint)sampleCodeModuleAddress);
 	
 	
 	// LAS SYS ESTAN DESACTIVADAASS
@@ -133,6 +131,10 @@ int main() {
 	// Llamado a la Shell.
 	//((EntryPoint)sampleCodeModuleAddress)();
 	
-	while(1);
-	return 0;
+	//!deberia deshabili desp
+	//*sino puedo poner int 20h
+	
+	execve(sampleCodeModuleAddress);
+	forceTimerInt();
+	
 }

@@ -8,6 +8,8 @@
 #define BLOCKED 0
 #define TERMINATED 3
 
+#define KERNEL_STACK_BASE 0x352000 
+
 uint16_t nextPid; 
 uint16_t lastSelected;
 
@@ -48,6 +50,12 @@ void initializeScheduler(){
 
 void * scheduler(void * stackPointer){
     
+    // identificio rsp del kernel para no guardarlo 
+    if ( stackPointer < (void *) KERNEL_STACK_BASE){
+        PCB[0]->state = RUNNING; 
+        return PCB[0]->stackPointer;
+    }
+        
     PCB[lastSelected]->stackPointer = stackPointer;
     /*
     int i;
@@ -75,7 +83,7 @@ void * scheduler(void * stackPointer){
     return PCB[lastSelected]->stackPointer;
     */
    PCB[0]->state = RUNNING;
-   return stackPointer;
+   return PCB[0]->stackPointer;
 }
 /*
 //para syscall bloqueante
@@ -99,7 +107,7 @@ int addToScheduler(void * stackPointer){
      PCB[i]->pid = nextPid;
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
-            PCB[i]->state = RUNNING;
+            PCB[i]->state = READY;
     /*
     int i; 
     for ( i = 0; i < MAX_SIZE_PCB; i++){
