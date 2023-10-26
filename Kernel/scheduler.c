@@ -15,6 +15,7 @@ uint16_t nextPid;
 uint16_t lastSelected;
 
 // ticks no modu => block 
+pcbEntryADT PCB[MAX_SIZE_PCB]; 
 
 void blockProcess(int pid, uint16_t blockReason){
     // sys bloq => 1º modif PCB.state
@@ -54,9 +55,10 @@ void * scheduler(void * stackPointer){
     // identificio rsp del kernel para no guardarlo 
     if ( stackPointer < (void *) KERNEL_STACK_BASE){
         PCB[0]->state = RUNNING; 
+        return (void *)0x710f60;
         return PCB[0]->stackPointer;
-    }
-        
+    } else
+      
     PCB[lastSelected]->stackPointer = stackPointer;
     /*
     int i;
@@ -80,9 +82,10 @@ void * scheduler(void * stackPointer){
     PCB[lastSelected]->state = READY;
     PCB[i]->state = RUNNING;
     lastSelected = i;
+    
+    return PCB[lastSelected]->stackPointer;
     */
-   PCB[0]->state = RUNNING;
-   return PCB[0]->stackPointer;
+   return PCB[lastSelected]->stackPointer;
 }
 
 //flujo de estados:
@@ -100,6 +103,8 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 int addToScheduler(void * stackPointer, void * baseMemAllocated){
+    PCB[0]->stackPointer = stackPointer;
+    return nextPid; 
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             PCB[i]->pid = nextPid;

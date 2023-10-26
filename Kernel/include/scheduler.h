@@ -13,7 +13,7 @@ typedef struct pcbEntryCDT
 
 typedef struct pcbEntryCDT * pcbEntryADT;
 
-pcbEntryADT PCB[MAX_SIZE_PCB]; 
+
 
 void initializeScheduler();
 void * scheduler(void * stackPointer);

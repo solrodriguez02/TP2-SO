@@ -8,6 +8,8 @@
 #define SS 0x0
 #define RFLAGS 0x202
 #define CS 0x8
+
+// SIZES estan en bits
 #define SIZE_GPT SIZE_ADRESS * GPR 
 #define SIZE_INT_PUSHED_R SIZE_ADRESS * INT_PUSHED_R
 #define SIZE_INITIAL_STACK  SIZE_GPT + SIZE_INT_PUSHED_R
@@ -43,7 +45,7 @@ void execve(void * ptrFunction ){
     processStackADT p = (processStackADT) memForStack; 
     p->ss = (void *) SS;
     // + SIZE_ADRESS para asegurar que no pisa los gpr
-    p->rsp = (void *) p + SIZE_ADRESS*GPR + SIZE_ADRESS; 
+    p->rsp = (void *) p - SIZE_ADRESS*GPR; 
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
