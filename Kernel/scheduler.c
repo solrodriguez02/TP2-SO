@@ -53,9 +53,10 @@ void * scheduler(void * stackPointer){
     // identificio rsp del kernel para no guardarlo 
     if ( stackPointer < (void *) KERNEL_STACK_BASE){
         PCB[0]->state = RUNNING; 
+        return (void *)0x710f60;
         return PCB[0]->stackPointer;
-    }
-        
+    } else
+      
     PCB[lastSelected]->stackPointer = stackPointer;
     /*
     int i;
@@ -82,6 +83,7 @@ void * scheduler(void * stackPointer){
     
     return PCB[lastSelected]->stackPointer;
     */
+   return PCB[lastSelected]->stackPointer;
    PCB[0]->state = RUNNING;
    return PCB[0]->stackPointer;
 }

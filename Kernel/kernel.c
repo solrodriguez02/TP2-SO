@@ -93,12 +93,13 @@ int main() {
 	drawTopLine();
 
 	//!creo proceso 
-	
+	execve((void*)0x400000);
+
 	// Carga de descriptores del IDT.
 	load_idt(); 	
 	
-	execve(sampleCodeModuleAddress);
-	forceTimerInt();
+	
+	//forceTimerInt();
 	
 	// LAS SYS ESTAN DESACTIVADAASS
 	// sin PushState
@@ -135,6 +136,6 @@ int main() {
 	
 	
 	// Llamado a la Shell.
-	((EntryPoint)sampleCodeModuleAddress)();
+//	((EntryPoint)sampleCodeModuleAddress)();
 	
 }
