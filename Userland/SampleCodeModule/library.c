@@ -236,3 +236,28 @@ int strcmp(const char* s1, const char* s2){
     }
     return 1;
 }
+
+// ------------------------------------- MODIFICACIONES STRINGS ------------------------------------- //
+
+//se devuelve la cant maxima de strings que se parsearon
+int strtok(char * s, char delim, char * array[], int arraySize){
+    int arrayIndex = 0;
+    //primero se guarda el puntero en el array desde el principio
+    //entonces por cada vez que encuentre el delimitador tengo que dejar el puntero al char de inicio
+    if(*s != delim && *s != '\0')
+        array[arrayIndex++] = s;
+    while( *s != '\0' ){
+        if(*s == delim){
+            *s = 0;
+            //si el siguiente no es tambien un delimitador ni el final del string
+            //entonces mientras todavia tenga espacio en el array -> me guardo el puntero al siguiente
+            if( *(s+1) != delim &&  (*(s+1) != '\0')){
+                if(arrayIndex >= arraySize)
+                    return arrayIndex;
+                array[arrayIndex++] = s + 1;
+            }
+        }
+        s++;
+    }
+    return arrayIndex;
+}
