@@ -6,7 +6,8 @@
 #include <time.h>
 #include <clock.h>
 #include "MemoryManager.h"
-#include "scheduler.h"
+#include <scheduler.h>
+#include "manageProcess.h"
 
 extern char buffer;
 
@@ -96,6 +97,17 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             return getPid();
         case 16:
             return getStatus(param1);
+        case 17:
+            return deleteFromScheduler(param1);
+        case 18:
+            return execve(param1);
+        case 19:
+            if (getStatus(param1) == BLOCKED){
+                unblockProcess(param1);
+            }else{
+                blockProcess(param1, BLOCKBYUSER);
+            }
+            break;
     }
 	return 0;
 }

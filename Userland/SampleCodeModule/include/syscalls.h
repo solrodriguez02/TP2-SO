@@ -14,4 +14,11 @@ extern void syscall_enableDoubleBuffer(int enable);
 extern void syscall_time(char * timeStr);
 extern void * syscall_malloc(unsigned int size);
 extern void syscall_free(void * ptr);
+/*
+extern int syscall_getpid();
+extern int syscall_getstatus(int pid)
+extern int syscall_kill(int pid);
+extern int syscall_execve(void * pointer);
+extern void syscall_block(int pid);
+*/
 #endif

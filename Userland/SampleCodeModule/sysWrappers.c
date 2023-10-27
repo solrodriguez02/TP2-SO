@@ -106,3 +106,15 @@ int getPid(){
 int getStatus(int pid){
     return syscall_getstatus(pid);
 }
+
+int kill(int pid){
+    return syscall_kill(pid);
+}
+
+int execve(void * pointer){
+    return syscall_execve(pointer);
+}
+
+void block(int pid){
+    syscall_block(pid);
+}

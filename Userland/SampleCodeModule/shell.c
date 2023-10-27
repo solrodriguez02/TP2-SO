@@ -58,25 +58,48 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 void enter(){
     while (1)
     {
-         printf("--------------------------------------xxxxxxx------------");    
+        printf("--------------------------------------xxxxxxx------------");
+        break;
     }
-    
 }
 
 void getDefinedStatus(){
-    int status =  getStatus(7449);
-    switch(status){
-        case RUNNING:
-            printf("proceso running\n");
-        case READY:
-            printf("proceso ready\n");
-        case BLOCKED:
-            printf("proceso bloqueado\n");
+    for(int i = 1; i <3; i++){
+        int status =  getStatus(i);
+        printf("PID %d: ", i);
+        switch(status){
+            case RUNNING:
+                printf("proceso running\n");
+                break;
+            case READY:
+                printf("proceso ready\n");
+                break;
+            case BLOCKED:
+                printf("proceso bloqueado\n");
+                break;
+        }
     }
 }
 
 void getCurrentPid(){
     printf("El pid: %d\n", getPid());
+}
+
+void killProcess(){
+    kill(2);
+}
+
+void execveNew(){
+    int pid = execve(&enter);
+    if (pid != -1){
+        printf("proceso enter creado con pid: %d", pid);
+    }else{
+        printf("creacion de proceso fallida");
+    }
+}
+
+void blockProcess(){
+    block(2);
 }
 
 /**
@@ -88,6 +111,9 @@ void loadAllModules() {
     loadModule("enter", "Prueba enters",&enter);
     loadModule("getPid", "Returns current process PID", &getCurrentPid);
     loadModule("getstatus", "get status from process", &getDefinedStatus);
+    loadModule("kill", "kill a process", &killProcess);
+    loadModule("fork", "executes fork+execve for a given process", &execveNew);
+    loadModule("block", "block specific process", &blockProcess);
 }
 
 

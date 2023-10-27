@@ -1,7 +1,7 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#define TOTAL_MODULES 5
+#define TOTAL_MODULES 8
 #define COMMAND_MIN_SIZE 4
 #define TIME_BUFF_SIZE 9
 

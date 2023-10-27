@@ -1,5 +1,13 @@
 #include <stdint.h>
 #define SIZE_ENTRY 12
+#define BLOCKBYIO 0
+#define BLOCKBYIPC 1
+#define BLOCKBYUSER 2
+
+#define RUNNING 2
+#define READY 1 
+#define BLOCKED 0
+#define TERMINATED 3
 typedef struct pcbEntryCDT
 {
     uint16_t parentPid;
@@ -23,7 +31,3 @@ int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);
 void blockProcess(int pid, uint16_t blockReason);
-
-#define BLOCKBYIO 0
-#define BLOCKBYIPC 1
-#define BLOCKBYUSER 2

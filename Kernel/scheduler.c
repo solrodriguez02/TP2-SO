@@ -3,11 +3,6 @@
 #include "MemoryManager.h"
 #define MAX_SIZE_PCB 2
 
-#define RUNNING 2
-#define READY 1 
-#define BLOCKED 0
-#define TERMINATED 3
-
 #define KERNEL_STACK_BASE 0x352000 
 
 uint16_t nextPid; 
@@ -31,11 +26,10 @@ void blockProcess(int pid, uint16_t blockReason){
 void unblockProcess(int pid){
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
-            PCB[i]->state = BLOCKED;
+            PCB[i]->state = READY;
             // aviso q info espera en struct
-                    }
+        }
     }
-    PCB[lastSelected]->state = READY;
 }
 
 void initializeScheduler(){
@@ -43,7 +37,7 @@ void initializeScheduler(){
         lastSelected =0;
 
         PCB[0] = allocMemory( SIZE_ENTRY );
-        PCB[1] = PCB[0]+24;
+        PCB[1] = PCB[0]+8 *7;
         PCB[0]->state = TERMINATED;
         PCB[1]->state = TERMINATED; 
         
@@ -74,7 +68,7 @@ void * scheduler(void * stackPointer){
     }
 
     // retorno una direccion xq asm no tiene null
-    if ( i==lastSelected && PCB[lastSelected]->state == BLOCKED)
+    if ( i==lastSelected && (PCB[lastSelected]->state == BLOCKED || PCB[lastSelected]->state == TERMINATED))
         return 0x0; 
     // Si es el =, se van a pisar => evi comparacion 
      
@@ -96,7 +90,7 @@ int deleteFromScheduler(uint16_t pid){
             return 1;
         }
     }
-    return 0;
+    return -1;
 }
 
 
@@ -105,15 +99,15 @@ int addToScheduler(void * stackPointer, void * baseMemAllocated){
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO
-            PCB[i]->pid = nextPid;
+            PCB[i]->pid = nextPid++;
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
             PCB[i]->baseMemAllocated = baseMemAllocated;
-            return 1;
+            return PCB[i]->pid;
         }
     }
-    return 0;
+    return -1;
 }
 
 int getPid(){

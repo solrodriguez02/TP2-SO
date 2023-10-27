@@ -1,2 +1,2 @@
 
-void execve(void * ptrFunction );
+int execve(void * ptrFunction );

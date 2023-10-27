@@ -11,6 +11,9 @@ GLOBAL syscall_malloc
 GLOBAL syscall_free
 GLOBAL syscall_getpid
 GLOBAL syscall_getstatus
+GLOBAL syscall_kill
+GLOBAL syscall_execve
+GLOBAL syscall_block
 
 section .text
 
@@ -118,6 +121,30 @@ syscall_getstatus:
 	pushf
 	mov rsi, rdi
 	mov rdi, 16
+	int 80h
+	popf
+	ret
+
+syscall_kill:
+	pushf
+	mov rsi, rdi
+	mov rdi, 17
+	int 80h
+	popf
+	ret
+
+syscall_execve:
+	pushf
+	mov rsi, rdi
+	mov rdi, 18
+	int 80h
+	popf
+	ret
+
+syscall_block:
+	pushf
+	mov rsi, rdi
+	mov rdi, 19
 	int 80h
 	popf
 	ret
