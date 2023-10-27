@@ -22,3 +22,4 @@ int getStatus(int pid);
 int kill(int pid);
 int execve(void* pointer);
 void block(int pid);
+void exit();

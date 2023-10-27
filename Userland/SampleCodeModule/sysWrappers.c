@@ -118,3 +118,7 @@ int execve(void * pointer){
 void block(int pid){
     syscall_block(pid);
 }
+
+void exit(){
+    kill(getPid());
+}

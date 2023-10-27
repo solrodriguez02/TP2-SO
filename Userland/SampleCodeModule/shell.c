@@ -23,10 +23,6 @@ typedef struct {
 module modules[TOTAL_MODULES];
 int modulesCount = 0;
 
-void exit(){
-    kill(getPid());
-}
-
 /**
  * @brief Función que inicializa la Shell, y consulta constantemente acerca de qué módulo se desea correr.
  */
@@ -61,7 +57,7 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 }
 
 
-void enter(int iterac){
+void enter(){
     for (int i = 0; i < 6; i++){
         printf("--------------------------------------xxxxxxx------------");
     }

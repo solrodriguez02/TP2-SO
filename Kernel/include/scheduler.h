@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <time.h>
+
 #define SIZE_ENTRY 12
 #define BLOCKBYIO 0
 #define BLOCKBYIPC 1

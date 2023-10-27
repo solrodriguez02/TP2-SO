@@ -1,7 +1,7 @@
 #include "scheduler.h"
 #include <stdio.h>
 #include "MemoryManager.h"
-#define MAX_SIZE_PCB 2
+#define MAX_SIZE_PCB 3
 
 #define KERNEL_STACK_BASE 0x352000 
 
@@ -14,6 +14,14 @@ pcbEntryADT PCB[MAX_SIZE_PCB];
 void blockProcess(int pid, uint16_t blockReason){
     // sys bloq => 1º modif PCB.state
     //             2º fuerzo interr
+    if ( pid == PCB[lastSelected]->pid ){
+            PCB[lastSelected]->state = BLOCKED;
+            // aviso q info espera en struct
+            PCB[lastSelected]->blockReason = blockReason;
+            forceTimerInt();
+            return;
+    }
+
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = BLOCKED;
@@ -37,18 +45,19 @@ void initializeScheduler(){
         lastSelected =0;
 
         PCB[0] = allocMemory( SIZE_ENTRY );
-        PCB[1] = PCB[0]+8 *7;
+        PCB[1] = PCB[0]+8 *10;
         PCB[0]->state = TERMINATED;
         PCB[1]->state = TERMINATED; 
-        
+        PCB[2] = PCB[1]+8 *10;
+        PCB[2]->state = TERMINATED; 
 }
 
 void * scheduler(void * stackPointer){
     
+    restartTicks();
     // identificio rsp del kernel para no guardarlo 
     if ( stackPointer < (void *) KERNEL_STACK_BASE){
         PCB[0]->state = RUNNING; 
-        //return (void *)0x710f60;
         return PCB[0]->stackPointer;
     } 
       
@@ -69,7 +78,7 @@ void * scheduler(void * stackPointer){
 
     // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && (PCB[lastSelected]->state == BLOCKED || PCB[lastSelected]->state == TERMINATED))
-        return 0x0; 
+        return PCB[lastSelected]->stackPointer; 
     // Si es el =, se van a pisar => evi comparacion 
      
     PCB[lastSelected]->state = READY;
@@ -83,6 +92,13 @@ void * scheduler(void * stackPointer){
 // INIT (PID = PARENTPID = 1)
 // Arranca en running pero despues siempre
 int deleteFromScheduler(uint16_t pid){
+    if ( pid == PCB[lastSelected]->pid ){
+            PCB[lastSelected]->state = TERMINATED;
+            // aviso q info espera en struct
+            forceTimerInt();
+            return;
+    }
+
     for(int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
@@ -107,6 +123,8 @@ int addToScheduler(void * stackPointer, void * baseMemAllocated){
             return PCB[i]->pid;
         }
     }
+    forceTimerInt();
+
     return -1;
 }
 

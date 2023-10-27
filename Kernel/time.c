@@ -23,6 +23,10 @@ int ticks_elapsed() {
 	return ticks;
 }
 
+void restartTicks(){
+	ticks =0; 
+}
+
 /**
  * @brief Retorna la cantidad de segundos transcurridos a partir de los ticks.
  * 
