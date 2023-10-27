@@ -25,5 +25,6 @@ void numToStr(long int num, int base, char * buffer);
 int strToNum(char* num);
 
 int strcmp (const char* s1, const char* s2);
+int strtok(char * s, char delim, char * array[], int arraySize);
 
 #endif

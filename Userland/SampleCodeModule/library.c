@@ -205,7 +205,7 @@ int strToNum(char * stringNum){
         notNeg=-1;
         i++;
     }
-    while (stringNum[i]){
+    while (stringNum[i] && stringNum[i] != '\n'){
         n = n*10 + (stringNum[i] - '0');
         i++;
     }

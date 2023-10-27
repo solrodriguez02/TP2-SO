@@ -14,7 +14,7 @@
 typedef struct {
     char * name;
     char * description;
-    void (*function)(void);
+    void (*function)(int param1);
 } module;
 
 /**
@@ -23,19 +23,25 @@ typedef struct {
 module modules[TOTAL_MODULES];
 int modulesCount = 0;
 
+void exit(){
+    kill(getPid());
+}
+
 /**
  * @brief Función que inicializa la Shell, y consulta constantemente acerca de qué módulo se desea correr.
  */
 void startShell() {
     loadAllModules();
     printf("Welcome to the shell\n");
-    modules[0].function();
+    modules[0].function(0);
     char input[COMMAND_MAX_SIZE];
+    char * command[MAX_NUM_ARGUMENTS];
     while(1){
         printf("\n");
         print("$ ", BLUE);
         getInput(input);
-        runModule(input);
+        strtok(input,' ', command, MAX_NUM_ARGUMENTS);
+        runModule(command);
     }
 }
 
@@ -55,18 +61,15 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 }
 
 
-void enter(){
-    while (1)
-    {
+void enter(int iterac){
+    for (int i = 0; i < 6; i++){
         printf("--------------------------------------xxxxxxx------------");
-        break;
     }
+    exit();
 }
 
-void getDefinedStatus(){
-    for(int i = 1; i <3; i++){
-        int status =  getStatus(i);
-        printf("PID %d: ", i);
+void getDefinedStatus(int pid){
+        int status =  getStatus(pid);
         switch(status){
             case RUNNING:
                 printf("proceso running\n");
@@ -78,28 +81,27 @@ void getDefinedStatus(){
                 printf("proceso bloqueado\n");
                 break;
         }
-    }
 }
 
-void getCurrentPid(){
+void getCurrentPid(int none){
     printf("El pid: %d\n", getPid());
 }
 
-void killProcess(){
-    kill(2);
+void killProcess(int pid){
+    kill(pid);
 }
 
-void execveNew(){
-    int pid = execve(&enter);
+void execveNew(int functionIndex){
+    int pid = execve(modules[functionIndex-1].function);
     if (pid != -1){
         printf("proceso enter creado con pid: %d", pid);
     }else{
-        printf("creacion de proceso fallida");
+        printf("creacion de proceso fallido");
     }
 }
 
-void blockProcess(){
-    block(2);
+void blockProcess(int pid){
+    block(pid);
 }
 
 /**
@@ -123,11 +125,15 @@ void loadAllModules() {
  * 
  * @param input Nombre del módulo que se busca comparar.
  */
-void runModule(const char * input){
+void runModule(const char * input[]){
     printf("\n");    
     for(int i=0;i<TOTAL_MODULES;i++){
-        if (strcmp(modules[i].name,input)){
-            modules[i].function();
+        if (strcmp(modules[i].name,input[0])){
+            if (!input[1]){
+                modules[i].function(1);
+                return;
+            }
+            modules[i].function(strToNum(input[1]));
             return;
         }
     }
@@ -140,7 +146,7 @@ void runModule(const char * input){
 /**
  * @brief Función correspondiente para el módulo de "help". Imprime todas las funcionalidades disponibles.
  */
-void printHelp() {
+void printHelp(int none) {
     printf("The shell's functionalities are the following:\n");
     for(int i=0; i<TOTAL_MODULES; i++) {
         printf("\n");
@@ -156,7 +162,7 @@ void printHelp() {
 /**
  * @brief Función correspondiente al módulo de "clear". Limpia la pantalla de la shell.
  */
-void clear() {
+void clear(int none) {
     enableDoubleBuffer(1);
     enableDoubleBuffer(0);
 }
