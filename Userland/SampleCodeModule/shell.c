@@ -94,6 +94,10 @@ void killProcess(int pid){
 }
 
 void execveNew(int functionIndex){
+    if ( functionIndex < 1 || functionIndex > 3 ){
+        printf("Invalid module");
+        return;
+    }
     int pid = execve(modules[functionIndex-1].function);
     if (pid != -1){
         printf("proceso enter creado con pid: %d", pid);

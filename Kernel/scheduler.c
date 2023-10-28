@@ -14,9 +14,8 @@ uint16_t lastSelected;
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 
 void blockProcess(int pid, uint16_t blockReason){
-    // sys bloq => 1º modif PCB.state
-    //             2º fuerzo interr
-    if ( pid == PCB[lastSelected]->pid ){
+    
+    if ( pid == PCB[lastSelected]->pid || pid == RUNNING_PROCESS ){
             PCB[lastSelected]->state = BLOCKED;
             // aviso q info espera en struct
             PCB[lastSelected]->blockReason = blockReason;
@@ -141,7 +140,6 @@ int addToScheduler(void * stackPointer, void * topMemAllocated){
             return PCB[i]->pid;
         }
     }
-    //forceTimerInt();
 
     return -1;
 }

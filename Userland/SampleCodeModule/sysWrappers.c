@@ -122,3 +122,7 @@ void block(int pid){
 void exit(){
     kill(0);
 }
+
+void yield(){
+    syscall_block(0);   
+}
