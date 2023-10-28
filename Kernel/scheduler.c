@@ -157,8 +157,3 @@ int getStatus(int pid){
     return -1;
 }
 
-int nopProcess(){
-    while(1){
-        _hlt();
-    }
-}
