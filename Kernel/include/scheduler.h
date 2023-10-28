@@ -11,6 +11,9 @@
 #define READY 1 
 #define BLOCKED 0
 #define TERMINATED 3
+
+#define RUNNING_PROCESS 0
+
 typedef struct pcbEntryCDT
 {
     uint16_t parentPid;

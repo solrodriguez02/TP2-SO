@@ -120,5 +120,5 @@ void block(int pid){
 }
 
 void exit(){
-    kill(getPid());
+    kill(0);
 }

@@ -88,6 +88,8 @@ void getCurrentPid(int none){
 }
 
 void killProcess(int pid){
+    if ( pid==0)
+        printf("Invalid pid\n");
     kill(pid);
 }
 
@@ -165,4 +167,5 @@ void printHelp(int none) {
 void clear(int none) {
     enableDoubleBuffer(1);
     enableDoubleBuffer(0);
+    exit();
 }

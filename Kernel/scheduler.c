@@ -82,7 +82,6 @@ void * scheduler(void * stackPointer){
             i=1;
             if ( i==lastSelected)
                 break;
-            //continue;
         }
         if ( PCB[i]->state==READY)
             break;
@@ -105,8 +104,9 @@ void * scheduler(void * stackPointer){
 //flujo de estados:
 // INIT (PID = PARENTPID = 1)
 // Arranca en running pero despues siempre
+//* RUNNING_PROCESS asi se evita syscall getpid 
 int deleteFromScheduler(uint16_t pid){
-    if ( pid == lastSelected ){
+    if ( pid == lastSelected || pid == RUNNING_PROCESS){
             PCB[lastSelected]->state = TERMINATED;
             //* aca se sacaria al nodo de la lista y desp free
             //freeMemory(PCB[lastSelected]->topMemAllocated);
@@ -117,7 +117,8 @@ int deleteFromScheduler(uint16_t pid){
     for(int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
-            freeMemory(PCB[i]->topMemAllocated);
+            //* aca se sacaria al nodo de la lista y desp free
+            //freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
         }
@@ -127,8 +128,6 @@ int deleteFromScheduler(uint16_t pid){
 
 
 int addToScheduler(void * stackPointer, void * topMemAllocated){
-    //if ( nextPid==0){
-        
     
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
