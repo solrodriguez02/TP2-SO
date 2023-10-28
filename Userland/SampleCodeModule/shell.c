@@ -37,6 +37,10 @@ void startShell() {
         print("$ ", BLUE);
         getInput(input);
         strtok(input,' ', command, MAX_NUM_ARGUMENTS);
+       /*
+       command[0]= "fork";
+       command[1]= "3";
+       */ 
         runModule(command);
     }
 }

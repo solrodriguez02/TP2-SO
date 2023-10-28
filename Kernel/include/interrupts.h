@@ -15,6 +15,8 @@ extern int syscallsHandler(void);
 extern void _exception0Handler(void);
 extern void _exception6Handler(void);
 
+//! extern <=> no las llamo desde afuera de interrupts.asm
+
 void _cli(void);
 
 void _sti(void);
@@ -28,5 +30,6 @@ void picSlaveMask(uint8_t mask);
 void haltcpu(void);
 
 void forceTimerInt(void);
+
 
 #endif

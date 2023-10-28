@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <time.h>
+//#include "interrupts.h"
 
 #define SIZE_ENTRY 12
 #define BLOCKBYIO 0
@@ -17,7 +18,7 @@ typedef struct pcbEntryCDT
     void * stackPointer;
     uint8_t state;
     uint8_t priority;
-    void * baseMemAllocated;
+    void * topMemAllocated;
     uint16_t blockReason;
 } pcbEntryCDT;
 

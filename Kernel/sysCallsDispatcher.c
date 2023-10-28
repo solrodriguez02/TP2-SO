@@ -57,6 +57,9 @@ void wait(int seconds){
  * retorna el valor 0.
  */
 long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2, uint64_t param3, uint64_t param4, uint64_t param5) {
+    // va a entrar al scheduler si o si, pues ticks=0 => (0%quantum == 0) = true 
+    if ( syscall > 16 )
+        restartTicks();
     switch (syscall) {
 		case 0:
 			return read();

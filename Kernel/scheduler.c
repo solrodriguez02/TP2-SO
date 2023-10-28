@@ -1,9 +1,11 @@
 #include "scheduler.h"
-#include <stdio.h>
+#include <interrupts.h>
 #include "MemoryManager.h"
-#define MAX_SIZE_PCB 3
+#define MAX_SIZE_PCB 4
 
 #define KERNEL_STACK_BASE 0x352000 
+
+
 
 uint16_t nextPid; 
 uint16_t lastSelected;
@@ -22,7 +24,7 @@ void blockProcess(int pid, uint16_t blockReason){
             return;
     }
 
-    for (int i = 0; i < MAX_SIZE_PCB; i++){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = BLOCKED;
             // aviso q info espera en struct
@@ -32,7 +34,7 @@ void blockProcess(int pid, uint16_t blockReason){
 }
 
 void unblockProcess(int pid){
-    for (int i = 0; i < MAX_SIZE_PCB; i++){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
             // aviso q info espera en struct
@@ -44,33 +46,43 @@ void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
 
-        PCB[0] = allocMemory( SIZE_ENTRY );
-        PCB[1] = PCB[0]+8 *10;
-        PCB[0]->state = TERMINATED;
-        PCB[1]->state = TERMINATED; 
-        PCB[2] = PCB[1]+8 *10;
+        
+        PCB[1] = allocMemory( SIZE_ENTRY );
+        PCB[2] = allocMemory( SIZE_ENTRY );
+        PCB[3] = allocMemory( SIZE_ENTRY );
+        PCB[1]->state = TERMINATED;
         PCB[2]->state = TERMINATED; 
+        PCB[3]->state = TERMINATED; 
 }
 
 void * scheduler(void * stackPointer){
     
+    /* reinicio ticks en 
+        + sysDispa sys block 
+        + add
+        + delete si el era el q estaba corriendo
+    => sig int llama al scheduler 
     restartTicks();
-    // identificio rsp del kernel para no guardarlo 
-    if ( stackPointer < (void *) KERNEL_STACK_BASE){
-        PCB[0]->state = RUNNING; 
-        return PCB[0]->stackPointer;
+    
+*/
+    //* identificio rsp del kernel para no guardarlo 
+    //if ( stackPointer < (void *) KERNEL_STACK_BASE || ){
+    if ( lastSelected==0 ){
+        lastSelected = 1; 
+        PCB[1]->state = RUNNING; 
+        return PCB[1]->stackPointer;
     } 
-      
+ // GUARDA EL STACK  
     PCB[lastSelected]->stackPointer = stackPointer;
     int i;
     // puedo apuntar a ese ultimo nodo seleccio
 
     for ( i=lastSelected+1; i!=lastSelected; i++ ){
         if ( i==MAX_SIZE_PCB){
-            i=0;
+            i=1;
             if ( i==lastSelected)
                 break;
-            continue;
+            //continue;
         }
         if ( PCB[i]->state==READY)
             break;
@@ -81,7 +93,9 @@ void * scheduler(void * stackPointer){
         return PCB[lastSelected]->stackPointer; 
     // Si es el =, se van a pisar => evi comparacion 
      
-    PCB[lastSelected]->state = READY;
+     // SI proceso no fue ni bloqueado ni terminado
+    if ( PCB[lastSelected]->state == RUNNING )
+        PCB[lastSelected]->state = READY;
     PCB[i]->state = RUNNING;
     lastSelected = i;
     
@@ -92,38 +106,43 @@ void * scheduler(void * stackPointer){
 // INIT (PID = PARENTPID = 1)
 // Arranca en running pero despues siempre
 int deleteFromScheduler(uint16_t pid){
-    if ( pid == PCB[lastSelected]->pid ){
+    if ( pid == lastSelected ){
             PCB[lastSelected]->state = TERMINATED;
-            // aviso q info espera en struct
+            //* aca se sacaria al nodo de la lista y desp free
+            //freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
-            return;
+            return 0;
     }
 
-    for(int i = 0; i < MAX_SIZE_PCB; i++){
+    for(int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
-            freeMemory(PCB[i]->baseMemAllocated);
-            return 1;
+            freeMemory(PCB[i]->topMemAllocated);
+            forceTimerInt();
+            return 0;
         }
     }
     return -1;
 }
 
 
-int addToScheduler(void * stackPointer, void * baseMemAllocated){
-
-    for (int i = 0; i < MAX_SIZE_PCB; i++){
+int addToScheduler(void * stackPointer, void * topMemAllocated){
+    //if ( nextPid==0){
+        
+    
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO
             PCB[i]->pid = nextPid++;
             PCB[i]->priority = 1;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
-            PCB[i]->baseMemAllocated = baseMemAllocated;
+            PCB[i]->topMemAllocated = topMemAllocated;
+            forceTimerInt();
             return PCB[i]->pid;
         }
     }
-    forceTimerInt();
+    //forceTimerInt();
 
     return -1;
 }
