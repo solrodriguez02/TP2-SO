@@ -1,6 +1,8 @@
-#include "scheduler.h"
+#include <scheduler.h>
 #include <interrupts.h>
 #include "MemoryManager.h"
+#include <listADT.h>
+#include <time.h>
 #define MAX_SIZE_PCB 4
 
 #define KERNEL_STACK_BASE 0x352000 
@@ -12,9 +14,16 @@ uint16_t lastSelected;
 
 // ticks no modu => block 
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
+//voy creando lista
+/*
+listADT processList;
 
+//creo funcion para comparar por id
+int comparePid(elemType elem1, elemType elem2){
+    return elem1->pid - elem2->pid;
+}
+*/
 void blockProcess(int pid, uint16_t blockReason){
-    
     if ( pid == PCB[lastSelected]->pid || pid == RUNNING_PROCESS ){
             PCB[lastSelected]->state = BLOCKED;
             // aviso q info espera en struct
@@ -33,9 +42,40 @@ void blockProcess(int pid, uint16_t blockReason){
 }
 
 void unblockProcess(int pid){
+    if (!pid){
+        PCB[lastSelected]->state = READY;
+        return;
+    }
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
+            return;
+            // aviso q info espera en struct
+        }
+    }
+}
+
+void updateTicks(int pid, int ticks){
+    if (!pid){
+        PCB[lastSelected]->ticksBeforeBlock += ticks;
+        updatePriority(lastSelected, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+        return;
+    }
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->ticksBeforeBlock += ticks;
+            updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+            return;
+            // aviso q info espera en struct
+        }
+    }
+}
+
+void updatePriority(int pid, int priority){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->priority = priority;
+            return;
             // aviso q info espera en struct
         }
     }
@@ -44,7 +84,7 @@ void unblockProcess(int pid){
 void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
-
+        //processList = newList(comparePid);
         
         PCB[1] = allocMemory( SIZE_ENTRY );
         PCB[2] = allocMemory( SIZE_ENTRY );
@@ -131,11 +171,14 @@ int addToScheduler(void * stackPointer, void * topMemAllocated){
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO
+            PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->pid = nextPid++;
-            PCB[i]->priority = 1;
+            PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
+            PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
             PCB[i]->topMemAllocated = topMemAllocated;
+            PCB[i]->isForeground = TRUE;
             forceTimerInt();
             return PCB[i]->pid;
         }
@@ -157,3 +200,11 @@ int getStatus(int pid){
     return -1;
 }
 
+int getPriority(int pid){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return PCB[i]->priority;
+        }
+    }
+    return -1;
+}

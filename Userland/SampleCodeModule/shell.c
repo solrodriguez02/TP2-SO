@@ -80,6 +80,9 @@ void getDefinedStatus(int pid){
             case BLOCKED:
                 printf("proceso bloqueado\n");
                 break;
+            case TERMINATED:
+                printf("proceso terminado\n");
+                break;
         }
 }
 
@@ -90,7 +93,17 @@ void getCurrentPid(int none){
 void killProcess(int pid){
     if ( pid==0)
         printf("Invalid pid\n");
-    kill(pid);
+    else
+        kill(pid);
+}
+
+void getProcessPriority(int pid){
+    int priority = getPriority(pid);
+    printf("El proceso %d tiene prioridad %d\n", pid, priority);
+}
+
+void updateProcessPriority(int pid){
+    updatePriority(pid);
 }
 
 void execveNew(int functionIndex){
@@ -122,6 +135,8 @@ void loadAllModules() {
     loadModule("kill", "kill a process", &killProcess);
     loadModule("fork", "executes fork+execve for a given process", &execveNew);
     loadModule("block", "block specific process", &blockProcess);
+    loadModule("getPriority", "get priority from process", &getProcessPriority);
+    loadModule("updatePriority", "update priority from process", &updateProcessPriority);
 }
 
 

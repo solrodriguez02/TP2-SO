@@ -58,6 +58,7 @@ void wait(int seconds){
  */
 long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2, uint64_t param3, uint64_t param4, uint64_t param5) {
     // va a entrar al scheduler si o si, pues ticks=0 => (0%quantum == 0) = true 
+    updateTicks(0, ticks_before_quantum());
     if ( syscall > 16 )
         restartTicks();
     switch (syscall) {
@@ -103,7 +104,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 17:
             return deleteFromScheduler(param1);
         case 18:
-            return execve(param1);
+            return execve((void *)param1);
         case 19:
             if (getStatus(param1) == BLOCKED){
                 unblockProcess(param1);
@@ -111,6 +112,15 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
                 blockProcess(param1, BLOCKBYUSER);
             }
             break;
+        case 20:
+            if (getPriority(param1)== 0){
+                updatePriority(param1, 1);
+            }else{
+                updatePriority(param1, 0);
+            }
+            break;
+        case 21:
+            return getPriority(param1);
     }
 	return 0;
 }
