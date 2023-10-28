@@ -88,7 +88,7 @@ void * scheduler(void * stackPointer){
 
     // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && (PCB[lastSelected]->state == BLOCKED || PCB[lastSelected]->state == TERMINATED))
-        return PCB[lastSelected]->stackPointer; 
+        return (void *) 0x0; 
     // Si es el =, se van a pisar => evi comparacion 
      
      // SI proceso no fue ni bloqueado ni terminado
