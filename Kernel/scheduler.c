@@ -1,6 +1,8 @@
-#include "scheduler.h"
+#include <scheduler.h>
 #include <interrupts.h>
 #include "MemoryManager.h"
+#include <listADT.h>
+#include <time.h>
 #define MAX_SIZE_PCB 4
 
 #define KERNEL_STACK_BASE 0x352000 
@@ -23,10 +25,13 @@ typedef struct pcbEntryCDT
     uint16_t pid; 
     void * stackPointer;
     uint8_t state;
-    uint8_t priority;
     void * topMemAllocated;
     void * fds[MAX_FD_PER_PROCESS];
     blockedReasonCDT blockedReasonCDT; 
+    uint8_t priority;
+    uint16_t ticksBeforeBlock;
+    uint16_t blockReason;
+    uint16_t isForeground;
 } pcbEntryCDT;
 
 typedef struct pcbEntryCDT * pcbEntryADT;
@@ -54,8 +59,16 @@ uint8_t canBeUnlocked ( int i, uint8_t reason){
 
 // en realidad solo se llama cuando el user lo bloquea
 // => blockReason = BLOCKBYUSER
+//voy creando lista
+/*
+listADT processList;
+
+//creo funcion para comparar por id
+int comparePid(elemType elem1, elemType elem2){
+    return elem1->pid - elem2->pid;
+}
+*/
 void blockProcess(int pid, uint16_t blockReason){
-    
     if ( pid == PCB[lastSelected]->pid || pid == RUNNING_PROCESS ){
             PCB[lastSelected]->state = BLOCKED;
             // aviso q info espera en struct
@@ -74,6 +87,7 @@ void blockProcess(int pid, uint16_t blockReason){
 }
 
 void unblockProcess(int pid){
+
     // saco: " pid == PCB[lastSelected]->pid || " pues si o si no va a estar
     // corriendo si llame a unblock desde la shell
     //* en reali ni las sysBlock lo llaman, pues ya el scheduler las agarra 
@@ -88,7 +102,32 @@ void unblockProcess(int pid){
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
-            
+        }
+    }
+}
+
+void updateTicks(int pid, int ticks){
+    if (!pid){
+        PCB[lastSelected]->ticksBeforeBlock += ticks;
+        updatePriority(lastSelected, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+        return;
+    }
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->ticksBeforeBlock += ticks;
+            updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+            return;
+            // aviso q info espera en struct
+        }
+    }
+}
+
+void updatePriority(int pid, int priority){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            PCB[i]->priority = priority;
+            return;
+            // aviso q info espera en struct
         }
     }
 }
@@ -96,7 +135,7 @@ void unblockProcess(int pid){
 void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
-
+        //processList = newList(comparePid);
         
         PCB[1] = allocMemory( SIZE_ENTRY );
         PCB[2] = allocMemory( SIZE_ENTRY );
@@ -201,13 +240,16 @@ int addToScheduler(void * stackPointer, void * topMemAllocated){
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO
+            PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->pid = nextPid++;
-            PCB[i]->priority = 1;
+            PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
+            PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
             PCB[i]->fds[0] = STDIN;
             PCB[i]->fds[1] = STDOUT;
             PCB[i]->topMemAllocated = topMemAllocated;
+            PCB[i]->isForeground = TRUE;
             forceTimerInt();
             return PCB[i]->pid;
         }
@@ -233,4 +275,12 @@ void * getFd(uint8_t i){
     if ( i > MAX_FD_PER_PROCESS || i < 0 )
         return 0;
     return PCB[lastSelected]->fds[i];   
+}
+int getPriority(int pid){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return PCB[i]->priority;
+        }
+    }
+    return -1;
 }

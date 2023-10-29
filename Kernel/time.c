@@ -8,7 +8,8 @@ static unsigned long ticks = 0;
  *! wasForced para sys bloq? 
  */
 void * timer_handler(void * stackPointer) {
-	if ( ticks%100 == 0 ) 
+	updateTicks(0, ticks_before_quantum());
+	if ( ticks% QUANTUM == 0 ) 
 		return scheduler( stackPointer );
 	ticks++;
 	return stackPointer;
@@ -27,6 +28,10 @@ void restartTicks(){
 	ticks =0; 
 }
 
+
+int ticks_before_quantum(){
+	return ticks_elapsed()%QUANTUM;
+}
 /**
  * @brief Retorna la cantidad de segundos transcurridos a partir de los ticks.
  * 

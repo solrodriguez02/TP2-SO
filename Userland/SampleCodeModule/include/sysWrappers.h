@@ -24,3 +24,5 @@ int execve(void* pointer);
 void block(int pid);
 void exit();
 void yield();
+void updatePriority(int pid);
+int getPriority(int pid);

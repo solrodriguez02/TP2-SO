@@ -12,7 +12,7 @@
 #define MID_SCREEN_X 512
 #define SCREEN_HEIGHT 768
 #define SCREEN_WIDTH 1018
-#define COMMAND_MAX_SIZE 15
+#define COMMAND_MAX_SIZE 22
 
 void getInput(char * buffer);
 
