@@ -8,7 +8,7 @@ static unsigned long ticks = 0;
  *! wasForced para sys bloq? 
  */
 void * timer_handler(void * stackPointer) {
-	if ( ticks%50 == 0 ) 
+	if ( ticks%100 == 0 ) 
 		return scheduler( stackPointer );
 	ticks++;
 	return stackPointer;

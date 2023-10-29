@@ -8,6 +8,7 @@
 #include "MemoryManager.h"
 #include <scheduler.h>
 #include "manageProcess.h"
+#include <blockingSys.h>
 
 extern char buffer;
 
@@ -16,7 +17,7 @@ extern char buffer;
  * 
  * @return Valor ASCII guardado en la variable buffer.
  */
-static unsigned char read() {
+static unsigned char readVIEJO() {
     _sti();
     buffer = 0; 
     while ( buffer == 0);
@@ -58,11 +59,14 @@ void wait(int seconds){
  */
 long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2, uint64_t param3, uint64_t param4, uint64_t param5) {
     // va a entrar al scheduler si o si, pues ticks=0 => (0%quantum == 0) = true 
-    if ( syscall > 16 )
+    if ( syscall > 16 ){
         restartTicks();
+    }
+        
     switch (syscall) {
 		case 0:
-			return read();
+        return readNuevo(param1,param2,param3);
+			return readVIEJO();
         case 1:
             if (param1==127)    
                 deleteChar();
@@ -111,6 +115,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
                 blockProcess(param1, BLOCKBYUSER);
             }
             break;
+        case 21: 
+            return readVIEJO();
+            
     }
 	return 0;
 }

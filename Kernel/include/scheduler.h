@@ -3,9 +3,10 @@
 //#include "interrupts.h"
 
 #define SIZE_ENTRY 12
-#define BLOCKBYIO 0
-#define BLOCKBYIPC 1
-#define BLOCKBYUSER 2
+#define BLOCKBYREAD 0
+#define BLOCKBYWRITE 1
+#define BLOCKBYIPC 2
+#define BLOCKBYUSER 3
 
 #define RUNNING 2
 #define READY 1 
@@ -14,20 +15,9 @@
 
 #define RUNNING_PROCESS 0
 
-typedef struct pcbEntryCDT
-{
-    uint16_t parentPid;
-    uint16_t pid; 
-    void * stackPointer;
-    uint8_t state;
-    uint8_t priority;
-    void * topMemAllocated;
-    uint16_t blockReason;
-} pcbEntryCDT;
-
-typedef struct pcbEntryCDT * pcbEntryADT;
-
-
+#define MAX_FD_PER_PROCESS 4
+#define STDIN 0
+#define STDOUT 1
 
 void initializeScheduler();
 void * scheduler(void * stackPointer);
@@ -37,3 +27,6 @@ int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);
 void blockProcess(int pid, uint16_t blockReason);
+
+void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf );
+void * getFd(uint8_t i);
