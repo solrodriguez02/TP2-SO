@@ -26,7 +26,7 @@ typedef struct pcbEntryCDT * pcbEntryADT;
 void initializeScheduler();
 void * scheduler(void * stackPointer);
 int deleteFromScheduler(uint16_t pid);
-int addToScheduler(void * stackPointer, void * baseMemAllocated);
+int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground);
 int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);

@@ -33,7 +33,7 @@ typedef struct processStackCDT{
 typedef processStackCDT * processStackADT;
 
 // q mantenga pipes
-int execve(void * ptrFunction ){
+int execve(void * ptrFunction, char isForeground ){
     // pido espacio 
     void * topMem = allocMemory(PROCESS_STACK_SIZE);
 	
@@ -50,5 +50,5 @@ int execve(void * ptrFunction ){
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
 
-    return addToScheduler( p->rsp, topMem );
+    return addToScheduler( p->rsp, topMem, isForeground );
 }

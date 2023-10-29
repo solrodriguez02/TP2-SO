@@ -29,7 +29,7 @@ int modulesCount = 0;
 void startShell() {
     loadAllModules();
     printf("Welcome to the shell\n");
-    modules[0].function(0);
+    //modules[0].function(0);
     char input[COMMAND_MAX_SIZE];
     char * command[MAX_NUM_ARGUMENTS];
     while(1){
@@ -62,7 +62,7 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 
 
 void enter(){
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < 16; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     exit();
@@ -106,12 +106,12 @@ void updateProcessPriority(int pid){
     updatePriority(pid);
 }
 
-void execveNew(int functionIndex){
+void execveNew(int functionIndex, char isForeground ){
     if ( functionIndex < 1 || functionIndex > 3 ){
         printf("Invalid module");
         return;
     }
-    int pid = execve(modules[functionIndex-1].function);
+    int pid = execve(modules[functionIndex-1].function, isForeground);
     if (pid != -1){
         printf("proceso enter creado con pid: %d", pid);
     }else{

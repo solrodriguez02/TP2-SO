@@ -30,8 +30,7 @@ typedef struct pcbEntryCDT
     blockedReasonCDT blockedReasonCDT; 
     uint8_t priority;
     uint16_t ticksBeforeBlock;
-    uint16_t blockReason;
-    uint16_t isForeground;
+    uint8_t isForeground;
 } pcbEntryCDT;
 
 typedef struct pcbEntryCDT * pcbEntryADT;
@@ -235,7 +234,7 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 
-int addToScheduler(void * stackPointer, void * topMemAllocated){
+int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground){
     
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
@@ -249,7 +248,7 @@ int addToScheduler(void * stackPointer, void * topMemAllocated){
             PCB[i]->fds[0] = STDIN;
             PCB[i]->fds[1] = STDOUT;
             PCB[i]->topMemAllocated = topMemAllocated;
-            PCB[i]->isForeground = TRUE;
+            PCB[i]->isForeground = isForeground;
             forceTimerInt();
             return PCB[i]->pid;
         }

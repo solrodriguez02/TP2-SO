@@ -20,7 +20,7 @@ extern int syscall_getstatus(int pid);
 int getPid();
 int getStatus(int pid);
 int kill(int pid);
-int execve(void* pointer);
+int execve(void* pointer, char isForeground);
 void block(int pid);
 void exit();
 void yield();

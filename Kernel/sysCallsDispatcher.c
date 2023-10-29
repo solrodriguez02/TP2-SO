@@ -66,7 +66,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         
     switch (syscall) {
 		case 0:
-        return readNuevo(param1,param2,param3);
+        //return readNuevo(param1,param2,param3);
 			return readVIEJO();
         case 1:
             if (param1==127)    
@@ -108,7 +108,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 17:
             return deleteFromScheduler(param1);
         case 18:
-            return execve((void *)param1);
+            return execve((void *)param1, param2);
         case 19:
             if (getStatus(param1) == BLOCKED){
                 unblockProcess(param1);

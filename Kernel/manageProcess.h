@@ -1,2 +1,2 @@
 
-int execve(void * ptrFunction );
+int execve(void * ptrFunction, char isForeground );

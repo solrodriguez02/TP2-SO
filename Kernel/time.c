@@ -9,7 +9,7 @@ static unsigned long ticks = 0;
  */
 void * timer_handler(void * stackPointer) {
 	updateTicks(0, ticks_before_quantum());
-	if ( ticks% QUANTUM == 0 ) 
+	if ( ticks% 1000 == 0 ) 
 		return scheduler( stackPointer );
 	ticks++;
 	return stackPointer;
