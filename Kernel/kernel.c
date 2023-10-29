@@ -93,6 +93,8 @@ int main() {
 	drawTopLine();
 
 	//!creo proceso 
+	execve( &haltProcess, 0);
+
 	execve((void*)0x400000, 1);
 
 	// Carga de descriptores del IDT.

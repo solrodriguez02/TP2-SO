@@ -52,3 +52,11 @@ int execve(void * ptrFunction, char isForeground ){
 
     return addToScheduler( p->rsp, topMem, isForeground );
 }
+
+
+void haltProcess(){
+    
+    while(1){
+        _hlt();
+    }
+}

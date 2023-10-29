@@ -21,6 +21,8 @@
 #define MAX_FD_PER_PROCESS 4
 #define STDIN 0
 #define STDOUT 1
+
+#define MAX_CHILDREN_PER_PROCESS 5
 typedef struct pcbEntryCDT * pcbEntryADT;
 
 void initializeScheduler();

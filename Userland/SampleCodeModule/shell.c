@@ -37,10 +37,6 @@ void startShell() {
         print("$ ", BLUE);
         getInput(input);
         strtok(input,' ', command, MAX_NUM_ARGUMENTS);
-       /*
-       command[0]= "fork";
-       command[1]= "3";
-       */ 
         runModule(command);
     }
 }
@@ -62,7 +58,7 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 
 
 void enter(){
-    for (int i = 0; i < 16; i++){
+    for (int i = 0; i < 36; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     exit();
@@ -106,11 +102,17 @@ void updateProcessPriority(int pid){
     updatePriority(pid);
 }
 
+void enterBg(){
+    execveNew(3, 0);
+}
+
 void execveNew(int functionIndex, char isForeground ){
     if ( functionIndex < 1 || functionIndex > 3 ){
         printf("Invalid module");
         return;
     }
+    if (isForeground)
+        printf("Is in fg!");
     int pid = execve(modules[functionIndex-1].function, isForeground);
     if (pid != -1){
         printf("proceso enter creado con pid: %d", pid);
@@ -134,9 +136,12 @@ void loadAllModules() {
     loadModule("getstatus", "get status from process", &getDefinedStatus);
     loadModule("kill", "kill a process", &killProcess);
     loadModule("fork", "executes fork+execve for a given process", &execveNew);
+    loadModule("bgEnter", "crea proceso en bg", &enterBg);
     loadModule("block", "block specific process", &blockProcess);
     loadModule("getPriority", "get priority from process", &getProcessPriority);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority);
+    loadModule("yield", "Abandonar cpu", &yield);
+    loadModule("sleep", "Sleep (param= #ticks)", &sleep);
 }
 
 

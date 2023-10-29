@@ -124,7 +124,7 @@ void exit(){
 }
 
 void yield(){
-    syscall_block(0);   
+    syscall_yield();   
 }
 void updatePriority(int pid){
     syscall_update_priority(pid);

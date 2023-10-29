@@ -31,6 +31,7 @@ typedef struct pcbEntryCDT
     uint8_t priority;
     uint16_t ticksBeforeBlock;
     uint8_t isForeground;
+    uint16_t children;
 } pcbEntryCDT;
 
 typedef struct pcbEntryCDT * pcbEntryADT;
@@ -164,8 +165,6 @@ void * scheduler(void * stackPointer){
         PCB[1]->state = RUNNING; 
         return PCB[1]->stackPointer;
     } 
- // GUARDA EL STACK  
-    PCB[lastSelected]->stackPointer = stackPointer;
     int i;
     // puedo apuntar a ese ultimo nodo seleccio
 
@@ -193,10 +192,15 @@ void * scheduler(void * stackPointer){
         if ( PCB[lastSelected]->state == BLOCKED && canBeUnlocked(i, PCB[i]->blockedReasonCDT.blockReason)) {
                 // llamo a funcion 
                 PCB[i]->state = READY; 
-        } else 
-            return (void *) 0x0; 
+        } else
+            return PCB[0]->stackPointer; 
+            //return (void *) 0x0; 
     }
-        
+
+ // GUARDA EL STACK  
+    PCB[lastSelected]->stackPointer = stackPointer;
+
+
     // Si es el =, se van a pisar => evi comparacion 
      
      // SI proceso no fue ni bloqueado ni terminado
@@ -235,7 +239,12 @@ int deleteFromScheduler(uint16_t pid){
 
 
 int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground){
-    
+    // PARA TENER UN HLT CHOTO
+    if ( !isForeground){
+        PCB[0]->stackPointer = stackPointer;
+        PCB[0]->state = TERMINATED;
+    }
+
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             //* CREAR NODO

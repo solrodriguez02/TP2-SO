@@ -166,21 +166,10 @@ _irq00Handler:
 
 	mov rsi, rsp		; si hlt => rsp sigue = 0x0 
 						; deberia ignorarlo
-chooseProcess:
 	mov rdi, 0 			; numero de interrupción para el timer (IRQ0)
 	call irqDispatcher
 	mov rsp, rax
 
-	cmp rax,0
-	jne continue
-	sti
-	hlt
-	cli
-	mov rsi,0
-	jmp chooseProcess
-
-
-continue:
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
