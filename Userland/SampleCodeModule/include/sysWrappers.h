@@ -1,6 +1,7 @@
 #include "syscalls.h"
 #include <stdio.h>
-
+#define STDIN 0
+#define STDOUT 1
 int getChar();
 
 int putCharAt(char c, int x, int y);

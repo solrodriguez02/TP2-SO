@@ -22,7 +22,10 @@ section .text
 
 syscall_read:
     pushf
-    mov rdi,0      ; syscall for read
+    mov rcx, rdx   ; count
+	mov rdx, rsi   ; &placeholder
+	mov rsi, rdi   ; fd
+	mov rdi,0      ; syscall for read
     int 80h
     popf
     ret

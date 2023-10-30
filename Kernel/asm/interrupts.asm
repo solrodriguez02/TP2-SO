@@ -179,27 +179,25 @@ _irq00Handler:
 
 ;Keyboard
 _irq01Handler:
-	pushState
+	push rax
 
-	mov rax, 0
-	in al, 60h ;en la direccion 60h esta el scancode de la tecla que haya sido presionada
+	mov rax, 0	;limpio el registro para no alterar el valor en rax tras leer el byte del puerto 60h
+	in al, 60h 	;en la direccion 60h esta el scancode de la tecla que haya sido presionada
 
-	cmp al, 38h ;scancode del left Alt: si se presiono alt guarda los registros, sino no
-	jne .dontSaveR
+;	cmp al, 38h ;scancode del left Alt: si se presiono alt guarda los registros, sino no
+;	jne .dontSaveR
 
-	fill_register_space
-	mov rax, [rsp + 14*8] ;cuando se hizo el pushState se pushearon 15 registros de 8 bytes, asi que rsp esta apuntando al ultimo que se pusheo y necestio "bajar" 14 lugares para que apunte a rax
-	mov [registers_space],rax ;lo guardo en la primera posicion de registers_space
 
-.dontSaveR:
+    mov rsi, rax
 	mov rdi, 1 ; numero de interrupción para el teclado (IRQ1)
 	call irqDispatcher
-	;llamo al scheduler? --> IMPORTANTE
+
+	pop rax
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
 
-	popState
+	
 	iretq
 
 ;RTC

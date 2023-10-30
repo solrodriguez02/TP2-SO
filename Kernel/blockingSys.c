@@ -6,17 +6,19 @@ extern char buffer;
  * @brief Lee del buffer correspondiente al fd 
  * 
  */
-int readNuevo(int fd, void * placeholder, int count){
+int readNuevo(int fd, char * placeholder, int count){
     void * buf = getFd(fd);
     
     // ya fuerza interrup 
     //blockProcess(RUNNING_PROCESS, BLOCKBYREAD);
-    blockRunningProcess(BLOCKBYREAD,count,0x0);
-    char aux = buffer;
-    //*placeholder = buffer;
-    buffer = 0;
+    blockRunningProcess(BLOCKBYREAD,count,STDIN);
+    
+    while ( count--){
+        *placeholder++ = consumeKeyFromBuffer();
+    }
+    
     // copio resultado a placeholder
-    return aux;
+    return 0;
 }
 
 int write( int fd, void * placeholder, int count){

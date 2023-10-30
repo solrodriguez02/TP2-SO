@@ -4,13 +4,16 @@
 
 // ------------------------------------- LECTURA ------------------------------------- //
 
+
+static char buf;
 /**
  * @brief Retorna el valor ASCII de lectura del teclado.
  * 
  * @return Valor ASCII de lecuta del teclado.
  */
 int getChar(){
-    return syscall_read();
+    syscall_read(STDIN, &buf, 1);
+    return buf;
 }
 
 

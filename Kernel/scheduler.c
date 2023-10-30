@@ -40,6 +40,18 @@ typedef struct pcbEntryCDT * pcbEntryADT;
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 // blockFunctions 
 
+void tryToUnlockRead(int dim ){
+    for ( int i=lastSelected; i<MAX_SIZE_PCB; i++){
+        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYREAD
+            && PCB[i]->blockedReasonCDT.waitingBuf == STDIN ){
+            
+                if ( PCB[i]->blockedReasonCDT.size == dim )
+                    PCB[i]->state = READY;
+                return;
+        }
+    }
+}
+
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
@@ -47,14 +59,6 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
     PCB[lastSelected]->blockedReasonCDT.size = size;
     PCB[lastSelected]->blockedReasonCDT.waitingBuf = waitingBuf;
     forceTimerInt();
-}
-
-uint8_t canBeUnlocked ( int i, uint8_t reason){
-    //if (  sizeof( PCB[i]->blockedReasonCDT.waitingBuf) == ){
-    if (  buffer != 0 ){
-        return 1; 
-    }
-    return 0; 
 }
 
 // en realidad solo se llama cuando el user lo bloquea
@@ -136,7 +140,7 @@ void initializeScheduler(){
         nextPid = 1;
         lastSelected =0;
         //processList = newList(comparePid);
-        
+        PCB[0] = allocMemory( SIZE_ENTRY );
         PCB[1] = allocMemory( SIZE_ENTRY );
         PCB[2] = allocMemory( SIZE_ENTRY );
         PCB[3] = allocMemory( SIZE_ENTRY );
@@ -156,8 +160,6 @@ void * scheduler(void * stackPointer){
     
 */
 
-    if ( stackPointer == 0)
-        buffer = 'A';
     //* identificio rsp del kernel para no guardarlo 
     //if ( stackPointer < (void *) KERNEL_STACK_BASE || ){
     if ( lastSelected==0 ){
@@ -174,25 +176,12 @@ void * scheduler(void * stackPointer){
             if ( i==lastSelected)
                 break;
         }
-        //! ojo waitpid => hay q bajarle la prioridad
-        if ( PCB[i]->state==BLOCKED){
-            if ( canBeUnlocked(i, PCB[i]->blockedReasonCDT.blockReason) ){
-                // llamo a funcion 
-                PCB[i]->state = READY; 
-                break; 
-            }
-        }
-
         if ( PCB[i]->state==READY)
             break;
     }
 
     // retorno una direccion xq asm no tiene null
-    if ( i==lastSelected && (PCB[lastSelected]->state == BLOCKED || PCB[lastSelected]->state == TERMINATED)){
-        if ( PCB[lastSelected]->state == BLOCKED && canBeUnlocked(i, PCB[i]->blockedReasonCDT.blockReason)) {
-                // llamo a funcion 
-                PCB[i]->state = READY; 
-        } else
+    if ( i==lastSelected && PCB[lastSelected]->state != READY ){
             return PCB[0]->stackPointer; 
             //return (void *) 0x0; 
     }
@@ -243,6 +232,9 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForegr
     if ( !isForeground){
         PCB[0]->stackPointer = stackPointer;
         PCB[0]->state = TERMINATED;
+        PCB[0]->pid = 0;
+        PCB[0]->ticksBeforeBlock = 0;
+        //return PCB[0]->pid; 
     }
 
     for (int i = 1; i < MAX_SIZE_PCB; i++){

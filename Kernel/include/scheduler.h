@@ -39,3 +39,4 @@ void * getFd(uint8_t i);
 void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
 int getPriority(int pid);
+void tryToUnlockRead(int dim );

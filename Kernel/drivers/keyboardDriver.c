@@ -1,5 +1,5 @@
 #include <keyboardDriver.h>
-
+#define MAX_SIZE_BUF 10
 const unsigned char ascii[TOTAL_SCANCODES][2] = {
 	{  0, 0  }, { 27, 27 } , {'1', '!'}, {'2', '@'}, {'3', '#'}, {'4', '$'}, {'5', '%'}, {'6', '^'},
 	{'7', '&'}, {'8', '*'}, {'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {127, 127}, {  9, 9  },
@@ -17,8 +17,9 @@ const unsigned char ascii[TOTAL_SCANCODES][2] = {
 
 static int shiftActivated = 0;
 static int capslockActivated = 0;
-static unsigned char character;
 static char ctrlActivated = 0;
+char buffer[MAX_SIZE_BUF];
+char bufferSize = 0;
 
 /**
  * @brief Handler de la interrupción de teclado. Retorna el valor ASCII obtenido del buffer en el mapa de
@@ -26,10 +27,18 @@ static char ctrlActivated = 0;
  * 
  * @return Código ASCII correspondiente al make-code leído del mapa de entrada y salida.
  */
-char keyboard_handler() {
-	character = readScanCode();
+char keyboard_handler(char character) {
+	//character = readScanCode();
 	checkConditions(character);
-	return scanCodeToASCII(character);
+	character= scanCodeToASCII(character);
+    if ( !character ){
+        return 0; 
+    }
+    //se pisan las letras si escribis rapido
+    //buffer[bufferSize++] = character;
+    buffer[0] = character;
+    bufferSize++;
+    return 1;
 }
 
 /**
@@ -49,10 +58,30 @@ unsigned char scanCodeToASCII(unsigned char scanCode) {
     /*if( scancode de D & ctrlActivated)
         excep
     */
-    
-
     return ascii[scanCode][getShift()];
 }
+
+//trato al buffer como una queue
+char consumeKeyFromBuffer(){
+    if (bufferSize==0){
+        return 0;
+    }
+	char toReturn = buffer[0];
+/* se pisan las letras si escribis rapido
+    //muevo todo un lugar a la izquierda
+	for (int i = 1; i < bufferSize; i++){
+		buffer[i-1] = buffer[i];
+	}
+	//actualizo el size
+  */
+    bufferSize--;
+    return toReturn;
+}   
+
+void clearKeyboardBuffer(){
+    bufferSize = 0;
+}
+
 
 /**
  * @brief Cambia los valores booleanos acerca de si alguna de las teclas está combinada.

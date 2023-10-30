@@ -5,7 +5,6 @@ static unsigned long ticks = 0;
 
 /**
  * @brief Handler para la interrupción del Timer Tick. Incrementa constantemente el valor de ticks.
- *! wasForced para sys bloq? 
  */
 void * timer_handler(void * stackPointer) {
 	updateTicks(0, ticks_before_quantum());

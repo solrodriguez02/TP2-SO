@@ -2,27 +2,23 @@
 #include <time.h>
 #include <keyboardDriver.h>
 #include <clock.h>
+#include <scheduler.h>
 
 static void * int_20(void * stackPointer);
-static void int_21();
+static void int_21(char character);
 static void int_28();
-
-/**
- * @brief Variable global sobre la cual se actualiza la tecla presionada sobre el teclado por el usuario.
- */
-char buffer;
 
 /**
  * @brief Llama a los distintos Handlers dependiendo de la interrupción ocurrida.
  * 
  * @param irq Número de la interrupción ocurrida.
  */
-void * irqDispatcher(uint64_t irq, void * stackPointer) {
+void * irqDispatcher(uint64_t irq, uint64_t param1) {
 	switch (irq) {
 		case 0:
-			return int_20(stackPointer);
+			return int_20((void *) param1);
         case 1:
-            int_21();
+            int_21( param1 );
             break;
 		case 8:
 			int_28();
@@ -44,8 +40,12 @@ void * int_20(void * stackPointer) {
 /**
  * @brief Función correspondiente a la interrupción número 21h, sobre el teclado.
  */
-void int_21() {
-	buffer = keyboard_handler();
+void int_21(char character) {
+	if ( keyboard_handler(character)== 0)
+		return;
+	
+	tryToUnlockRead(1);
+
 }
 
 /**

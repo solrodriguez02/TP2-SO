@@ -14,12 +14,12 @@
 #define BREAK_CODE 128 
 
 extern char readScanCode();
-char keyboard_handler();
+char keyboard_handler(char character);
 unsigned char scanCodeToASCII(unsigned char scanCode);
 void checkConditions(unsigned char scanCode);
 int isLetter(unsigned char scanCode);
 int getShift();
 int getCapslock();
-void getKeyboardState(char * up) ;
-
+char consumeKeyFromBuffer();
+void clearKeyboardBuffer();
 #endif
