@@ -27,3 +27,4 @@ void exit();
 void yield();
 void updatePriority(int pid);
 int getPriority(int pid);
+void waitChildren();

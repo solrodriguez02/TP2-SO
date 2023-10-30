@@ -2,7 +2,7 @@
 #include <lib.h>
 
 extern char buffer;
-extern void _sti();
+
 
 /**
  * @brief Copia un caracter las veces deseadas sobre un puntero dado
@@ -117,22 +117,3 @@ void numToStr(int64_t num, int base, char * buffer) {
         
 }
 
-/**
- * @brief Retorna el valor leído de la entrada de teclado.
- * 
- * @return Valor leído de la entrada de teclado.
- */
-unsigned char read() {
-	_sti();
-	buffer = 0;
-    while (buffer == 0);
-    return buffer;
-}
-
-/**
- * @brief Espera a que el caracter ingresado por entrada de teclado sea un salto de línea.
- */
-void waitForEnter(){
-	unsigned char c;
-	while((c = read()) != '\n');
-}

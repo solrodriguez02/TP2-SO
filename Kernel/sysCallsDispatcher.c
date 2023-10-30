@@ -66,7 +66,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         
     switch (syscall) {
 		case 0:
-        return readNuevo(param1,(char *) param2,param3);
+        return read(param1,(char *) param2,param3);
 			return readVIEJO();
         case 1:
             if (param1==127)    
@@ -127,6 +127,8 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             return getPriority(param1);
         case 22: 
             forceTimerInt();
+        case 23:
+            waitChildren();
     }
 	return 0;
 }

@@ -17,6 +17,7 @@ GLOBAL syscall_block
 GLOBAL syscall_update_priority
 GLOBAL syscall_get_priority
 GLOBAL syscall_yield
+GLOBAL syscall_waitChildren
 
 section .text
 
@@ -175,6 +176,13 @@ syscall_get_priority:
 syscall_yield:
 	pushf
 	mov rdi, 22
+	int 80h
+	popf
+	ret
+
+syscall_waitChildren:
+	pushf
+	mov rdi, 23
 	int 80h
 	popf
 	ret

@@ -136,3 +136,7 @@ void updatePriority(int pid){
 int getPriority(int pid){
     return syscall_get_priority(pid);
 }
+
+void waitChildren(){
+    syscall_waitChildren();
+}

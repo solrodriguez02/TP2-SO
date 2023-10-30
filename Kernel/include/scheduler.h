@@ -6,14 +6,15 @@
 #define FALSE 0
 
 #define SIZE_ENTRY 12
-#define BLOCKBYREAD 0
-#define BLOCKBYWRITE 1
-#define BLOCKBYIPC 2
-#define BLOCKBYUSER 3
+#define BLOCKBYREAD 3
+#define BLOCKBYWRITE 4
+#define BLOCKBYIPC 5
+#define BLOCKBYUSER 6
+#define BLOCKBYWAITCHILDREN 7
 
-#define RUNNING 2
+#define RUNNING 0
 #define READY 1 
-#define BLOCKED 0
+#define BLOCKED 2
 #define TERMINATED 3
 
 #define RUNNING_PROCESS 0

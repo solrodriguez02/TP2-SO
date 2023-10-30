@@ -58,7 +58,7 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 
 
 void enter(){
-    for (int i = 0; i < 36; i++){
+    for (int i = 0; i < 3; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     exit();
@@ -114,11 +114,13 @@ void execveNew(int functionIndex, char isForeground ){
     if (isForeground)
         printf("Is in fg!");
     int pid = execve(modules[functionIndex-1].function, isForeground);
+    waitChildren();
     if (pid != -1){
-        printf("proceso enter creado con pid: %d", pid);
+        printf("\nproceso enter creado con pid: %d", pid);
     }else{
-        printf("creacion de proceso fallido");
+        printf("\ncreacion de proceso fallido");
     }
+    
 }
 
 void blockProcess(int pid){

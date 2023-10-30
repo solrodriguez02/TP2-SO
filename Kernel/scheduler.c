@@ -31,7 +31,7 @@ typedef struct pcbEntryCDT
     uint8_t priority;
     uint16_t ticksBeforeBlock;
     uint8_t isForeground;
-    uint16_t children;
+    uint16_t countChildren;
 } pcbEntryCDT;
 
 typedef struct pcbEntryCDT * pcbEntryADT;
@@ -201,12 +201,25 @@ void * scheduler(void * stackPointer){
     return PCB[lastSelected]->stackPointer;
 }
 
+//* con lista, paso puntero a nodo
+static void deadChild(uint16_t index){
+    // obtengo padre
+    int parent = PCB[index]->parentPid;
+    PCB[parent]->countChildren--;
+    if ( PCB[parent]->state == BLOCKED && PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0)
+        PCB[parent]->state = READY;
+    // no fuerzo interrupt pues el hijo al morir la genera
+}
+
 //flujo de estados:
 // INIT (PID = PARENTPID = 1)
 // Arranca en running pero despues siempre
 //* RUNNING_PROCESS asi se evita syscall getpid 
 int deleteFromScheduler(uint16_t pid){
+    
     if ( pid == lastSelected || pid == RUNNING_PROCESS){
+            // aviso al padre
+            deadChild(lastSelected);
             PCB[lastSelected]->state = TERMINATED;
             //* aca se sacaria al nodo de la lista y desp free
             //freeMemory(PCB[lastSelected]->topMemAllocated);
@@ -217,6 +230,7 @@ int deleteFromScheduler(uint16_t pid){
     for(int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = TERMINATED;
+            deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
             //freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
@@ -228,6 +242,8 @@ int deleteFromScheduler(uint16_t pid){
 
 
 int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground){
+    //
+    PCB[lastSelected]->countChildren++;
     // PARA TENER UN HLT CHOTO
     if ( !isForeground){
         PCB[0]->stackPointer = stackPointer;
