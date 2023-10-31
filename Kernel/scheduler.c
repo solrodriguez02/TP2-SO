@@ -175,8 +175,6 @@ void * scheduler(void * stackPointer){
 */
 
     //* identificio rsp del kernel para no guardarlo 
-    //if ( stackPointer < (void *) KERNEL_STACK_BASE || ){
-    
     if ( lastSelected==0 ){
         halt = 0; 
         lastSelected = 1;  
@@ -189,8 +187,6 @@ void * scheduler(void * stackPointer){
     if ( !halt )
         PCB[lastSelected]->stackPointer = stackPointer;
     int i;
-    // puedo apuntar a ese ultimo nodo seleccio
-    
 
     for ( i=lastSelected+1; i!=lastSelected; i++ ){
         if ( i==MAX_SIZE_PCB){
@@ -204,10 +200,8 @@ void * scheduler(void * stackPointer){
 
     // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
-            //lastSelected =0;
             halt = 1; 
             return PCB[0]->stackPointer; 
-            //return (void *) 0x0; 
     }
 
     
