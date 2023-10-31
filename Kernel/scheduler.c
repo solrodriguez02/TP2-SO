@@ -147,7 +147,8 @@ void initializeScheduler(){
         
         int sizeEntry = sizeof(pcbEntryCDT); 
         sizeEntry = 17 * 8; 
-        PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
+        //PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
+        PCB[0] = allocMemory( sizeEntry);
         PCB[0]->state = TERMINATED;
         
         /*
@@ -156,7 +157,8 @@ void initializeScheduler(){
         PCB[3] = allocMemory( SIZE_ENTRY );
         */
        for ( int i=1; i<MAX_SIZE_PCB; i++){
-            PCB[i] = PCB[i-1] + sizeEntry;
+            //PCB[i] = PCB[i-1] + sizeEntry;
+            PCB[i] = allocMemory( sizeEntry );
             PCB[i]->state = TERMINATED;
             PCB[i]->fds[0] = STDIN;
             PCB[i]->fds[1] = STDOUT;
