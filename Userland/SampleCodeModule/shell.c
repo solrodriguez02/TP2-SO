@@ -2,6 +2,8 @@
 #include <library.h>
 #include <stdint.h>
 
+//! VAR SOLO USADA PARA TESTS
+static int nextPid=2;
 
 #define RUNNING 2
 #define READY 1 
@@ -58,9 +60,10 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 
 
 void enter(){
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 28; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
+    printf("\nSobrevivi?");
     exit();
 }
 
@@ -86,6 +89,11 @@ void getCurrentPid(int none){
     printf("El pid: %d\n", getPid());
 }
 
+void killLastCreated(){
+    kill(nextPid);
+}
+
+
 void killProcess(int pid){
     if ( pid==0)
         printf("Invalid pid\n");
@@ -103,7 +111,7 @@ void updateProcessPriority(int pid){
 }
 
 void enterBg(){
-    execveNew(3, 0);
+    execveNew(3,0);
 }
 
 void execveNew(int functionIndex, char isForeground ){
@@ -111,16 +119,26 @@ void execveNew(int functionIndex, char isForeground ){
         printf("Invalid module");
         return;
     }
+    //int pid = execve(modules[functionIndex-1].function, isForeground);
+    // comentado pues x ahora usamos isForeground para identif halt
+    int pid = execve(modules[functionIndex-1].function, 1);
+    
+    nextPid = pid; 
+    nextPid++;
+    
     if (isForeground)
-        printf("Is in fg!");
-    int pid = execve(modules[functionIndex-1].function, isForeground);
-    waitChildren();
+        waitChildren();
     if (pid != -1){
         printf("\nproceso enter creado con pid: %d", pid);
     }else{
         printf("\ncreacion de proceso fallido");
     }
     
+}
+
+
+void blockLastCreated (){
+    block(nextPid); 
 }
 
 void blockProcess(int pid){
@@ -137,9 +155,11 @@ void loadAllModules() {
     loadModule("getPid", "Returns current process PID", &getCurrentPid);
     loadModule("getstatus", "get status from process", &getDefinedStatus);
     loadModule("kill", "kill a process", &killProcess);
+    loadModule("k", "to kill last created process", &killLastCreated);
     loadModule("fork", "executes fork+execve for a given process", &execveNew);
     loadModule("bgEnter", "crea proceso en bg", &enterBg);
-    loadModule("block", "block specific process", &blockProcess);
+    loadModule("block", "block specific process", &blockLastCreated);
+    loadModule("b", "to block last created process", &blockProcess);
     loadModule("getPriority", "get priority from process", &getProcessPriority);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority);
     loadModule("yield", "Abandonar cpu", &yield);

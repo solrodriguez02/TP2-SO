@@ -17,8 +17,6 @@
 #define BLOCKED 2
 #define TERMINATED 3
 
-#define RUNNING_PROCESS 0
-
 #define MAX_FD_PER_PROCESS 4
 #define STDIN 0
 #define STDOUT 1

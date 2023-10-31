@@ -36,7 +36,7 @@ int read(int fd, char * placeholder, int count){
 
 int write( int fd, void * placeholder, int count){
     void * buf = getFd(fd);
-    blockProcess(RUNNING_PROCESS, BLOCKBYWRITE);      
+    blockProcess(RUNNING, BLOCKBYWRITE);      
     return 0;
 }
 
