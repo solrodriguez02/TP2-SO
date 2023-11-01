@@ -17,6 +17,9 @@
 #define PROCESS_STACK_SIZE 4096 //4kb
 #define POSTION_REL_STRUCT PROCESS_STACK_SIZE - SIZE_INT_PUSHED_R
 
+#define RDI_REL_POSITION 6 * SIZE_ADRESS // (QUEDO ARRIBA)
+#define RSI_REL_POSITION RDI_REL_POSITION - SIZE_ADRESS
+
 typedef unsigned long long u_int64_t;
 
 typedef struct processStackCDT{
@@ -43,9 +46,16 @@ int execve(void * ptrFunction, char isForeground ){
     
     void * memForStack = topMem + POSTION_REL_STRUCT;
     processStackADT p = (processStackADT) memForStack; 
+    
     p->ss = (void *) SS;
     // + SIZE_ADRESS para asegurar que no pisa los gpr
     p->rsp = (void *) p - SIZE_ADRESS*GPR; 
+
+    int * rdi = (char *)memForStack - RDI_REL_POSITION ;
+    char * rsi = (char *)memForStack - RSI_REL_POSITION;
+    
+    *rdi = 233; 
+    rsi[0] = "Vengo del execve"; 
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
