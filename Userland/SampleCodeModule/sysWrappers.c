@@ -114,8 +114,8 @@ int kill(int pid){
     return syscall_kill(pid);
 }
 
-int execve(void * pointer, char isForeground){
-    return syscall_execve(pointer, isForeground);
+int execve(void * pointer, char isForeground, int argc, char ** argv){
+    return syscall_execve(pointer, isForeground, argc, argv);
 }
 
 void block(int pid){

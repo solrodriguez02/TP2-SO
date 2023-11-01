@@ -4,8 +4,7 @@
 
 #include <library.h>
 
-int main(int argc, char ** argv) {
-	printf("Hola %d, %s \n", argc, argv[0]);
+int main() {
 	startShell();
 	return 0;
 }

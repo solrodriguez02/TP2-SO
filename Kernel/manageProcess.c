@@ -39,7 +39,7 @@ char * array[4];
 typedef processStackCDT * processStackADT;
 
 // q mantenga pipes
-int execve(void * ptrFunction, char isForeground ){
+int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     // pido espacio 
     void * topMem = allocMemory(PROCESS_STACK_SIZE);
 	
@@ -57,9 +57,10 @@ int execve(void * ptrFunction, char isForeground ){
     int * rdi = (char *)memForStack - RDI_REL_POSITION ;
     char ** rsi = (char *)memForStack - RSI_REL_POSITION;
     
-    *rdi = 233;
-    *rsi = array; 
-    array[0] = "Vengo del execve"; 
+    *rdi = argc;
+    *rsi = argv; 
+    //array[0] = "Vengo del execve"; 
+
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 

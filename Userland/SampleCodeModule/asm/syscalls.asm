@@ -142,6 +142,8 @@ syscall_kill:
 
 syscall_execve:
 	pushf
+	mov r8, rcx
+    mov rcx, rdx   
 	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 18

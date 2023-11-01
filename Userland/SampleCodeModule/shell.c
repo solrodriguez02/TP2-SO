@@ -59,8 +59,9 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 }
 
 
-void enter(){
-    for (int i = 0; i < 28; i++){
+void enter(int argc, char ** argv){
+    printf("hola soy %d, %s \n", argc, argv[0]);
+    for (int i = 0; i < 8; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -121,7 +122,9 @@ void execveNew(int functionIndex, char isForeground ){
     }
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt
-    int pid = execve(modules[functionIndex-1].function, 1);
+    char * argv[1];
+    argv [0] = "mi pid es...";
+    int pid = execve(modules[functionIndex-1].function, 1, 1, argv );
     
     nextPid = pid; 
     nextPid++;
