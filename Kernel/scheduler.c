@@ -42,7 +42,7 @@ pcbEntryADT PCB[MAX_SIZE_PCB];
 // blockFunctions 
 
 void tryToUnlockRead(int dim ){
-    for ( int i=lastSelected; i<MAX_SIZE_PCB; i++){
+    for ( int i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYREAD
             && PCB[i]->blockedReasonCDT.waitingBuf == STDIN ){
             
