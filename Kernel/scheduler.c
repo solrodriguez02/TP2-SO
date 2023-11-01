@@ -145,24 +145,17 @@ void initializeScheduler(){
         
         // ya recervo espacio para todas las entradas de la tabla
         
-        int sizeEntry = sizeof(pcbEntryCDT); 
-        sizeEntry = 17 * 8; 
-        //PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
-        PCB[0] = allocMemory( sizeEntry);
+        char sizeEntry = 13 * 8;  //sizeof(pcbEntryCDT); 
+        PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
         PCB[0]->state = TERMINATED;
         
-        /*
-        PCB[1] = allocMemory( SIZE_ENTRY );
-        PCB[2] = allocMemory( SIZE_ENTRY );
-        PCB[3] = allocMemory( SIZE_ENTRY );
-        */
-       for ( int i=1; i<MAX_SIZE_PCB; i++){
-            //PCB[i] = PCB[i-1] + sizeEntry;
-            PCB[i] = allocMemory( sizeEntry );
+        //chequeado que funciona
+        for ( int i=1; i<MAX_SIZE_PCB; i++){
+            PCB[i] = (char*) PCB[i-1] + sizeEntry;
             PCB[i]->state = TERMINATED;
             PCB[i]->fds[0] = STDIN;
             PCB[i]->fds[1] = STDOUT;
-       }
+        }
 }
 
 void * scheduler(void * stackPointer){
