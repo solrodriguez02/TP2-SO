@@ -5,9 +5,9 @@
 //! VAR SOLO USADA PARA TESTS
 static int nextPid=2;
 
-#define RUNNING 2
+#define RUNNING 0
 #define READY 1 
-#define BLOCKED 0
+#define BLOCKED 2
 #define TERMINATED 3
 
 /**
@@ -61,7 +61,14 @@ void loadModule(char * name, char * description, void (*function)(void)) {
 
 void enter(int argc, char ** argv){
     printf("hola soy %d, %s \n", argc, argv[0]);
-    for (int i = 0; i < 8; i++){
+    for (int i = 0; i < 2; i++){
+        printf("--------------------------------------xxxxxxx------------");
+    }
+    /*
+    printf("bloqueo proceso\n");
+    blockProcess(0);
+    */
+    for (int i = 0; i < 20; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -91,7 +98,7 @@ void getCurrentPid(int none){
 }
 
 void killLastCreated(){
-    kill(nextPid);
+    kill(nextPid-1);
 }
 
 
@@ -141,7 +148,7 @@ void execveNew(int functionIndex, char isForeground ){
 
 
 void blockLastCreated (){
-    block(nextPid); 
+    block(nextPid-1); 
 }
 
 void blockProcess(int pid){
@@ -161,8 +168,8 @@ void loadAllModules() {
     loadModule("k", "to kill last created process", &killLastCreated);
     loadModule("fork", "executes fork+execve for a given process", &execveNew);
     loadModule("bgEnter", "crea proceso en bg", &enterBg);
-    loadModule("block", "block specific process", &blockLastCreated);
-    loadModule("b", "to block last created process", &blockProcess);
+    loadModule("block", "block specific process", &blockProcess);
+    loadModule("b", "to block last created process", &blockLastCreated);
     loadModule("getPriority", "get priority from process", &getProcessPriority);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority);
     loadModule("yield", "Abandonar cpu", &yield);
