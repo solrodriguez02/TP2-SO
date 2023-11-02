@@ -1,6 +1,9 @@
 #ifndef INTERRUPS_H_
 #define INTERRUPS_H_
 
+#define CTRLD 1
+#define CTRLC 2
+
 extern void _irq00Handler(void);
 extern void _irq01Handler(void);
 extern void _irq02Handler(void);

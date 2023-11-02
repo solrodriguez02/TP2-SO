@@ -3,22 +3,21 @@
 #include "MemoryManager.h"
 #include <listADT.h>
 #include <time.h>
-#define MAX_SIZE_PCB 4
+#include <videodriver.h>
+#include <pipes.h>
 
 #define KERNEL_STACK_BASE 0x352000 
 
 extern char buffer;
-
+int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
-
 
 typedef struct blockedReasonCDT {
     uint8_t blockReason;
     uint16_t size;
     void * waitingBuf; 
 } blockedReasonCDT;
-
 typedef struct pcbEntryCDT
 {
     uint16_t parentPid;
@@ -33,9 +32,6 @@ typedef struct pcbEntryCDT
     uint8_t isForeground;
     uint16_t countChildren;
 } pcbEntryCDT;
-
-typedef struct pcbEntryCDT * pcbEntryADT;
-
 // ticks no modu => block 
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 // blockFunctions 
@@ -47,6 +43,16 @@ void tryToUnlockRead(int dim ){
             
                 if ( PCB[i]->blockedReasonCDT.size == dim )
                     PCB[i]->state = READY;
+                return;
+        }
+    }
+}
+
+void tryToUnlockPipe(int dim){
+    for(int i=lastSelected; i<MAX_SIZE_PCB; i++){
+        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
+            && PCB[i]->blockedReasonCDT.size <= dim ){
+                PCB[i]->state = READY;
                 return;
         }
     }
@@ -86,9 +92,28 @@ void blockProcess(int pid, uint16_t blockReason){
             PCB[i]->state = BLOCKED;
             // aviso q info espera en struct
             PCB[i]->blockedReasonCDT.blockReason = blockReason;
+            return;
         }
     }
 }
+
+int getForegroundPid(){
+    for (int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->state == RUNNING && PCB[i]->isForeground){
+            return PCB[i]->pid;
+        }
+    }
+    return -1;
+}
+
+void signalHandler(int signal){
+    if ( signal == CTRLD){
+        updatePriority(lastSelected, 1);//para cambiar en funcion de lo que preguntemos
+    }else if ( signal == CTRLC){
+        deleteFromScheduler(getForegroundPid);
+    }
+}
+
 
 void unblockProcess(int pid){
 
@@ -97,6 +122,7 @@ void unblockProcess(int pid){
     //* en reali ni las sysBlock lo llaman, pues ya el scheduler las agarra 
     if ( pid == RUNNING_PROCESS ){
             PCB[lastSelected]->state = READY;
+            PCB[lastSelected]->priority = 1;
             // ni me preocupo en elim info de blockCDT, total solo
             // se consulta cuando state== BLOCKED, => va a estar sobreescrita
             forceTimerInt();
@@ -106,6 +132,8 @@ void unblockProcess(int pid){
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
+            PCB[i]->priority = 1;
+            return;
         }
     }
 }
@@ -134,6 +162,12 @@ void updatePriority(int pid, int priority){
             // aviso q info espera en struct
         }
     }
+}
+
+void createNewPipe(int writePid, int readPid){
+    pipeADT pipe = createPipe(writePid, readPid);
+    PCB[readPid]->fds[0] = pipe->buffer;
+    PCB[writePid]->fds[1] = pipe->buffer;
 }
 
 void initializeScheduler(){
@@ -262,8 +296,8 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForegr
             PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
-            PCB[i]->fds[0] = STDIN;
-            PCB[i]->fds[1] = STDOUT;
+            PCB[i]->fds[0] = &buffer;
+            PCB[i]->fds[1] = BASEDIRVIDEO;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
             forceTimerInt();
@@ -287,11 +321,19 @@ int getStatus(int pid){
     return -1;
 }
 
-void * getFd(uint8_t i){
+void * getFdBuffer(int pid, int i){
     if ( i > MAX_FD_PER_PROCESS || i < 0 )
         return 0;
-    return PCB[lastSelected]->fds[i];   
+    if (pid == 0){
+        return PCB[lastSelected]->fds[i];   
+    }
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return PCB[i]->fds[i];
+        }
+    }
 }
+
 int getPriority(int pid){
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){

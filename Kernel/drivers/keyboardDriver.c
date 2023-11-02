@@ -1,4 +1,7 @@
 #include <keyboardDriver.h>
+#include <scheduler.h>
+#include <interrupts.h>
+
 #define MAX_SIZE_BUF 10
 const unsigned char ascii[TOTAL_SCANCODES][2] = {
 	{  0, 0  }, { 27, 27 } , {'1', '!'}, {'2', '@'}, {'3', '#'}, {'4', '$'}, {'5', '%'}, {'6', '^'},
@@ -98,9 +101,19 @@ void checkConditions(unsigned char scanCode) {
     else if(scanCode == CAPSLOCK_DOWN) {
         capslockActivated = !capslockActivated;
     } 
+    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'c'){
+        signalHandler(CTRLC);
+        //buffer[0] = 'C'; //testing
+    }
+    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'd'){
+        signalHandler(CTRLD);
+        //buffer[0] = 'D'; //testing
+    }
     //PARA CTRL+D y CTRL+C
-    else if ( scanCode== CTRL_KEY_DOWN ) 
+    else if ( scanCode== CTRL_KEY_DOWN ){ 
         ctrlActivated = 1;
+        //buffer[0] = 'C';
+    }
     else if ( scanCode== CTRL_KEY_UP ) 
         ctrlActivated = 0;
 }

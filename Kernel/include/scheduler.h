@@ -5,6 +5,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MAX_SIZE_PCB 4
+
 #define SIZE_ENTRY 12
 #define BLOCKBYREAD 3
 #define BLOCKBYWRITE 4
@@ -36,8 +38,12 @@ void unblockProcess(int pid);
 void blockProcess(int pid, uint16_t blockReason);
 
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf );
-void * getFd(uint8_t i);
+void * getFdBuffer(int pid, int i);
 void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
+void tryToUnlockPipe(int dim );
+int getForegroundPid();
+void signalHandler(int signal);
+void createNewPipe(int writePid, int readPid);
