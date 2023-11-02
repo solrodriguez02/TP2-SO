@@ -2,10 +2,12 @@
 #include <library.h>
 #include <stdint.h>
 
+//! VAR SOLO USADA PARA TESTS
+static int nextPid=2;
 
-#define RUNNING 2
+#define RUNNING 0
 #define READY 1 
-#define BLOCKED 0
+#define BLOCKED 2
 #define TERMINATED 3
 
 /**
@@ -60,33 +62,54 @@ void loadModule(char * name, char * description, void (*function)(void), int num
 
 
 void enter(){
-    while(1){
+    //while(1){
+//void enter(int argc, char ** argv){
+    //printf("hola soy %d, %s \n", argc, argv[0]);
+    //for (int i = 0; i < 2; i++){
+        //printf("--------------------------------------xxxxxxx------------");
+    //}
+    /*
+    printf("bloqueo proceso\n");
+    blockProcess(0);
+    */
+    for (int i = 0; i < 20; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
+    printf("\nSobrevivi?");
     exit();
 }
 
-void getDefinedStatus(int pid){
-        int status =  getStatus(pid);
-        switch(status){
+static void printStatus(status){
+    switch(status){
             case RUNNING:
-                printf("proceso running\n");
+                printf("running\n");
                 break;
             case READY:
-                printf("proceso ready\n");
+                printf("ready\n");
                 break;
             case BLOCKED:
-                printf("proceso bloqueado\n");
+                printf("bloqueado\n");
                 break;
             case TERMINATED:
-                printf("proceso terminado\n");
+                printf("terminado\n");
                 break;
         }
+}
+
+
+void getDefinedStatus(int pid){
+        int status =  getStatus(pid);
+        printStatus(status);
 }
 
 void getCurrentPid(int none){
     printf("El pid: %d\n", getPid());
 }
+
+void killLastCreated(){
+    kill(nextPid-1);
+}
+
 
 void killProcess(int pid){
     if ( pid==0)
@@ -105,18 +128,25 @@ void updateProcessPriority(int pid){
 }
 
 void enterBg(){
-    execveNew(3, 0);
+    execveNew(3,0);
 }
 
 void execveNew(int functionIndex, char isForeground ){
-    if ( functionIndex < 1 || functionIndex > 3 ){
+    if ( functionIndex < 1 || functionIndex > TOTAL_MODULES ){
         printf("Invalid module");
         return;
     }
+    //int pid = execve(modules[functionIndex-1].function, isForeground);
+    // comentado pues x ahora usamos isForeground para identif halt
+    char * argv[1];
+    argv [0] = "mi pid es...";
+    int pid = execve(modules[functionIndex-1].function, 1, 1, argv );
+    
+    nextPid = pid; 
+    nextPid++;
+    
     if (isForeground)
-        printf("Is in fg!");
-    int pid = execve(modules[functionIndex-1].function, isForeground);
-    waitChildren();
+        waitChildren();
     if (pid != -1){
         printf("\nproceso enter creado con pid: %d", pid);
     }else{
@@ -143,8 +173,31 @@ void runWithPipe(){
     block(3);
 }
 
+
+void blockLastCreated (){
+    block(nextPid-1); 
+}
+
 void blockProcess(int pid){
     block(pid);
+}
+
+void ps() {
+    // podria sino hacer un malloc
+    int MAX_PROCESS = 5;
+    stat arrayStats[MAX_PROCESS];
+    getAllProcessInfo(arrayStats);
+    for ( int i=0; arrayStats[i]!= 0; i++ ){
+        printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
+        printf("\t Prioridad: %d", arrayStats[i]->priority);
+        printf("\t Estado: ");
+        printStatus(arrayStats[i]->pid);
+        printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
+        printf("\t StackPointer: %d", arrayStats[i]->stackPointer );
+        printf("\t BasePointer: %d", arrayStats[i]->basePointer );
+    }
+
+    //exit();
 }
 
 /**
@@ -165,14 +218,17 @@ void loadAllModules() {
     loadModule("getPid", "Returns current process PID", &getCurrentPid, 0);
     loadModule("getstatus", "get status from process", &getDefinedStatus, 1);
     loadModule("kill", "kill a process", &killProcess, 1);
+    loadModule("k", "to kill last created process", &killLastCreated, 1);
     loadModule("fork", "executes fork+execve for a given process", &execveNew, 2);
     loadModule("bgEnter", "crea proceso en bg", &enterBg, 0);
     loadModule("block", "block specific process", &blockProcess, 1);
+    loadModule("b", "to block last created process", &blockLastCreated, 0);
     loadModule("getPriority", "get priority from process", &getProcessPriority, 1);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority, 2);
     loadModule("yield", "Abandonar cpu", &yield, 1);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
     loadModule("createPipe", "Crea un pipe", &runWithPipe, 1);
+    loadModule("ps", "Ver el estado de los procesos en ejecucion", &ps, 0);
 }
 
 
@@ -223,5 +279,4 @@ void printHelp(int none) {
 void clear(int none) {
     enableDoubleBuffer(1);
     enableDoubleBuffer(0);
-    exit();
 }

@@ -17,6 +17,9 @@
 #define PROCESS_STACK_SIZE 4096 //4kb
 #define POSTION_REL_STRUCT PROCESS_STACK_SIZE - SIZE_INT_PUSHED_R
 
+#define RDI_REL_POSITION 6 * SIZE_ADRESS // (QUEDO ARRIBA)
+#define RSI_REL_POSITION RDI_REL_POSITION - SIZE_ADRESS
+
 typedef unsigned long long u_int64_t;
 
 typedef struct processStackCDT{
@@ -29,11 +32,14 @@ typedef struct processStackCDT{
     //align
 } processStackCDT;
 
+// debe terminar en NULL
+char * array[4];
+
 // le paso el puntero a funcion asm para que pushee al stack
 typedef processStackCDT * processStackADT;
 
 // q mantenga pipes
-int execve(void * ptrFunction, char isForeground ){
+int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     // pido espacio 
     void * topMem = allocMemory(PROCESS_STACK_SIZE);
 	
@@ -43,14 +49,23 @@ int execve(void * ptrFunction, char isForeground ){
     
     void * memForStack = topMem + POSTION_REL_STRUCT;
     processStackADT p = (processStackADT) memForStack; 
+    
     p->ss = (void *) SS;
     // + SIZE_ADRESS para asegurar que no pisa los gpr
     p->rsp = (void *) p - SIZE_ADRESS*GPR; 
+
+    int * rdi = (char *)memForStack - RDI_REL_POSITION ;
+    char ** rsi = (char *)memForStack - RSI_REL_POSITION;
+    
+    *rdi = argc;
+    *rsi = argv; 
+    array[0] = "Vengo del execve"; 
+
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
 
-    return addToScheduler( p->rsp, topMem, isForeground );
+    return addToScheduler( p->rsp, topMem, (int * )topMem + PROCESS_STACK_SIZE, isForeground );
 }
 
 

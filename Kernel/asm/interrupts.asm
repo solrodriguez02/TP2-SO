@@ -164,8 +164,7 @@ forceTimerInt:
 _irq00Handler:
 	pushState
 
-	mov rsi, rsp		; si hlt => rsp sigue = 0x0 
-						; deberia ignorarlo
+	mov rsi, rsp		
 	mov rdi, 0 			; numero de interrupción para el timer (IRQ0)
 	call irqDispatcher
 	mov rsp, rax

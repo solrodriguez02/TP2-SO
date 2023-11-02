@@ -19,19 +19,20 @@
 #define BLOCKED 2
 #define TERMINATED 3
 
-#define RUNNING_PROCESS 0
-
 #define MAX_FD_PER_PROCESS 4
 #define STDIN 0
 #define STDOUT 1
 
 #define MAX_CHILDREN_PER_PROCESS 5
+
 typedef struct pcbEntryCDT * pcbEntryADT;
+
+typedef struct statProcess * stat;
 
 void initializeScheduler();
 void * scheduler(void * stackPointer);
 int deleteFromScheduler(uint16_t pid);
-int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground);
+int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground);
 int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);
@@ -47,3 +48,4 @@ void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);
 void createNewPipe(int writePid, int readPid);
+void getAllProcessInfo(stat * arrayStats);

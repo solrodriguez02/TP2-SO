@@ -96,6 +96,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 6:
             beep(param1,param2);
             break;
+        case 8:
+            getAllProcessInfo(param1);
+            break;
         case 9:
             loadScreen();         
             break;
@@ -117,7 +120,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 17:
             return deleteFromScheduler(param1);
         case 18:
-            return execve((void *)param1, param2);
+            return execve((void *)param1, param2, param3, param4);
         case 19:
             if (getStatus(param1) == BLOCKED){
                 unblockProcess(param1);

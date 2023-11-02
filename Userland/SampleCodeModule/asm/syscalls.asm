@@ -19,6 +19,7 @@ GLOBAL syscall_get_priority
 GLOBAL syscall_yield
 GLOBAL syscall_waitChildren
 GLOBAL syscall_createPipe
+GLOBAL syscall_getAllProcessInfo
 
 section .text
 
@@ -71,6 +72,14 @@ syscall_beep:
 	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 6
+	int 80h
+	popf
+	ret
+
+syscall_getAllProcessInfo:
+	pushf
+	mov rsi, rdi
+	mov rdi, 8
 	int 80h
 	popf
 	ret
@@ -143,6 +152,8 @@ syscall_kill:
 
 syscall_execve:
 	pushf
+	mov r8, rcx
+    mov rcx, rdx   
 	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 18

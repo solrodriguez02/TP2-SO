@@ -5,6 +5,7 @@
 #include <time.h>
 #include <videodriver.h>
 #include <pipes.h>
+#define MAX_SIZE_PCB 5
 
 #define KERNEL_STACK_BASE 0x352000 
 
@@ -12,6 +13,7 @@ extern char buffer;
 int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
+uint8_t halt=0;
 
 typedef struct blockedReasonCDT {
     uint8_t blockReason;
@@ -20,9 +22,11 @@ typedef struct blockedReasonCDT {
 } blockedReasonCDT;
 typedef struct pcbEntryCDT
 {
+    uint8_t * name;
     uint16_t parentPid;
     uint16_t pid; 
     void * stackPointer;
+    void * basePointer;
     uint8_t state;
     void * topMemAllocated;
     void * fds[MAX_FD_PER_PROCESS];
@@ -32,12 +36,27 @@ typedef struct pcbEntryCDT
     uint8_t isForeground;
     uint16_t countChildren;
 } pcbEntryCDT;
+
+// la informacion que tendra disponible el usuario
+struct statProcess{
+    uint8_t * name;
+    int16_t pid;
+    uint8_t state;
+    uint8_t priority;
+    uint8_t isForeground;
+    void * stackPointer;
+    void * basePointer;
+    //FDS? 
+};
+
+typedef struct pcbEntryCDT * pcbEntryADT;
+
 // ticks no modu => block 
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 // blockFunctions 
 
 void tryToUnlockRead(int dim ){
-    for ( int i=lastSelected; i<MAX_SIZE_PCB; i++){
+    for ( int i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYREAD
             && PCB[i]->blockedReasonCDT.waitingBuf == STDIN ){
             
@@ -79,7 +98,7 @@ int comparePid(elemType elem1, elemType elem2){
 }
 */
 void blockProcess(int pid, uint16_t blockReason){
-    if ( pid == PCB[lastSelected]->pid || pid == RUNNING_PROCESS ){
+    if ( pid == PCB[lastSelected]->pid || pid == RUNNING ){
             PCB[lastSelected]->state = BLOCKED;
             // aviso q info espera en struct
             PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
@@ -120,7 +139,7 @@ void unblockProcess(int pid){
     // saco: " pid == PCB[lastSelected]->pid || " pues si o si no va a estar
     // corriendo si llame a unblock desde la shell
     //* en reali ni las sysBlock lo llaman, pues ya el scheduler las agarra 
-    if ( pid == RUNNING_PROCESS ){
+    if ( pid == RUNNING ){
             PCB[lastSelected]->state = READY;
             PCB[lastSelected]->priority = 1;
             // ni me preocupo en elim info de blockCDT, total solo
@@ -171,16 +190,24 @@ void createNewPipe(int writePid, int readPid){
 }
 
 void initializeScheduler(){
-        nextPid = 1;
+        nextPid = 0;
         lastSelected =0;
         //processList = newList(comparePid);
-        PCB[0] = allocMemory( SIZE_ENTRY );
-        PCB[1] = allocMemory( SIZE_ENTRY );
-        PCB[2] = allocMemory( SIZE_ENTRY );
-        PCB[3] = allocMemory( SIZE_ENTRY );
-        PCB[1]->state = TERMINATED;
-        PCB[2]->state = TERMINATED; 
-        PCB[3]->state = TERMINATED; 
+        
+        
+        // ya recervo espacio para todas las entradas de la tabla
+        
+        char sizeEntry = 15 * 8;  //sizeof(pcbEntryCDT); 
+        PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
+        PCB[0]->state = TERMINATED;
+        
+        //chequeado que funciona
+        for ( int i=1; i<MAX_SIZE_PCB; i++){
+            PCB[i] = (char*) PCB[i-1] + sizeEntry;
+            PCB[i]->state = TERMINATED;
+            PCB[i]->fds[0] = STDIN;
+            PCB[i]->fds[1] = STDOUT;
+        }
 }
 
 void * scheduler(void * stackPointer){
@@ -195,14 +222,18 @@ void * scheduler(void * stackPointer){
 */
 
     //* identificio rsp del kernel para no guardarlo 
-    //if ( stackPointer < (void *) KERNEL_STACK_BASE || ){
     if ( lastSelected==0 ){
+        halt = 0; 
         lastSelected = 1;  
         PCB[1]->state = RUNNING; 
         return PCB[1]->stackPointer;
     } 
+    
+    // GUARDA EL STACK  
+    // si lo pongo antes, hlt stack se va a guardar=> queda afuera del while
+    if ( !halt )
+        PCB[lastSelected]->stackPointer = stackPointer;
     int i;
-    // puedo apuntar a ese ultimo nodo seleccio
 
     for ( i=lastSelected+1; i!=lastSelected; i++ ){
         if ( i==MAX_SIZE_PCB){
@@ -215,23 +246,22 @@ void * scheduler(void * stackPointer){
     }
 
     // retorno una direccion xq asm no tiene null
-    if ( i==lastSelected && PCB[lastSelected]->state != READY ){
+    if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
+            halt = 1; 
             return PCB[0]->stackPointer; 
-            //return (void *) 0x0; 
     }
 
- // GUARDA EL STACK  
-    PCB[lastSelected]->stackPointer = stackPointer;
-
-
+    
     // Si es el =, se van a pisar => evi comparacion 
-     
      // SI proceso no fue ni bloqueado ni terminado
-    if ( PCB[lastSelected]->state == RUNNING )
+    if ( PCB[lastSelected]->state == RUNNING ){
         PCB[lastSelected]->state = READY;
+    }
+    halt = 0; 
     PCB[i]->state = RUNNING;
     lastSelected = i;
     
+
     return PCB[lastSelected]->stackPointer;
 }
 
@@ -248,10 +278,10 @@ static void deadChild(uint16_t index){
 //flujo de estados:
 // INIT (PID = PARENTPID = 1)
 // Arranca en running pero despues siempre
-//* RUNNING_PROCESS asi se evita syscall getpid 
+//* RUNNING asi se evita syscall getpid 
 int deleteFromScheduler(uint16_t pid){
     
-    if ( pid == lastSelected || pid == RUNNING_PROCESS){
+    if ( pid == lastSelected || pid == RUNNING){
             // aviso al padre
             deadChild(lastSelected);
             PCB[lastSelected]->state = TERMINATED;
@@ -275,31 +305,35 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 
-int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground){
-    //
-    PCB[lastSelected]->countChildren++;
-    // PARA TENER UN HLT CHOTO
-    if ( !isForeground){
-        PCB[0]->stackPointer = stackPointer;
+int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground){
+    
+    // creo halt
+    if ( nextPid==0){
+        PCB[0]->pid = nextPid++;
         PCB[0]->state = TERMINATED;
-        PCB[0]->pid = 0;
-        PCB[0]->ticksBeforeBlock = 0;
-        //return PCB[0]->pid; 
+        PCB[0]->stackPointer = stackPointer;
+        PCB[0]->fds[0] = &buffer;
+        PCB[0]->fds[1] = BASEDIRVIDEO;
+        return PCB[0]->pid;
     }
 
+    PCB[lastSelected]->countChildren++;
+    
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
-            //* CREAR NODO
-            PCB[i]->parentPid = PCB[lastSelected]->pid;
+            PCB[i]->name = "Juan";
             PCB[i]->pid = nextPid++;
+            PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
             PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
             PCB[i]->fds[0] = &buffer;
             PCB[i]->fds[1] = BASEDIRVIDEO;
+            PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
+            PCB[i]->state = READY;
             forceTimerInt();
             return PCB[i]->pid;
         }
@@ -341,4 +375,20 @@ int getPriority(int pid){
         }
     }
     return -1;
+}
+
+void getAllProcessInfo(stat * arrayStats){
+    // no incluimos al halt
+    int j=0,i;
+    for ( i=1; i<MAX_SIZE_PCB; i++){
+        if ( PCB[i]->state != TERMINATED ) {
+            arrayStats[j]->name = PCB[i]->name;
+            arrayStats[j]->pid = PCB[i]->pid;
+            arrayStats[j]->state = PCB[i]->state;
+            arrayStats[j]->stackPointer = PCB[i]->stackPointer;
+            arrayStats[j]->basePointer = PCB[i]->basePointer;
+            arrayStats[j++]->isForeground = PCB[i]->isForeground;
+        }
+    }
+    arrayStats[j] = 0;
 }

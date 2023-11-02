@@ -39,7 +39,7 @@ int read(int fd, char * placeholder, int count){
 
 int write( int fd, void * placeholder, int count){
     void * buf = getFdBuffer(0, fd);
-    blockProcess(RUNNING_PROCESS, BLOCKBYWRITE);      
+    blockProcess(0, BLOCKBYWRITE);      
     return 0;
 }
 
