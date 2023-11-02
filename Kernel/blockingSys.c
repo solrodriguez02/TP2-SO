@@ -1,21 +1,23 @@
 #include <blockingSys.h>
 #include <lib.h>
+#include <videodriver.h>
 #include <pipes.h>
 
+extern buffer;
 /**
  * @brief Lee del buffer correspondiente al fd 
  * 
  */
 int read(int fd, char * placeholder, int count){
     
-    void * buf = getFd(fd);
+    void * buf = getFdBuffer(0, fd);
 
     // ya fuerza interrup 
     //blockProcess(RUNNING_PROCESS, BLOCKBYREAD);
     blockRunningProcess(BLOCKBYREAD,count,fd);
 
     // ojo con los EOF!
-    if ( fd==STDIN)
+    if ( buf == &buffer)
         while ( count--){
             *placeholder++ = consumeKeyFromBuffer(fd);
         }
@@ -28,14 +30,15 @@ int read(int fd, char * placeholder, int count){
         count -= dim; 
         */
        int dim = count; 
-        memcpy(placeholder,buf,dim);
+       pipeADT pipe = (pipeADT) buf;
+       readPipe(pipe,placeholder,dim);
     }
     
     return 0;
 }
 
 int write( int fd, void * placeholder, int count){
-    void * buf = getFd(fd);
+    void * buf = getFdBuffer(0, fd);
     blockProcess(RUNNING_PROCESS, BLOCKBYWRITE);      
     return 0;
 }

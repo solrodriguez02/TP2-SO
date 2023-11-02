@@ -136,7 +136,7 @@ int main() {
 	
 	//!deberia deshabili desp
 	//*sino puedo poner int 20h
-	
+	return 0;
 	
 	// Llamado a la Shell.
 //	((EntryPoint)sampleCodeModuleAddress)();

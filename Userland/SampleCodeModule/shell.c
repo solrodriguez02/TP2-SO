@@ -15,6 +15,7 @@ typedef struct {
     char * name;
     char * description;
     void (*function)(int param1);
+    int numParams;
 } module;
 
 /**
@@ -49,16 +50,17 @@ void startShell() {
  * @param description Breve descripción del módulo.
  * @param function Puntero a la función correspondiente.
  */
-void loadModule(char * name, char * description, void (*function)(void)) {
+void loadModule(char * name, char * description, void (*function)(void), int numparams) {
     modules[modulesCount].name = name;
     modules[modulesCount].description = description;
     modules[modulesCount].function = function;
+    modules[modulesCount].numParams = numparams;
     modulesCount++;
 }
 
 
 void enter(){
-    for (int i = 0; i < 3; i++){
+    while(1){
         printf("--------------------------------------xxxxxxx------------");
     }
     exit();
@@ -120,7 +122,25 @@ void execveNew(int functionIndex, char isForeground ){
     }else{
         printf("\ncreacion de proceso fallido");
     }
-    
+}
+
+void getInputAndPrint(){
+    printf("estoy en el proceso que lee del pipe e imprime");
+    while (1){
+        char read;
+        syscall_read(0,&read,1);
+        printf("proceso get&print: %c", read);
+    }
+}
+
+void runWithPipe(){
+    execveNew(3, 0);
+    block(2);
+    execveNew(4, 0);
+    block(3);
+    syscall_createPipe();
+    block(2);
+    block(3);
 }
 
 void blockProcess(int pid){
@@ -129,21 +149,30 @@ void blockProcess(int pid){
 
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
+ * faltan: 
+ * ps - 0 param - syscall needed -lista de procesos con sus estados (nombre, ID, prioridad, stack y base pointer, foreground)
+ * loop -  Imprime su ID con un saludo cada una determinada cantidad de segundos.
+ * cat: Imprime el stdin tal como lo recibe.
+ * wc: Cuenta la cantidad de líneas del input.
+ * filter: Filtra las vocales del input.
+ * phylo: Implementa el problema de los filósofos comensales. DEBERÁ permitir cambiar la cantidad de filósofos en runtime con las teclas “a” (add 1) y “r” (remove 1).
  */
 void loadAllModules() {
-    loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp);
-    loadModule("clear", "Clears the screen of the shell", &clear);
-    loadModule("enter", "Prueba enters",&enter);
-    loadModule("getPid", "Returns current process PID", &getCurrentPid);
-    loadModule("getstatus", "get status from process", &getDefinedStatus);
-    loadModule("kill", "kill a process", &killProcess);
-    loadModule("fork", "executes fork+execve for a given process", &execveNew);
-    loadModule("bgEnter", "crea proceso en bg", &enterBg);
-    loadModule("block", "block specific process", &blockProcess);
-    loadModule("getPriority", "get priority from process", &getProcessPriority);
-    loadModule("updatePriority", "update priority from process", &updateProcessPriority);
-    loadModule("yield", "Abandonar cpu", &yield);
-    loadModule("sleep", "Sleep (param= #ticks)", &sleep);
+    loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp, 0);
+    loadModule("clear", "Clears the screen of the shell", &clear, 0);
+    loadModule("enter", "Prueba enters",&enter, 0);
+    loadModule("getInputAndPrint", "imprime lo que recibe por fd = 0",&getInputAndPrint, 0);
+    loadModule("getPid", "Returns current process PID", &getCurrentPid, 0);
+    loadModule("getstatus", "get status from process", &getDefinedStatus, 1);
+    loadModule("kill", "kill a process", &killProcess, 1);
+    loadModule("fork", "executes fork+execve for a given process", &execveNew, 2);
+    loadModule("bgEnter", "crea proceso en bg", &enterBg, 0);
+    loadModule("block", "block specific process", &blockProcess, 1);
+    loadModule("getPriority", "get priority from process", &getProcessPriority, 1);
+    loadModule("updatePriority", "update priority from process", &updateProcessPriority, 2);
+    loadModule("yield", "Abandonar cpu", &yield, 1);
+    loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
+    loadModule("createPipe", "Crea un pipe", &runWithPipe, 1);
 }
 
 
@@ -152,6 +181,7 @@ void loadAllModules() {
  * no existir, imprime un mensaje de error.
  * 
  * @param input Nombre del módulo que se busca comparar.
+ * necesitaria conocer el numero de parametros que espero de la funcion que matcheo para despues poder chequear si se paso un | o un &
  */
 void runModule(const char * input[]){
     printf("\n");    

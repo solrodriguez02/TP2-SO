@@ -8,6 +8,7 @@
 #define GREEN 0x00FF00
 #define WHITE 0xFFFFFF
 #define BACKGROUNG_COLOR 0x080808
+#define BASEDIRVIDEO 0x0000000000005C00
 
 // ----------------------------------- FONT ----------------------------------- //
 unsigned char* getBitmapArrayEntry(unsigned char c);

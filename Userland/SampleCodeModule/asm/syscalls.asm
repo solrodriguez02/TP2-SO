@@ -18,6 +18,7 @@ GLOBAL syscall_update_priority
 GLOBAL syscall_get_priority
 GLOBAL syscall_yield
 GLOBAL syscall_waitChildren
+GLOBAL syscall_createPipe
 
 section .text
 
@@ -183,6 +184,13 @@ syscall_yield:
 syscall_waitChildren:
 	pushf
 	mov rdi, 23
+	int 80h
+	popf
+	ret
+
+syscall_createPipe:
+	pushf
+	mov rdi, 24
 	int 80h
 	popf
 	ret

@@ -9,8 +9,11 @@
 #include <scheduler.h>
 #include "manageProcess.h"
 #include <blockingSys.h>
+#include <scheduler.h>
 
 extern char buffer;
+extern pcbEntryADT PCB[MAX_SIZE_PCB]; 
+extern uint16_t lastSelected;
 
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
@@ -33,7 +36,13 @@ static unsigned char readVIEJO() {
  * @param BGColor Color de fondo del caracter deseado en el formato 0xRRGGBB, siendo RR el byte para el código de 
  * color rojo, GG el código de color verde, y BB el código de color azul.
  */
-static void write(unsigned char c, int FGColor, int BGColor) { drawChar(c, FGColor, BGColor);}
+static void write(unsigned char c, int FGColor, int BGColor) { 
+    if (getFdBuffer(0, STDOUT) == BASEDIRVIDEO){
+        drawChar(c, FGColor, BGColor);
+        return;
+    }
+    writePipe(getFdBuffer(0,STDOUT), &c, 1);
+}
 
 /**
  * @brief Función que espera al transcurso de los segundos deseados que se reciben como parámetro.
@@ -129,6 +138,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             forceTimerInt();
         case 23:
             waitChildren();
+        case 24:
+            createNewPipe(2,3);
+            return 0;
     }
 	return 0;
 }
