@@ -59,13 +59,13 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     
     *rdi = argc;
     *rsi = argv; 
-    //array[0] = "Vengo del execve"; 
+    array[0] = "Vengo del execve"; 
 
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
 
-    return addToScheduler( p->rsp, topMem, isForeground );
+    return addToScheduler( p->rsp, topMem, (int * )topMem + PROCESS_STACK_SIZE, isForeground );
 }
 
 

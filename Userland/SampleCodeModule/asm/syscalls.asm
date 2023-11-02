@@ -18,6 +18,7 @@ GLOBAL syscall_update_priority
 GLOBAL syscall_get_priority
 GLOBAL syscall_yield
 GLOBAL syscall_waitChildren
+GLOBAL syscall_getAllProcessInfo
 
 section .text
 
@@ -70,6 +71,14 @@ syscall_beep:
 	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 6
+	int 80h
+	popf
+	ret
+
+syscall_getAllProcessInfo:
+	pushf
+	mov rsi, rdi
+	mov rdi, 8
 	int 80h
 	popf
 	ret

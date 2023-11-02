@@ -22,12 +22,15 @@
 #define STDOUT 1
 
 #define MAX_CHILDREN_PER_PROCESS 5
+
 typedef struct pcbEntryCDT * pcbEntryADT;
+
+typedef struct statProcess * stat;
 
 void initializeScheduler();
 void * scheduler(void * stackPointer);
 int deleteFromScheduler(uint16_t pid);
-int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground);
+int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground);
 int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);
@@ -39,3 +42,4 @@ void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
+void getAllProcessInfo(stat * arrayStats);

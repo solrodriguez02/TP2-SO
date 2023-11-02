@@ -87,6 +87,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 6:
             beep(param1,param2);
             break;
+        case 8:
+            getAllProcessInfo(param1);
+            break;
         case 9:
             loadScreen();         
             break;

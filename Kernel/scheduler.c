@@ -22,9 +22,11 @@ typedef struct blockedReasonCDT {
 
 typedef struct pcbEntryCDT
 {
+    uint8_t * name;
     uint16_t parentPid;
     uint16_t pid; 
     void * stackPointer;
+    void * basePointer;
     uint8_t state;
     void * topMemAllocated;
     void * fds[MAX_FD_PER_PROCESS];
@@ -34,6 +36,18 @@ typedef struct pcbEntryCDT
     uint8_t isForeground;
     uint16_t countChildren;
 } pcbEntryCDT;
+
+// la informacion que tendra disponible el usuario
+struct statProcess{
+    uint8_t * name;
+    int16_t pid;
+    uint8_t state;
+    uint8_t priority;
+    uint8_t isForeground;
+    void * stackPointer;
+    void * basePointer;
+    //FDS? 
+};
 
 typedef struct pcbEntryCDT * pcbEntryADT;
 
@@ -145,7 +159,7 @@ void initializeScheduler(){
         
         // ya recervo espacio para todas las entradas de la tabla
         
-        char sizeEntry = 13 * 8;  //sizeof(pcbEntryCDT); 
+        char sizeEntry = 15 * 8;  //sizeof(pcbEntryCDT); 
         PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
         PCB[0]->state = TERMINATED;
         
@@ -253,7 +267,7 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 
-int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForeground){
+int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground){
     
     // creo halt
     if ( nextPid==0){
@@ -267,11 +281,13 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, uint8_t isForegr
     
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
+            PCB[i]->name = "Juan";
             PCB[i]->pid = nextPid++;
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
             PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
+            PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
             PCB[i]->state = READY;
@@ -308,4 +324,20 @@ int getPriority(int pid){
         }
     }
     return -1;
+}
+
+void getAllProcessInfo(stat * arrayStats){
+    // no incluimos al halt
+    int j=0,i;
+    for ( i=1; i<MAX_SIZE_PCB; i++){
+        if ( PCB[i]->state != TERMINATED ) {
+            arrayStats[j]->name = PCB[i]->name;
+            arrayStats[j]->pid = PCB[i]->pid;
+            arrayStats[j]->state = PCB[i]->state;
+            arrayStats[j]->stackPointer = PCB[i]->stackPointer;
+            arrayStats[j]->basePointer = PCB[i]->basePointer;
+            arrayStats[j++]->isForeground = PCB[i]->isForeground;
+        }
+    }
+    arrayStats[j] = 0;
 }

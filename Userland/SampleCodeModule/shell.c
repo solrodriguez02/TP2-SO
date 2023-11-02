@@ -75,22 +75,27 @@ void enter(int argc, char ** argv){
     exit();
 }
 
-void getDefinedStatus(int pid){
-        int status =  getStatus(pid);
-        switch(status){
+static void printStatus(status){
+    switch(status){
             case RUNNING:
-                printf("proceso running\n");
+                printf("running\n");
                 break;
             case READY:
-                printf("proceso ready\n");
+                printf("ready\n");
                 break;
             case BLOCKED:
-                printf("proceso bloqueado\n");
+                printf("bloqueado\n");
                 break;
             case TERMINATED:
-                printf("proceso terminado\n");
+                printf("terminado\n");
                 break;
         }
+}
+
+
+void getDefinedStatus(int pid){
+        int status =  getStatus(pid);
+        printStatus(status);
 }
 
 void getCurrentPid(int none){
@@ -123,7 +128,7 @@ void enterBg(){
 }
 
 void execveNew(int functionIndex, char isForeground ){
-    if ( functionIndex < 1 || functionIndex > 3 ){
+    if ( functionIndex < 1 || functionIndex > TOTAL_MODULES ){
         printf("Invalid module");
         return;
     }
@@ -155,6 +160,24 @@ void blockProcess(int pid){
     block(pid);
 }
 
+void ps() {
+    // podria sino hacer un malloc
+    int MAX_PROCESS = 5;
+    stat arrayStats[MAX_PROCESS];
+    getAllProcessInfo(arrayStats);
+    for ( int i=0; arrayStats[i]!= 0; i++ ){
+        printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
+        printf("\t Prioridad: %d", arrayStats[i]->priority);
+        printf("\t Estado: ");
+        printStatus(arrayStats[i]->pid);
+        printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
+        printf("\t StackPointer: %d", arrayStats[i]->stackPointer );
+        printf("\t BasePointer: %d", arrayStats[i]->basePointer );
+    }
+
+    //exit();
+}
+
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
  */
@@ -172,7 +195,7 @@ void loadAllModules() {
     loadModule("b", "to block last created process", &blockLastCreated);
     loadModule("getPriority", "get priority from process", &getProcessPriority);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority);
-    loadModule("yield", "Abandonar cpu", &yield);
+    loadModule("ps", "Ver el estado de los procesos en ejecucion", &ps);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep);
 }
 

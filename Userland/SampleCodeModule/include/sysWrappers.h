@@ -2,6 +2,20 @@
 #include <stdio.h>
 #define STDIN 0
 #define STDOUT 1
+
+struct statProcess{
+    uint8_t * name;
+    int16_t pid;
+    uint8_t state;
+    uint8_t priority;
+    uint8_t isForeground;
+    void * stackPointer;
+    void * basePointer;
+    //FDS? 
+};
+
+typedef struct statProcess * stat;
+
 int getChar();
 
 int putCharAt(char c, int x, int y);

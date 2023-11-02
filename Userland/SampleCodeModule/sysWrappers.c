@@ -140,3 +140,7 @@ int getPriority(int pid){
 void waitChildren(){
     syscall_waitChildren();
 }
+
+void getAllProcessInfo(stat * arrayStats){
+    syscall_getAllProcessInfo( arrayStats);
+}
