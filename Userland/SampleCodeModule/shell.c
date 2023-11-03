@@ -186,15 +186,15 @@ void ps() {
     // podria sino hacer un malloc
     int MAX_PROCESS = 5;
     stat arrayStats[MAX_PROCESS];
-    getAllProcessInfo(arrayStats);
-    for ( int i=0; arrayStats[i]!= 0; i++ ){
+    int end = getAllProcessInfo(arrayStats);
+    for ( int i=0; i<end; i++ ){
         printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
         printf("\t Prioridad: %d", arrayStats[i]->priority);
         printf("\t Estado: ");
         printStatus(arrayStats[i]->pid);
         printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
-        printf("\t StackPointer: %d", arrayStats[i]->stackPointer );
-        printf("\t BasePointer: %d", arrayStats[i]->basePointer );
+        printf("\t StackPointer: %x", arrayStats[i]->stackPointer );
+        printf("\t BasePointer: %x", arrayStats[i]->basePointer );
     }
 
     //exit();

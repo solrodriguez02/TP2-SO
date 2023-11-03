@@ -48,4 +48,4 @@ void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);
 void createNewPipe(int writePid, int readPid);
-void getAllProcessInfo(stat * arrayStats);
+int getAllProcessInfo(stat * arrayStats);

@@ -326,10 +326,9 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePoint
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
             PCB[i]->ticksBeforeBlock = 0;
-            PCB[i]->stackPointer = stackPointer;
-            PCB[i]->state = READY;
             PCB[i]->fds[0] = &buffer;
             PCB[i]->fds[1] = BASEDIRVIDEO;
+            PCB[i]->stackPointer = stackPointer;
             PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
@@ -377,7 +376,7 @@ int getPriority(int pid){
     return -1;
 }
 
-void getAllProcessInfo(stat * arrayStats){
+int getAllProcessInfo(stat * arrayStats){
     // no incluimos al halt
     int j=0,i;
     for ( i=1; i<MAX_SIZE_PCB; i++){
@@ -390,5 +389,5 @@ void getAllProcessInfo(stat * arrayStats){
             arrayStats[j++]->isForeground = PCB[i]->isForeground;
         }
     }
-    arrayStats[j] = 0;
+    return j; 
 }

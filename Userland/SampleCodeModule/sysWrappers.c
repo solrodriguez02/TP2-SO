@@ -141,6 +141,6 @@ void waitChildren(){
     syscall_waitChildren();
 }
 
-void getAllProcessInfo(stat * arrayStats){
-    syscall_getAllProcessInfo( arrayStats);
+int getAllProcessInfo(stat * arrayStats){
+    return syscall_getAllProcessInfo( arrayStats);
 }
