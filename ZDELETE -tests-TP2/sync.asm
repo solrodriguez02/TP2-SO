@@ -1,17 +1,24 @@
+section .text 
+
 GLOBAL enterRegion
 GLOBAL leaveRegion
 
 enterRegion:
-    mov rax, 1
-    mov r16, [lock]
-    xchg ax, r16
-    mov byte [lock], ax
+    push rax 
+tryToUnblock:    
+    mov al, 1
+    xchg byte [lock], al  
+    cmp al,0
+    jne continue
+    ; block 
+    jmp tryToUnblock 
+continue:
+    pop rax 
     ret
 
 leaveRegion:
-    mov [lock], 0
+    mov byte [lock], 0
     ret
 
-
-section .bss:
-    lock: resb 1
+section .bss
+lock resb 1

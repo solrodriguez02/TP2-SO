@@ -9,19 +9,19 @@ void * createSem(){
 }
 
 void waitSem(sem_ptr sem){
-    if(sem->value == 0){
+    // SE USA XCHG
+    if(sem->value == 0)
         blockProcess(0, BLOCKBYIPC);
-        sem->value--;
-    }
-    else{
-        sem->value--;
-    }
+    
+    sem->value--;
+    
 }
 
 void postSem(sem_ptr sem){
     sem->value++;
     if(sem->value <= 0){
         //tal vez sería mejor usar la info del struct del pipe especifico en vez de buscar (por ahi hay más de un pipe abierto entre distintos procesos)
+        //! tryToUnlockSem(); 
         tryToUnlockPipe(0);
     }
 }
