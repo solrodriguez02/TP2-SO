@@ -207,7 +207,6 @@ void yieldFun(){
 }
 
 void loop(){
-    updatePriority(0);
     while(1){
         print("Hola soy Oscar", ORANGE );
         //    syscall_wait(2);
