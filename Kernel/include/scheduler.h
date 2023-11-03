@@ -32,7 +32,7 @@ typedef struct statProcess * stat;
 void initializeScheduler();
 void * scheduler(void * stackPointer);
 int deleteFromScheduler(uint16_t pid);
-int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground);
+int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground);
 int getPid();
 int getStatus(int pid);
 void unblockProcess(int pid);

@@ -305,7 +305,7 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 
-int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground){
+int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground){
     
     // creo halt
     if ( nextPid==0){
@@ -321,7 +321,7 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePoint
     
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
-            PCB[i]->name = "Juan";
+            PCB[i]->name = name;
             PCB[i]->pid = nextPid++;
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar

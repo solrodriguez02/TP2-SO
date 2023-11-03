@@ -139,7 +139,7 @@ void execveNew(int functionIndex, char isForeground ){
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt
     char * argv[1];
-    argv [0] = "mi pid es...";
+    argv[0] = modules->name;
     int pid = execve(modules[functionIndex-1].function, 0, 1, argv );
     
     nextPid = pid; 
@@ -215,7 +215,7 @@ void loop(){
         //  PERO q el lo desbloquee es costoso
 
     }
-        printf("Me despido\n");
+    printf("Me despido\n");
 }
 
 /**
