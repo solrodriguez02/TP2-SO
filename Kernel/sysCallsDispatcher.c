@@ -68,7 +68,7 @@ void wait(int seconds){
  */
 long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2, uint64_t param3, uint64_t param4, uint64_t param5) {
     // va a entrar al scheduler si o si, pues ticks=0 => (0%quantum == 0) = true 
-    if ( syscall > 16 ){
+    if ( syscall > 16 || syscall == 8){
         updateTicks(0, ticks_before_quantum());
         restartTicks();
     }
@@ -87,7 +87,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             drawNextLine();
             break;
         case 3:
-        	_sti(); // esto creo q desactiva las interrup => ojo
+        //! con BUSY WAITING        	
             wait(param1);
             break;
         case 4:
@@ -138,8 +138,10 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             return getPriority(param1);
         case 22: 
             forceTimerInt();
+            break;
         case 23:
             waitChildren();
+            break;
         case 24:
             createNewPipe(2,3);
             return 0;

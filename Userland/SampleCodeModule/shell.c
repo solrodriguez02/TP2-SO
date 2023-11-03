@@ -72,7 +72,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 50; i++){
+    for (int i = 0; i < 500; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -200,6 +200,24 @@ void ps() {
     //exit();
 }
 
+void yieldFun(){
+    print("AAAA", BLUE);
+    yield();   
+    print("BBBB", 0xFF0000);
+}
+
+void loop(){
+    updatePriority(0);
+    while(1){
+        print("Hola soy Oscar", ORANGE );
+        //    syscall_wait(2);
+        //!  esta haciendo busy waiting!!! 
+        // => conviene usar int RTC
+        //  PERO q el lo desbloquee es costoso
+
+    }
+        printf("Me despido\n");
+}
 
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
@@ -226,8 +244,8 @@ void loadAllModules() {
     loadModule("b", "to block last created process", &blockLastCreated, 0);
     loadModule("getPriority", "get priority from process", &getProcessPriority, 1);
     loadModule("updatePriority", "update priority from process", &updateProcessPriority, 2);
-    loadModule("yield", "Abandonar cpu", &yield, 1);
-    loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
+    loadModule("yield", "Abandonar cpu", &yieldFun, 0);
+    loadModule("loop", "Sleep", &loop, 0);
     loadModule("createPipe", "Crea un pipe", &runWithPipe, 1);
     loadModule("ps", "Ver el estado de los procesos en ejecucion", &ps, 0);
 }
