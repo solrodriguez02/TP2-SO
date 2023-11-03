@@ -286,7 +286,7 @@ int deleteFromScheduler(uint16_t pid){
             deadChild(lastSelected);
             PCB[lastSelected]->state = TERMINATED;
             //* aca se sacaria al nodo de la lista y desp free
-            //freeMemory(PCB[lastSelected]->topMemAllocated);
+            freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
     }
@@ -296,7 +296,7 @@ int deleteFromScheduler(uint16_t pid){
             PCB[i]->state = TERMINATED;
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
-            //freeMemory(PCB[lastSelected]->topMemAllocated);
+            freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
         }

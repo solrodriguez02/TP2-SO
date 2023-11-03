@@ -72,7 +72,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 50; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -140,7 +140,7 @@ void execveNew(int functionIndex, char isForeground ){
     // comentado pues x ahora usamos isForeground para identif halt
     char * argv[1];
     argv [0] = "mi pid es...";
-    int pid = execve(modules[functionIndex-1].function, 1, 1, argv );
+    int pid = execve(modules[functionIndex-1].function, 0, 1, argv );
     
     nextPid = pid; 
     nextPid++;
