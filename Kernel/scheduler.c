@@ -136,18 +136,6 @@ void signalHandler(int signal){
 
 void unblockProcess(int pid){
 
-    // saco: " pid == PCB[lastSelected]->pid || " pues si o si no va a estar
-    // corriendo si llame a unblock desde la shell
-    //* en reali ni las sysBlock lo llaman, pues ya el scheduler las agarra 
-    if ( pid == RUNNING ){
-            PCB[lastSelected]->state = READY;
-            PCB[lastSelected]->priority = 1;
-            // ni me preocupo en elim info de blockCDT, total solo
-            // se consulta cuando state== BLOCKED, => va a estar sobreescrita
-            forceTimerInt();
-            return;
-    }
-
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
@@ -317,7 +305,6 @@ int deleteFromScheduler(uint16_t pid){
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
             freeMemory(PCB[lastSelected]->topMemAllocated);
-            forceTimerInt();
             return 0;
         }
     }
