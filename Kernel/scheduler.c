@@ -1,11 +1,10 @@
 #include <scheduler.h>
 #include <interrupts.h>
-#include "MemoryManager.h"
-#include <listADT.h>
+#include <MemoryManager.h>
 #include <time.h>
+#include <semaphore.h>
 #include <videodriver.h>
 #include <pipes.h>
-#define MAX_SIZE_PCB 5
 
 #define KERNEL_STACK_BASE 0x352000 
 
@@ -14,7 +13,6 @@ int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
 uint8_t halt=0;
-
 typedef struct blockedReasonCDT {
     uint8_t blockReason;
     uint16_t size;
@@ -30,11 +28,13 @@ typedef struct pcbEntryCDT
     uint8_t state;
     void * topMemAllocated;
     void * fds[MAX_FD_PER_PROCESS];
+    char * sems[MAX_SEM_PER_PROCESS];
     blockedReasonCDT blockedReasonCDT; 
     uint8_t priority;
     uint16_t ticksBeforeBlock;
     uint8_t isForeground;
     uint16_t countChildren;
+    uint16_t lastSemOpen;
 } pcbEntryCDT;
 
 // la informacion que tendra disponible el usuario
@@ -77,6 +77,7 @@ void tryToUnlockPipe(int dim){
     }
 }
 
+
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
@@ -97,6 +98,45 @@ int comparePid(elemType elem1, elemType elem2){
     return elem1->pid - elem2->pid;
 }
 */
+
+int getPCBIndex(int pid){
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int addSemToPCB(char * name, int pid){
+    int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
+    if (pcbIndex == -1){
+        return -1;
+    }
+    for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
+        if (PCB[pcbIndex]->sems[i] == NULL){
+            PCB[pcbIndex]->sems[i] = name;
+            PCB[pcbIndex]->lastSemOpen++;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int deleteSemFromPCB(char * name, int pid){
+    int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
+    if (pcbIndex == -1){
+        return -1;
+    }
+    for (int i = 0; i < PCB[pcbIndex]->lastSemOpen; i++){
+        if (strCmp(PCB[pcbIndex]->sems[i], name) == 0){
+            PCB[pcbIndex]->sems[i] = NULL;
+            return 0;
+        }
+    }
+    return -1;
+}
+
 void blockProcess(int pid, uint16_t blockReason){
     if ( pid == PCB[lastSelected]->pid || pid == RUNNING ){
             PCB[lastSelected]->state = BLOCKED;
@@ -129,7 +169,7 @@ void signalHandler(int signal){
     if ( signal == CTRLD){
         updatePriority(lastSelected, 1);//para cambiar en funcion de lo que preguntemos
     }else if ( signal == CTRLC){
-        deleteFromScheduler(getForegroundPid);
+        deleteFromScheduler(getForegroundPid());
     }
 }
 
@@ -182,8 +222,8 @@ void updatePriority(int pid, int priority){
 
 void createNewPipe(int writePid, int readPid){
     pipeADT pipe = createPipe(writePid, readPid);
-    PCB[readPid]->fds[0] = pipe->buffer;
-    PCB[writePid]->fds[1] = pipe->buffer;
+    PCB[getPCBIndex(readPid)]->fds[0] = pipe->buffer;
+    PCB[getPCBIndex(writePid)]->fds[1] = pipe->buffer;
 }
 
 void initializeScheduler(){
@@ -202,8 +242,8 @@ void initializeScheduler(){
         for ( int i=1; i<MAX_SIZE_PCB; i++){
             PCB[i] = (char*) PCB[i-1] + sizeEntry;
             PCB[i]->state = TERMINATED;
-            PCB[i]->fds[0] = STDIN;
-            PCB[i]->fds[1] = STDOUT;
+            PCB[i]->fds[0] = &buffer;
+            PCB[i]->fds[1] = BASEDIRVIDEO;
         }
 }
 
@@ -311,6 +351,15 @@ int deleteFromScheduler(uint16_t pid){
     return -1;
 }
 
+void copyFdFromParent(int index){
+    for (int i = 0; i < 2; i++){
+        PCB[index]->fds[i] = PCB[getPCBIndex(PCB[index]->parentPid)]->fds[i];
+    }
+}
+
+void changeFd(int index, int fd, void * buffer){
+    PCB[index]->fds[fd] = buffer;
+}
 
 int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground){
     
@@ -333,9 +382,12 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
             PCB[i]->ticksBeforeBlock = 0;
-            PCB[i]->fds[0] = &buffer;
-            PCB[i]->fds[1] = BASEDIRVIDEO;
             PCB[i]->stackPointer = stackPointer;
+            PCB[i]->state = READY;
+            copyFdFromParent(i);
+            for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
+                PCB[i]->sems[i] = NULL;
+            }
             PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
@@ -372,6 +424,7 @@ void * getFdBuffer(int pid, int i){
             return PCB[i]->fds[i];
         }
     }
+    return NULL;
 }
 
 int getPriority(int pid){

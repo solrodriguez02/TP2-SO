@@ -16,7 +16,7 @@ static int nextPid=2;
 typedef struct {
     char * name;
     char * description;
-    void (*function)(int param1);
+    void (*function)(char ** params);
     int numParams;
 } module;
 
@@ -52,7 +52,7 @@ void startShell() {
  * @param description Breve descripción del módulo.
  * @param function Puntero a la función correspondiente.
  */
-void loadModule(char * name, char * description, void (*function)(void), int numparams) {
+void loadModule(char * name, char * description, void (*function)(char** params), int numparams) {
     modules[modulesCount].name = name;
     modules[modulesCount].description = description;
     modules[modulesCount].function = function;
@@ -79,7 +79,16 @@ void enter(){
     exit();
 }
 
-static void printStatus(status){
+static getIndexModule(char * name){
+    for(int i=0; i<TOTAL_MODULES; i++) {
+        if (strcmp(modules[i].name,name)){
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void printStatus(int status){
     switch(status){
             case RUNNING:
                 printf("running\n");
@@ -97,12 +106,13 @@ static void printStatus(status){
 }
 
 
-void getDefinedStatus(int pid){
+void getDefinedStatus(char ** params){
+        int pid = strToNum(params[0]);
         int status =  getStatus(pid);
         printStatus(status);
 }
 
-void getCurrentPid(int none){
+void getCurrentPid(){
     printf("El pid: %d\n", getPid());
 }
 
@@ -111,27 +121,30 @@ void killLastCreated(){
 }
 
 
-void killProcess(int pid){
+void killProcess(char ** params){
+    int pid = strToNum(params[0]);
     if ( pid==0)
         printf("Invalid pid\n");
     else
         kill(pid);
 }
 
-void getProcessPriority(int pid){
+void getProcessPriority(char ** params){
+    int pid = strToNum(params[0]);
     int priority = getPriority(pid);
     printf("El proceso %d tiene prioridad %d\n", pid, priority);
 }
 
-void updateProcessPriority(int pid){
+void updateProcessPriority(char ** params){
+    int pid = strToNum(params[0]);
     updatePriority(pid);
 }
 
-void enterBg(){
-    execveNew(3,0);
-}
 
-void execveNew(int functionIndex, char isForeground ){
+void execveNew( char ** params){
+    int functionIndex = strToNum(params[0]);
+    char isForeground = strToNum(params[1]);
+
     if ( functionIndex < 1 || functionIndex > TOTAL_MODULES ){
         printf("Invalid module");
         return;
@@ -140,7 +153,7 @@ void execveNew(int functionIndex, char isForeground ){
     // comentado pues x ahora usamos isForeground para identif halt
     char * argv[1];
     argv[0] = modules[functionIndex-1].name;
-    int pid = execve(modules[functionIndex-1].function, 0, 1, argv );
+    int pid = execve(modules[functionIndex-1].function, isForeground, 1, argv );
     
     nextPid = pid; 
     nextPid++;
@@ -154,31 +167,77 @@ void execveNew(int functionIndex, char isForeground ){
     }
 }
 
-void getInputAndPrint(){
+void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
     while (1){
-        char read;
-        syscall_read(0,&read,1);
-        printf("proceso get&print: %c", read);
+        char read = getChar();
+        print("proceso get&print:", BLUE);
+        print(&read, 0XFF0000);
     }
 }
 
-void runWithPipe(){
-    execveNew(3, 0);
-    block(2);
-    execveNew(4, 0);
-    block(3);
-    syscall_createPipe();
-    block(2);
-    block(3);
+void enterBg(){
+    char * params[2] = {"3", "0"};
+    execveNew(params);
 }
 
+void runWithPipe(char ** params){
+    char** params1 = { params[0], "0" };
+    char** params2 = { params[1], "0" };
+    syscall_createPipe();
+    execveNew(params1);
+    execveNew(params2);
+}
+
+void openSem(char ** params){
+    char * name = params[0]; 
+    int value = strToNum(params[1]);
+    int result = syscall_openSem(name, value);
+    if (result == 0){
+        printf("Se creo el semaforo: %s con valor inicial %d", name, value);
+    }
+    else{
+        printf("No se pudo crear el semaforo: %s", name);
+    }
+}
+
+void getSemValue(char ** params){
+    char * name = params[0];
+    int semValue = syscall_getSemValue(name);
+    printf("El valor del semaforo: %s es: %d", name, semValue);
+}
+
+void waitSem(char ** params){
+    char * name = params[0];
+    syscall_waitSem(name);
+    printf("Se hizo wait al semaforo %s: \n", name);
+    getSemValue(params);
+}
+
+void postSem(char ** params){
+    char * name = params[0];
+    syscall_postSem(name);
+    printf("Se hizo post al semaforo %s: \n", name);
+    getSemValue(params);
+}
+
+void closeSem(char ** params){
+    char * name = params[0];
+    int result = syscall_closeSem(name);
+    if (result == 0){
+        printf("Se elimino el semaforo: %s", name);
+    }
+    else{
+        printf("No se pudo eliminar el semaforo: %s", name);
+    }
+}
 
 void blockLastCreated (){
     block(nextPid-1); 
 }
 
-void blockProcess(int pid){
+void blockProcess(char ** params){
+    int pid = strToNum(params[0]);
     block(pid);
 }
 
@@ -231,24 +290,28 @@ void loop(){
 void loadAllModules() {
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp, 0);
     loadModule("clear", "Clears the screen of the shell", &clear, 0);
-    loadModule("enter", "Prueba enters",&enter, 0);
-    loadModule("getInputAndPrint", "imprime lo que recibe por fd = 0",&getInputAndPrint, 0);
+    loadModule("enter", "Tests a loop of printf's",&enter, 0);
+    loadModule("getInputAndPrint", "Prints the values in STDIN",&getInputAndPrint, 0);
     loadModule("getPid", "Returns current process PID", &getCurrentPid, 0);
-    loadModule("getstatus", "get status from process", &getDefinedStatus, 1);
-    loadModule("kill", "kill a process", &killProcess, 1);
-    loadModule("k", "to kill last created process", &killLastCreated, 1);
-    loadModule("fork", "executes fork+execve for a given process", &execveNew, 2);
-    loadModule("bgEnter", "crea proceso en bg", &enterBg, 0);
-    loadModule("block", "block specific process", &blockProcess, 1);
-    loadModule("b", "to block last created process", &blockLastCreated, 0);
-    loadModule("getPriority", "get priority from process", &getProcessPriority, 1);
-    loadModule("updatePriority", "update priority from process", &updateProcessPriority, 2);
-    loadModule("yield", "Abandonar cpu", &yieldFun, 0);
-    loadModule("loop", "Sleep", &loop, 0);
-    loadModule("createPipe", "Crea un pipe", &runWithPipe, 1);
-    loadModule("ps", "Ver el estado de los procesos en ejecucion", &ps, 0);
+    loadModule("getstatus", "Gets the current status from process", &getDefinedStatus, 1);
+    loadModule("kill", "Kills a given process", &killProcess, 1);
+    loadModule("k", "Kills the last-created process", &killLastCreated, 1);
+    loadModule("fork", "Executes fork+execve for a given process", &execveNew, 2);
+    loadModule("bgEnter", "Runs the program Enter in Background", &enterBg, 0);
+    loadModule("block", "Blocks a specific process", &blockProcess, 1);
+    loadModule("b", "Blocks the last-created process", &blockLastCreated, 0);
+    loadModule("getPriority", "Get priority from process", &getProcessPriority, 1);
+    loadModule("updatePriority", "Update priority from process", &updateProcessPriority, 2);
+    loadModule("yield", "Makes the current process stop it's quantum", &yield, 1);
+    loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
+    loadModule("createPipe", "Creates a pipe between 2 arbitrary processes (for now)", &runWithPipe, 1);
+    loadModule("ps", "List all processes in executions with their states", &ps, 0);
+    loadModule("openSem", "Opens a sem for the current proccess", &openSem, 2);
+    loadModule("getSemValue", "Gets the curret value in a sem", &getSemValue, 1);
+    loadModule("waitSem", "Does the operation to the given sem", &waitSem, 1);
+    loadModule("postSem", "Does the operation to the given sem", &postSem, 1);
+    loadModule("closeSem", "Closes a sem for the current proccess", &closeSem, 1);
 }
-
 
 /**
  * @brief Función que llama al módulo correspondiente dependiendo del parámetro ingresado. En caso de
@@ -265,7 +328,8 @@ void runModule(const char * input[]){
                 modules[i].function(1);
                 return;
             }
-            modules[i].function(strToNum(input[1]));
+            //debería pasarle el array de parametros y directamente que cada uno lo maneje a su gusto
+            modules[i].function(&input[1]);
             return;
         }
     }
@@ -278,7 +342,7 @@ void runModule(const char * input[]){
 /**
  * @brief Función correspondiente para el módulo de "help". Imprime todas las funcionalidades disponibles.
  */
-void printHelp(int none) {
+void printHelp() {
     printf("The shell's functionalities are the following:\n");
     for(int i=0; i<TOTAL_MODULES; i++) {
         printf("\n");
@@ -294,7 +358,8 @@ void printHelp(int none) {
 /**
  * @brief Función correspondiente al módulo de "clear". Limpia la pantalla de la shell.
  */
-void clear(int none) {
+void clear() {
     enableDoubleBuffer(1);
     enableDoubleBuffer(0);
+    exit();
 }

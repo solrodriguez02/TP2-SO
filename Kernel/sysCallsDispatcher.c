@@ -5,15 +5,17 @@
 #include <keyboardDriver.h>
 #include <time.h>
 #include <clock.h>
-#include "MemoryManager.h"
+#include <MemoryManager.h>
 #include <scheduler.h>
-#include "manageProcess.h"
+#include <semaphore.h>
+#include <manageProcess.h>
 #include <blockingSys.h>
 #include <scheduler.h>
 
 extern char buffer;
 extern pcbEntryADT PCB[MAX_SIZE_PCB]; 
 extern uint16_t lastSelected;
+sem_ptr sem;
 
 /**
  * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
@@ -145,6 +147,27 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             break;
         case 24:
             createNewPipe(2,3);
+            return 0;
+        case 25:
+            //syscall_openSem(char * name, int value)
+            return openSem((char *)param1, param2);
+        case 26:
+            //syscall_getsemvalue(char * name)
+            sem = getSemByName((char *)param1);
+            return getSemValue(sem);
+        case 27:
+            //syscall_waitsem(char * name)
+            sem = getSemByName((char *)param1);
+            //se podría probar que otro proceso sea el que hace el waitSem
+            waitSem(sem);
+            return 0;
+        case 28:
+            sem = getSemByName((char *)param1);
+            postSem(sem);
+            return 0;
+        case 29:
+            sem = getSemByName((char *)param1);
+            closeSem(sem);
             return 0;
     }
 	return 0;

@@ -117,3 +117,31 @@ void numToStr(int64_t num, int base, char * buffer) {
         
 }
 
+/**
+ * @brief Compara la igualdad entre dos cadenas de caracteres. Retorna 1 si ambos son iguales, y 0 en otro caso.
+ * 
+ * @param s1 Primera cadena de caracteres a comparar.
+ * @param s2 Segunda cadena de caracteres a comparar.
+ * @return Valor booleano de si ambas cadenas son iguales en representación ASCII.
+ */
+int strCmp(const char* s1, const char* s2){
+    int i=0;
+    while(s1[i]!='\0' && s2[i]!='\0') {
+        if (s1[i]!=s2[i]) {
+            return 0;
+        }
+        i++;
+    }
+    if(s1[i]!='\0' || s2[i]!='\0') {
+        return 0;
+    }
+    return 1;
+}
+
+int strlen(const char * str){
+    int i=0;
+    while(str[i]!='\0') {
+        i++;
+    }
+    return i;
+}

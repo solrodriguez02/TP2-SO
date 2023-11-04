@@ -1,6 +1,8 @@
-#include "scheduler.h"
-#include "MemoryManager.h"
+#include <scheduler.h>
+#include <MemoryManager.h>
+#include <manageProcess.h>
 #include <interrupts.h>
+#include <lib.h>
 
 #define GPR 15 
 #define SIZE_ADRESS 8   // 8bytes
@@ -32,6 +34,17 @@ typedef struct processStackCDT{
     //align
 } processStackCDT;
 
+uint16_t lastSemCreated = 0;
+
+sem_ptr sems[MAX_SEM_PER_PROCESS * MAX_SIZE_PCB];
+
+void initializeSems(){
+    int i;
+    for (i = 0; i < MAX_SEM_PER_PROCESS * MAX_SIZE_PCB; i++){
+        sems[i] = allocMemory(sizeof(sem_ptr));
+    }
+}
+
 // debe terminar en NULL
 
 
@@ -45,7 +58,7 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
 	
     // si no hay mas espa => ret -1
     if ( topMem == NULL )
-        return;
+        return -1;
     
     void * memForStack = topMem + POSTION_REL_STRUCT;
     processStackADT p = (processStackADT) memForStack; 
@@ -67,7 +80,40 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     return addToScheduler( p->rsp, argv[0], topMem, (char * )topMem + PROCESS_STACK_SIZE, isForeground );
 }
 
+sem_ptr getSemByName(char * name){
+    int i;
+    for (i = 0; i < lastSemCreated; i++){
+        if (strCmp(name, getSemName(sems[i]))){
+            return sems[i];
+        }
+    }
+    return NULL;
+}
 
+int openSem(char * name, int value){
+    if (getSemByName(name) == NULL){
+        sems[lastSemCreated++] = createSem(name, value);
+        addSemToPCB(name, 0);
+        return 0;
+    }
+    return -1;
+    /*
+    else{
+        addSemToPCB(name, 0);
+        return 0;
+    }
+    */
+}
+
+int closeSem(char * name){
+    sem_ptr sem = getSemByName(name);
+    if (sem){
+        destroySem(sem);
+        deleteSemFromPCB(name, 0);
+        return 0;
+    }
+    return -1;
+}
 void haltProcess(){
     
     while(1){

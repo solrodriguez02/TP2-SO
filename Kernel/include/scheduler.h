@@ -5,8 +5,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_SIZE_PCB 4
-
+#define MAX_SIZE_PCB 5
 #define SIZE_ENTRY 12
 #define BLOCKBYREAD 3
 #define BLOCKBYWRITE 4
@@ -20,6 +19,7 @@
 #define TERMINATED 3
 
 #define MAX_FD_PER_PROCESS 4
+#define MAX_SEM_PER_PROCESS 2
 #define STDIN 0
 #define STDOUT 1
 
@@ -49,3 +49,5 @@ int getForegroundPid();
 void signalHandler(int signal);
 void createNewPipe(int writePid, int readPid);
 int getAllProcessInfo(stat * arrayStats);
+int addSemToPCB(char * name, int pid);
+int deleteSemFromPCB(char * name, int pid);

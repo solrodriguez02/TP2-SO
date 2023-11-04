@@ -53,6 +53,15 @@ char keyboard_handler(char character) {
 unsigned char scanCodeToASCII(unsigned char scanCode) {
 	if(scanCode & 0x80)
 		return 0;
+    
+    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'c'){
+        signalHandler(CTRLC);
+        //buffer[0] = 'C'; //testing
+    }
+    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'd'){
+        signalHandler(CTRLD);
+        //buffer[0] = 'D'; //testing
+    }
     if(getCapslock()) {
         if(isLetter(scanCode)) {
             return ascii[scanCode][!getShift()];
@@ -101,14 +110,6 @@ void checkConditions(unsigned char scanCode) {
     else if(scanCode == CAPSLOCK_DOWN) {
         capslockActivated = !capslockActivated;
     } 
-    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'c'){
-        signalHandler(CTRLC);
-        //buffer[0] = 'C'; //testing
-    }
-    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'd'){
-        signalHandler(CTRLD);
-        //buffer[0] = 'D'; //testing
-    }
     //PARA CTRL+D y CTRL+C
     else if ( scanCode== CTRL_KEY_DOWN ){ 
         ctrlActivated = 1;
