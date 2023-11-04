@@ -158,15 +158,20 @@ void unblockProcess(int pid){
 }
 
 void updateTicks(int pid, int ticks){
+    int priority = 0;  
     if (!pid){
         PCB[lastSelected]->ticksBeforeBlock += ticks;
-        updatePriority(lastSelected, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+        priority = (PCB[lastSelected]->ticksBeforeBlock % QUANTUM) % 1;
+        updatePriority(0, priority);
+        //updatePriority(0, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
         return;
     }
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->ticksBeforeBlock += ticks;
-            updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+            priority = (PCB[i]->ticksBeforeBlock % QUANTUM) % 1;
+            updatePriority(i, priority);
+            //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
             return;
             // aviso q info espera en struct
         }
@@ -174,6 +179,10 @@ void updateTicks(int pid, int ticks){
 }
 
 void updatePriority(int pid, int priority){
+    if (!pid){
+            PCB[lastSelected]->priority = priority;
+            return;
+    }
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->priority = priority;
@@ -235,15 +244,26 @@ void * scheduler(void * stackPointer){
         PCB[lastSelected]->stackPointer = stackPointer;
     int i;
 
-    for ( i=lastSelected+1; i!=lastSelected; i++ ){
+    for ( i=lastSelected+1; i!=lastSelected; i++){
         if ( i==MAX_SIZE_PCB){
             i=1;
             if ( i==lastSelected)
                 break;
         }
-        if ( PCB[i]->state==READY)
+        if ( PCB[i]->priority && PCB[i]->state==READY)
             break;
     }
+    if ( lastSelected==i )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
+        for ( i=lastSelected+1; i!=lastSelected; i++ ){
+            if ( i==MAX_SIZE_PCB){
+                i=1;
+                if ( i==lastSelected)
+                    break;
+            }
+            if ( PCB[i]->state==READY) // si pongo priority==0 => va a ser 1 comparacion +
+                                        // => lo evito total si ready y de prior 1, lo agarraria =
+                break;
+        }
 
     // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
@@ -252,7 +272,7 @@ void * scheduler(void * stackPointer){
     }
 
     
-    // Si es el =, se van a pisar => evi comparacion 
+    // Si es el =, se v an a pisar => evi comparacion 
      // SI proceso no fue ni bloqueado ni terminado
     if ( PCB[lastSelected]->state == RUNNING ){
         PCB[lastSelected]->state = READY;
@@ -378,7 +398,11 @@ int getPriority(int pid){
 
 int getAllProcessInfo(stat * arrayStats){
     // no incluimos al halt
-    int j=0,i;
+    int j=0,i,aux;
+
+    aux = PCB[lastSelected]->priority;
+    PCB[lastSelected]->priority = 2;
+
     for ( i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state != TERMINATED ) {
             arrayStats[j]->name = PCB[i]->name;
@@ -389,5 +413,6 @@ int getAllProcessInfo(stat * arrayStats){
             arrayStats[j++]->isForeground = PCB[i]->isForeground;
         }
     }
+    
     return j; 
 }

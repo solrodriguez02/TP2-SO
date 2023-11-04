@@ -33,7 +33,7 @@ typedef struct processStackCDT{
 } processStackCDT;
 
 // debe terminar en NULL
-char * array[4];
+
 
 // le paso el puntero a funcion asm para que pushee al stack
 typedef processStackCDT * processStackADT;
@@ -59,7 +59,6 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     
     *rdi = argc;
     *rsi = argv; 
-    array[0] = "Vengo del execve"; 
 
     p->rflags = (void *) RFLAGS;
     p->rip = ptrFunction; 
