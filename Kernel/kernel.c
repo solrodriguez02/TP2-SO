@@ -4,9 +4,9 @@
 #include <videodriver.h>
 #include <naiveConsole.h>
 #include <idtLoader.h>
-#include "MemoryManager.h"
-#include "scheduler.h" 
-#include "manageProcess.h"
+#include <MemoryManager.h>
+#include <scheduler.h>
+#include <manageProcess.h>
 #include <interrupts.h>
 
 extern uint8_t text;

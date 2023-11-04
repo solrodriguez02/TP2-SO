@@ -3,7 +3,7 @@
 #include <videodriver.h>
 #include <pipes.h>
 
-extern buffer;
+extern char buffer;
 /**
  * @brief Lee del buffer correspondiente al fd 
  * 
@@ -14,7 +14,7 @@ int read(int fd, char * placeholder, int count){
 
     // ya fuerza interrup 
     //blockProcess(RUNNING_PROCESS, BLOCKBYREAD);
-    blockRunningProcess(BLOCKBYREAD,count,fd);
+    blockRunningProcess(BLOCKBYREAD,count, fd);
 
     // ojo con los EOF!
     if ( buf == &buffer)

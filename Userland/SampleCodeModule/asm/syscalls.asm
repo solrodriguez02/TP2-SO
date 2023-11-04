@@ -18,8 +18,13 @@ GLOBAL syscall_update_priority
 GLOBAL syscall_get_priority
 GLOBAL syscall_yield
 GLOBAL syscall_waitChildren
-GLOBAL syscall_createPipe
 GLOBAL syscall_getAllProcessInfo
+GLOBAL syscall_createPipe
+GLOBAL syscall_openSem
+GLOBAL syscall_getSemValue
+GLOBAL syscall_waitSem
+GLOBAL syscall_postSem
+GLOBAL syscall_closeSem
 
 section .text
 
@@ -202,6 +207,47 @@ syscall_waitChildren:
 syscall_createPipe:
 	pushf
 	mov rdi, 24
+	int 80h
+	popf
+	ret
+
+syscall_openSem:
+	pushf
+	mov rdx, rsi   ; el segundo argumento que se pasa (en rsi) es el 
+	mov rsi, rdi   ; en rsi hay que pasar la cadena de cracteres a imprimirse, la cual es el primer parametro que se encuentra en rdi
+    mov rdi, 25     ; syscall for write	mov rdi, 25
+	int 80h
+	popf
+	ret
+
+syscall_getSemValue:
+	pushf
+	mov rsi, rdi
+	mov rdi, 26
+	int 80h
+	popf
+	ret
+
+syscall_waitSem:
+	pushf
+	mov rsi, rdi
+	mov rdi, 27
+	int 80h
+	popf
+	ret
+
+syscall_postSem:
+	pushf
+	mov rsi, rdi
+	mov rdi, 28
+	int 80h
+	popf
+	ret
+
+syscall_closeSem:
+	pushf
+	mov rsi, rdi
+	mov rdi, 29
 	int 80h
 	popf
 	ret
