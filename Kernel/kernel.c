@@ -87,7 +87,7 @@ int main() {
 	createMemoryManager();
 	
 	initializeScheduler();
-	
+//	initializeSems();
 	//Elige escribir directo en pantalla.
 	setScreenBuffer(1);	
 	drawTopLine();

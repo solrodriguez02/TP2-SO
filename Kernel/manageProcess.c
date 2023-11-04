@@ -38,6 +38,13 @@ uint16_t lastSemCreated = 0;
 
 sem_ptr sems[MAX_SEM_PER_PROCESS * MAX_SIZE_PCB];
 
+void initializeSems(){
+    int i;
+    for (i = 0; i < MAX_SEM_PER_PROCESS * MAX_SIZE_PCB; i++){
+        sems[i] = allocMemory(sizeof(sem_ptr));
+    }
+}
+
 // debe terminar en NULL
 char * array[4];
 

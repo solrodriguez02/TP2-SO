@@ -137,3 +137,11 @@ int strCmp(const char* s1, const char* s2){
     }
     return 1;
 }
+
+int strlen(const char * str){
+    int i=0;
+    while(str[i]!='\0') {
+        i++;
+    }
+    return i;
+}

@@ -1,19 +1,20 @@
 #include <semaphore.h>
 #include <MemoryManager.h>
+#include <lib.h>
 #include <sync.h>
 #include <scheduler.h>
-
+#define MAX_LEN_NAME 40
 typedef struct sem_t{
-    char * name;
     int lockMutex;
     int value;
+    char name[MAX_LEN_NAME];
 };
 
 //para wrapper en syscall;
 
 sem_ptr createSem(char * name, int value){
     sem_ptr sem = allocMemory(sizeof(struct sem_t));
-    sem->name = name;
+    memcpy(sem->name, name, strlen(name));
     sem->value = value;
     sem->lockMutex = 0;
     return sem;

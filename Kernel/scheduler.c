@@ -77,6 +77,7 @@ void tryToUnlockPipe(int dim){
     }
 }
 
+
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
@@ -115,6 +116,7 @@ int addSemToPCB(char * name, int pid){
     for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if (PCB[pcbIndex]->sems[i] == NULL){
             PCB[pcbIndex]->sems[i] = name;
+            PCB[pcbIndex]->lastSemOpen++;
             return 0;
         }
     }
