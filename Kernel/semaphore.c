@@ -36,6 +36,7 @@ void postSem(sem_ptr sem){
     enterRegion(&sem->lockMutex);
     if(sem->value <= 0){
         //tal vez sería mejor usar la info del struct del pipe especifico en vez de buscar (por ahi hay más de un pipe abierto entre distintos procesos)
+        //! tryToUnlockSem(); 
         tryToUnlockPipe(0);
     }
     sem->value++;

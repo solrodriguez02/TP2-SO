@@ -72,7 +72,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 20; i++){
+    for (int i = 0; i < 500; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -152,7 +152,7 @@ void execveNew( char ** params){
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt
     char * argv[1];
-    argv [0] = "mi pid es...";
+    argv [0] = modules[functionIndex-1].name;
     int pid = execve(modules[functionIndex-1].function, isForeground, 1, argv );
     
     nextPid = pid; 
@@ -245,18 +245,36 @@ void ps() {
     // podria sino hacer un malloc
     int MAX_PROCESS = 5;
     stat arrayStats[MAX_PROCESS];
-    getAllProcessInfo(arrayStats);
-    for ( int i=0; arrayStats[i]!= 0; i++ ){
+    int end = getAllProcessInfo(arrayStats);
+    for ( int i=0; i<end; i++ ){
         printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
         printf("\t Prioridad: %d", arrayStats[i]->priority);
         printf("\t Estado: ");
         printStatus(arrayStats[i]->pid);
         printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
-        printf("\t StackPointer: %d", arrayStats[i]->stackPointer );
-        printf("\t BasePointer: %d", arrayStats[i]->basePointer );
+        printf("\t StackPointer: %x", arrayStats[i]->stackPointer );
+        printf("\t BasePointer: %x", arrayStats[i]->basePointer );
     }
 
     //exit();
+}
+
+void yieldFun(){
+    print("AAAA", BLUE);
+    yield();   
+    print("BBBB", 0xFF0000);
+}
+
+void loop(){
+    while(1){
+        print("Hola soy Oscar", ORANGE );
+        //    syscall_wait(2);
+        //!  esta haciendo busy waiting!!! 
+        // => conviene usar int RTC
+        //  PERO q el lo desbloquee es costoso
+
+    }
+    printf("Me despido\n");
 }
 
 /**

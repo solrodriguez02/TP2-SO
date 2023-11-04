@@ -324,7 +324,7 @@ int deleteFromScheduler(uint16_t pid){
             deadChild(lastSelected);
             PCB[lastSelected]->state = TERMINATED;
             //* aca se sacaria al nodo de la lista y desp free
-            //freeMemory(PCB[lastSelected]->topMemAllocated);
+            freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
     }
@@ -334,7 +334,7 @@ int deleteFromScheduler(uint16_t pid){
             PCB[i]->state = TERMINATED;
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
-            //freeMemory(PCB[lastSelected]->topMemAllocated);
+            freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
         }
@@ -352,7 +352,7 @@ void changeFd(int index, int fd, void * buffer){
     PCB[index]->fds[fd] = buffer;
 }
 
-int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePointer, uint8_t isForeground){
+int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground){
     
     // creo halt
     if ( nextPid==0){
@@ -368,7 +368,7 @@ int addToScheduler(void * stackPointer, void * topMemAllocated, void * basePoint
     
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
-            PCB[i]->name = "Juan";
+            PCB[i]->name = name;
             PCB[i]->pid = nextPid++;
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
@@ -427,7 +427,7 @@ int getPriority(int pid){
     return -1;
 }
 
-void getAllProcessInfo(stat * arrayStats){
+int getAllProcessInfo(stat * arrayStats){
     // no incluimos al halt
     int j=0,i;
     for ( i=1; i<MAX_SIZE_PCB; i++){
@@ -440,5 +440,5 @@ void getAllProcessInfo(stat * arrayStats){
             arrayStats[j++]->isForeground = PCB[i]->isForeground;
         }
     }
-    arrayStats[j] = 0;
+    return j; 
 }
