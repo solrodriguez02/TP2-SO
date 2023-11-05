@@ -1,7 +1,7 @@
 #ifndef TIME_H
 #define TIME_H
 
-#define QUANTUM 500
+#define QUANTUM 1000
 
 void * timer_handler(void * stackPointer);
 

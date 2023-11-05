@@ -176,18 +176,6 @@ void signalHandler(int signal){
 
 void unblockProcess(int pid){
 
-    // saco: " pid == PCB[lastSelected]->pid || " pues si o si no va a estar
-    // corriendo si llame a unblock desde la shell
-    //* en reali ni las sysBlock lo llaman, pues ya el scheduler las agarra 
-    if ( pid == RUNNING ){
-            PCB[lastSelected]->state = READY;
-            PCB[lastSelected]->priority = 1;
-            // ni me preocupo en elim info de blockCDT, total solo
-            // se consulta cuando state== BLOCKED, => va a estar sobreescrita
-            forceTimerInt();
-            return;
-    }
-
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->state = READY;
@@ -198,15 +186,20 @@ void unblockProcess(int pid){
 }
 
 void updateTicks(int pid, int ticks){
+    int priority = 0;  
     if (!pid){
         PCB[lastSelected]->ticksBeforeBlock += ticks;
-        updatePriority(lastSelected, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+        priority = (PCB[lastSelected]->ticksBeforeBlock % QUANTUM) % 1;
+        updatePriority(0, priority);
+        //updatePriority(0, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
         return;
     }
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->ticksBeforeBlock += ticks;
-            updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+            priority = (PCB[i]->ticksBeforeBlock % QUANTUM) % 1;
+            updatePriority(i, priority);
+            //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
             return;
             // aviso q info espera en struct
         }
@@ -214,6 +207,10 @@ void updateTicks(int pid, int ticks){
 }
 
 void updatePriority(int pid, int priority){
+    if (!pid){
+            PCB[lastSelected]->priority = priority;
+            return;
+    }
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             PCB[i]->priority = priority;
@@ -275,15 +272,26 @@ void * scheduler(void * stackPointer){
         PCB[lastSelected]->stackPointer = stackPointer;
     int i;
 
-    for ( i=lastSelected+1; i!=lastSelected; i++ ){
+    for ( i=lastSelected+1; i!=lastSelected; i++){
         if ( i==MAX_SIZE_PCB){
             i=1;
             if ( i==lastSelected)
                 break;
         }
-        if ( PCB[i]->state==READY)
+        if ( PCB[i]->priority && PCB[i]->state==READY)
             break;
     }
+    if ( lastSelected==i )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
+        for ( i=lastSelected+1; i!=lastSelected; i++ ){
+            if ( i==MAX_SIZE_PCB){
+                i=1;
+                if ( i==lastSelected)
+                    break;
+            }
+            if ( PCB[i]->state==READY) // si pongo priority==0 => va a ser 1 comparacion +
+                                        // => lo evito total si ready y de prior 1, lo agarraria =
+                break;
+        }
 
     // retorno una direccion xq asm no tiene null
     if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
@@ -292,7 +300,7 @@ void * scheduler(void * stackPointer){
     }
 
     
-    // Si es el =, se van a pisar => evi comparacion 
+    // Si es el =, se v an a pisar => evi comparacion 
      // SI proceso no fue ni bloqueado ni terminado
     if ( PCB[lastSelected]->state == RUNNING ){
         PCB[lastSelected]->state = READY;
@@ -310,7 +318,8 @@ static void deadChild(uint16_t index){
     // obtengo padre
     int parent = PCB[index]->parentPid;
     PCB[parent]->countChildren--;
-    if ( PCB[parent]->state == BLOCKED && PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0)
+    if ( PCB[parent]->state == BLOCKED && ( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
+    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid ) )
         PCB[parent]->state = READY;
     // no fuerzo interrupt pues el hijo al morir la genera
 }
@@ -337,7 +346,6 @@ int deleteFromScheduler(uint16_t pid){
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
             freeMemory(PCB[lastSelected]->topMemAllocated);
-            forceTimerInt();
             return 0;
         }
     }
@@ -431,7 +439,11 @@ int getPriority(int pid){
 
 int getAllProcessInfo(stat * arrayStats){
     // no incluimos al halt
-    int j=0,i;
+    int j=0,i,aux;
+
+    aux = PCB[lastSelected]->priority;
+    PCB[lastSelected]->priority = 2;
+
     for ( i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state != TERMINATED ) {
             arrayStats[j]->name = PCB[i]->name;
@@ -442,5 +454,6 @@ int getAllProcessInfo(stat * arrayStats){
             arrayStats[j++]->isForeground = PCB[i]->isForeground;
         }
     }
+    
     return j; 
 }

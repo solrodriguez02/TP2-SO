@@ -43,6 +43,8 @@ int writePipe(pipeADT pipe, char * buffer, int size){
             postSem(pipe->numWrites);
         }
         if(pipe->writePos == BUFFER_SIZE){
+            //! no deberia bloquearse si llega a BUFFER_SIZE?
+            //! hasta q no se haga un read ?
             postSem(pipe->hasAccess);
             return i;
         }

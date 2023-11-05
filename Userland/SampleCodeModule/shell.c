@@ -81,7 +81,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 500; i++){
+    for (int i = 0; i < 15; i++){
         printf("--------------------------------------xxxxxxx------------");
     }
     printf("\nSobrevivi?");
@@ -365,7 +365,7 @@ void ps() {
         printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
         printf("\t Prioridad: %d", arrayStats[i]->priority);
         printf("\t Estado: ");
-        printStatus(arrayStats[i]->pid);
+        printStatus(arrayStats[i]->state);
         printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
         printf("\t StackPointer: %x", arrayStats[i]->stackPointer );
         printf("\t BasePointer: %x", arrayStats[i]->basePointer );
