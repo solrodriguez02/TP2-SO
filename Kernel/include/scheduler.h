@@ -12,6 +12,7 @@
 #define BLOCKBYIPC 5
 #define BLOCKBYUSER 6
 #define BLOCKBYWAITCHILDREN 7
+#define BLOCKBYWAITCHILD 8
 
 #define RUNNING 0
 #define READY 1 

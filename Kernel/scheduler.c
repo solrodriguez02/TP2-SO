@@ -318,7 +318,8 @@ static void deadChild(uint16_t index){
     // obtengo padre
     int parent = PCB[index]->parentPid;
     PCB[parent]->countChildren--;
-    if ( PCB[parent]->state == BLOCKED && PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0)
+    if ( PCB[parent]->state == BLOCKED && ( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
+    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid ) )
         PCB[parent]->state = READY;
     // no fuerzo interrupt pues el hijo al morir la genera
 }
