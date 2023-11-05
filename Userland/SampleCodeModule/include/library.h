@@ -2,7 +2,7 @@
 #define _LIBRARY_H_
 
 #include "sysWrappers.h"
-
+#include <stdint.h>
 
 #define WHITE 0xFF
 #define BACKGROUNG_COLOR 0x00
@@ -26,5 +26,12 @@ int strToNum(char* num);
 
 int strcmp (const char* s1, const char* s2);
 int strtok(char * s, char delim, char * array[], int arraySize);
+uint32_t GetUint();
+uint32_t GetUniform(uint32_t max);
+uint8_t memcheck(void *start, uint8_t value, uint32_t size);
+int64_t satoi(char *str);
+void bussy_wait(uint64_t n);
+void endless_loop();
+void endless_loop_print(uint64_t wait);
 
 #endif

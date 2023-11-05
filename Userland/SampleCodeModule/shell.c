@@ -26,6 +26,15 @@ typedef struct {
 module modules[TOTAL_MODULES];
 int modulesCount = 0;
 
+int getIndexModule(char * name){
+    for(int i=0; i<TOTAL_MODULES; i++) {
+        if (strcmp(modules[i].name,name)){
+            return i;
+        }
+    }
+    return -1;
+}
+
 /**
  * @brief Función que inicializa la Shell, y consulta constantemente acerca de qué módulo se desea correr.
  */
@@ -79,14 +88,6 @@ void enter(){
     exit();
 }
 
-static getIndexModule(char * name){
-    for(int i=0; i<TOTAL_MODULES; i++) {
-        if (strcmp(modules[i].name,name)){
-            return i;
-        }
-    }
-    return -1;
-}
 
 static void printStatus(int status){
     switch(status){
@@ -121,6 +122,92 @@ void killLastCreated(){
 }
 
 
+#define SEM_ID "sem"
+#define TOTAL_PAIR_PROCESSES 2
+
+int64_t global; // shared memory
+
+void slowInc(int64_t *p, int64_t inc) {
+  uint64_t aux = *p;
+  my_yield(); // This makes the race condition highly probable
+  aux += inc;
+  *p = aux;
+}
+
+uint64_t my_process_inc(uint64_t argc, char *argv[]) {
+  uint64_t n = 10;
+  int8_t inc = 1;
+  int8_t use_sem = 1;
+  /*
+  if (argc != 3)
+    return -1;
+
+  if ((n = satoi(argv[0])) <= 0)
+    return -1;
+  if ((inc = satoi(argv[1])) == 0)
+    return -1;
+  if ((use_sem = satoi(argv[2])) < 0)
+    return -1;
+*/
+  printf("entre al proceso");
+  if (use_sem)
+    if (!my_sem_open(SEM_ID, 1)) {
+      printf("test_sync: ERROR opening semaphore\n");
+      return -1;
+    }
+
+  uint64_t i;
+  for (i = 0; i < n; i++) {
+    if (use_sem)
+      my_sem_wait(SEM_ID);
+    slowInc(&global, inc);
+    if (use_sem)
+      my_sem_post(SEM_ID);
+  }
+
+  if (use_sem)
+    my_sem_close(SEM_ID);
+
+  return 0;
+}
+
+uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+  uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
+
+/*
+  if (argc != 2)
+    return -1;
+*/
+  char **argvDec = malloc(3 * sizeof(char *));
+  memcpy(argvDec[0], argv[0], strlen(argv[0]));
+  memcpy(argvDec[1], "-1", 2);
+  memcpy(argvDec[2], argv[1], strlen(argv[1]));
+  char **argvInc = malloc(3 * sizeof(char *));
+  memcpy(argvInc[0], argv[0], strlen(argv[0]));
+  memcpy(argvInc[1], "1", 1);
+  memcpy(argvInc[2], argv[1], strlen(argv[1]));
+
+
+  global = 0;
+  printf("starting test_sync\n");
+  uint64_t i;
+  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+    pids[i] = my_create_process("my_process_inc", 3, argvDec);
+    pids[i + TOTAL_PAIR_PROCESSES] = my_create_process("my_process_inc", 3, argvInc);
+  }
+
+  /*
+  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+    my_wait(pids[i]);
+    my_wait(pids[i + TOTAL_PAIR_PROCESSES]);
+  }
+  */
+
+  printf("Final value: %d\n", global);
+
+  return 0;
+}
+
 void killProcess(char ** params){
     int pid = strToNum(params[0]);
     if ( pid==0)
@@ -144,16 +231,19 @@ void updateProcessPriority(char ** params){
 void execveNew( char ** params){
     int functionIndex = strToNum(params[0]);
     char isForeground = strToNum(params[1]);
-
     if ( functionIndex < 1 || functionIndex > TOTAL_MODULES ){
         printf("Invalid module");
         return;
     }
+    char ** argv;
+    argv[0] = modules[functionIndex].name;
+    int argc = modules[functionIndex].numParams;
+    for (int i = 0; i < argc; i++){
+        argv[i+1] = params[i+2];
+    }
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt
-    char * argv[1];
-    argv [0] = modules[functionIndex-1].name;
-    int pid = execve(modules[functionIndex-1].function, isForeground, 1, argv );
+    int pid = execve(modules[functionIndex].function, isForeground, argc+1, argv );
     
     nextPid = pid; 
     nextPid++;
@@ -181,9 +271,34 @@ void enterBg(){
     execveNew(params);
 }
 
+void testSync(char ** params){
+    char * *argvExec;
+    argvExec = (char**) malloc(5 * sizeof(char *));
+    for (int i = 0; i < 5; i++){
+        argvExec[i] = (char*) malloc(40 * sizeof(char));
+    }
+    int index = getIndexModule("test_sync");
+    numToStr(index, 10, argvExec[0]);
+    memcpy(argvExec[1], "1", 1);
+    memcpy(argvExec[2], params[0], strlen(params[0]));
+    memcpy(argvExec[3], params[1], strlen(params[1]));
+    memcpy(argvExec[4], params[2], strlen(params[2]));
+    execveNew(argvExec);
+}
+
 void runWithPipe(char ** params){
-    char** params1 = { params[0], "0" };
-    char** params2 = { params[1], "0" };
+    char ** params1 = malloc(3 * sizeof(char *));
+    for (int i = 0; i < 2; i++){
+        params1[i] = (char*) malloc(40 * sizeof(char));
+    }
+    memcpy(params1[0], params[0], strlen(params[0]));
+    memcpy(params1[1], "0", 1);
+    char ** params2= malloc(3 * sizeof(char *));
+    for (int i = 0; i < 2; i++){
+        params2[i] = (char*) malloc(40 * sizeof(char));
+    }
+    memcpy(params2[0], params[1], strlen(params[0]));
+    memcpy(params2[1], "0", 1);
     syscall_createPipe();
     execveNew(params1);
     execveNew(params2);
@@ -311,6 +426,9 @@ void loadAllModules() {
     loadModule("waitSem", "Does the operation to the given sem", &waitSem, 1);
     loadModule("postSem", "Does the operation to the given sem", &postSem, 1);
     loadModule("closeSem", "Closes a sem for the current proccess", &closeSem, 1);
+    loadModule("testSync", "Tests sems. order n, use_sem, inc", &testSync, 3);
+    loadModule("test_sync", "Tests sems. order n, use_sem, inc", &test_sync, 3);
+    loadModule("my_process_inc", "Increments a global variable", &my_process_inc, 3);
 }
 
 /**

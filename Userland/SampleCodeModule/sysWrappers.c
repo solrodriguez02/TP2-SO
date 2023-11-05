@@ -103,11 +103,11 @@ void free(void * ptr){
 // -------------------------------------- PROCESSES ------------------------------------- //
 
 int getPid(){
-    return syscall_getpid();
+    return syscall_getPid();
 } 
 
 int getStatus(int pid){
-    return syscall_getstatus(pid);
+    return syscall_getStatus(pid);
 }
 
 int kill(int pid){

@@ -9,8 +9,8 @@ GLOBAL syscall_enableDoubleBuffer
 GLOBAL syscall_writeAt
 GLOBAL syscall_malloc
 GLOBAL syscall_free
-GLOBAL syscall_getpid
-GLOBAL syscall_getstatus
+GLOBAL syscall_getPid
+GLOBAL syscall_getStatus
 GLOBAL syscall_kill
 GLOBAL syscall_execve
 GLOBAL syscall_block
@@ -132,14 +132,14 @@ syscall_free:
 	popf
 	ret
 
-syscall_getpid:
+syscall_getPid:
 	pushf	
 	mov rdi, 15
 	int 80h
 	popf
 	ret
 
-syscall_getstatus:
+syscall_getStatus:
 	pushf
 	mov rsi, rdi
 	mov rdi, 16
