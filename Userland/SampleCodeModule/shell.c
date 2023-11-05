@@ -72,8 +72,16 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 15; i++){
-        printf("--------------------------------------xxxxxxx------------");
+    for (int i = 0; i < 350; i++){
+        print("--------------------------------------xxxxxxx------------",0xFF0000);
+    }
+    printf("\nSobrevivi?");
+    exit();
+}
+
+void enterOrange(){
+    for (int i = 0; i < 350; i++){
+        print("--------------------------------------xxxxxxx------------",ORANGE);
     }
     printf("\nSobrevivi?");
     exit();
@@ -161,7 +169,7 @@ void execveNew( char ** params){
     if (isForeground)
         waitChildren();
     if (pid != -1){
-        printf("\nproceso enter creado con pid: %d", pid);
+        printf("proceso enter creado con pid: %d", pid);
     }else{
         printf("\ncreacion de proceso fallido");
     }
@@ -181,6 +189,10 @@ void enterBg(){
     execveNew(params);
 }
 
+void bgOrange(){
+    char * params[2] = {"4", "0"};
+    execveNew(params);
+}
 void runWithPipe(char ** params){
     char** params1 = { params[0], "0" };
     char** params2 = { params[1], "0" };
@@ -291,6 +303,7 @@ void loadAllModules() {
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp, 0);
     loadModule("clear", "Clears the screen of the shell", &clear, 0);
     loadModule("enter", "Tests a loop of printf's",&enter, 0);
+    loadModule("orange", "Tests a loop of printf's",&enterOrange, 0);
     loadModule("getInputAndPrint", "Prints the values in STDIN",&getInputAndPrint, 0);
     loadModule("getPid", "Returns current process PID", &getCurrentPid, 0);
     loadModule("getstatus", "Gets the current status from process", &getDefinedStatus, 1);
@@ -298,6 +311,7 @@ void loadAllModules() {
     loadModule("k", "Kills the last-created process", &killLastCreated, 1);
     loadModule("fork", "Executes fork+execve for a given process", &execveNew, 2);
     loadModule("bgEnter", "Runs the program Enter in Background", &enterBg, 0);
+    loadModule("bgOrange", "Runs the program Enter in Background", &bgOrange, 0);
     loadModule("block", "Blocks a specific process", &blockProcess, 1);
     loadModule("b", "Blocks the last-created process", &blockLastCreated, 0);
     loadModule("getPriority", "Get priority from process", &getProcessPriority, 1);

@@ -17,6 +17,7 @@ extern void syscall_free(void * ptr);
 extern void syscall_yield();
 extern void syscall_waitChildren();
 extern int syscall_getAllProcessInfo();
+extern int syscall_kill(int pid);
 /*
 extern int syscall_getpid();
 extern int syscall_getstatus(int pid)

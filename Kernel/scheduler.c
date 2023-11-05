@@ -329,7 +329,8 @@ static void deadChild(uint16_t index){
 // Arranca en running pero despues siempre
 //* RUNNING asi se evita syscall getpid 
 int deleteFromScheduler(uint16_t pid){
-    
+    PCB[lastSelected]->priority = 1;
+
     if ( pid == lastSelected || pid == RUNNING){
             // aviso al padre
             deadChild(lastSelected);
@@ -345,7 +346,7 @@ int deleteFromScheduler(uint16_t pid){
             PCB[i]->state = TERMINATED;
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
-            freeMemory(PCB[lastSelected]->topMemAllocated);
+            freeMemory(PCB[i]->topMemAllocated);
             return 0;
         }
     }

@@ -25,8 +25,7 @@ EXTERN exceptionDispatcher
 EXTERN getStackBase
 EXTERN waitForEnter
 EXTERN getAltTouched
-EXTERN ticks_before_quantum
-EXTERN updateTicks
+EXTERN restartTicks
 
 section .text
 
@@ -112,13 +111,6 @@ section .text
 	iretq
 %endmacro
 
-%macro updateProcessTicks 0
-	call ticks_before_quantum
-	mov rdi, 0
-	mov rsi, rax
-	call updateTicks
-%endmacro
-
 _hlt:
 	sti
 	hlt
@@ -157,6 +149,7 @@ syscallsHandler:
 
 
 forceTimerInt:
+	call restartTicks
 	int 0x20
 	ret
 
@@ -222,11 +215,6 @@ _irq08Handler:
 	mov rdi, 8 ; numero de interrupción para el RTC (IRQ8)
 	call irqDispatcher
 
-	call ticks_before_quantum
-	mov rdi, 0
-	mov rsi, rax
-	call updateTicks
-	mov rax, 0
 	; signal pic EOI - Slave (End of Interrupt)
 	mov al, 20h
 	out 0xA0, al
