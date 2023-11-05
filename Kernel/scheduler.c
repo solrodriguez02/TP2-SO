@@ -138,6 +138,10 @@ int deleteSemFromPCB(char * name, int pid){
 }
 
 void blockProcess(int pid, uint16_t blockReason){
+    // doy prioridad para disminuir la posibilidad de que el proximo
+    // proceso que escoja el scheduler sea el que se quiere bloquear    
+    PCB[lastSelected]->priority = 1;
+    
     if ( pid == PCB[lastSelected]->pid || pid == RUNNING ){
             PCB[lastSelected]->state = BLOCKED;
             // aviso q info espera en struct
