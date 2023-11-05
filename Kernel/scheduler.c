@@ -55,6 +55,19 @@ typedef struct pcbEntryCDT * pcbEntryADT;
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
 // blockFunctions 
 
+// no tiene en cuenta el halt
+static inline int searchProcessByPid(uint16_t pid){
+    for(int i = 1; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            if ( PCB[i]->state == TERMINATED )
+                return -1;
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 void tryToUnlockRead(int dim ){
     for ( int i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYREAD
@@ -99,7 +112,7 @@ int comparePid(elemType elem1, elemType elem2){
 }
 */
 
-int getPCBIndex(int pid){
+inline int getPCBIndex(int pid){
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             return i;
@@ -150,14 +163,14 @@ void blockProcess(int pid, uint16_t blockReason){
             return;
     }
 
-    for (int i = 1; i < MAX_SIZE_PCB; i++){
+    int i = searchProcessByPid(pid);
         if (PCB[i]->pid == pid){
             PCB[i]->state = BLOCKED;
             // aviso q info espera en struct
             PCB[i]->blockedReasonCDT.blockReason = blockReason;
             return;
         }
-    }
+
 }
 
 int getForegroundPid(){
@@ -179,14 +192,13 @@ void signalHandler(int signal){
 
 
 void unblockProcess(int pid){
-
-    for (int i = 1; i < MAX_SIZE_PCB; i++){
-        if (PCB[i]->pid == pid){
-            PCB[i]->state = READY;
-            PCB[i]->priority = 1;
-            return;
-        }
+    int i = searchProcessByPid(pid);
+    
+    if (i > 0 ){
+        PCB[i]->state = READY;
+        PCB[i]->priority = 1;
     }
+    
 }
 
 void updateTicks(int pid, int ticks){
@@ -226,8 +238,8 @@ void updatePriority(int pid, int priority){
 
 void createNewPipe(int writePid, int readPid){
     pipeADT pipe = createPipe(writePid, readPid);
-    PCB[getPCBIndex(readPid)]->fds[0] = pipe->buffer;
-    PCB[getPCBIndex(writePid)]->fds[1] = pipe->buffer;
+    PCB[searchProcessByPid(readPid)]->fds[0] = pipe->buffer;
+    PCB[searchProcessByPid(writePid)]->fds[1] = pipe->buffer;
 }
 
 void initializeScheduler(){
@@ -320,13 +332,16 @@ void * scheduler(void * stackPointer){
 //* con lista, paso puntero a nodo
 static void deadChild(uint16_t index){
     // obtengo padre
-    int parent = PCB[index]->parentPid;
+    int parent = searchProcessByPid( PCB[index]->parentPid );
+    if ( parent<0 )
+        return;
     PCB[parent]->countChildren--;
     if ( PCB[parent]->state == BLOCKED && ( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
     ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid ) )
         PCB[parent]->state = READY;
     // no fuerzo interrupt pues el hijo al morir la genera
 }
+
 
 //flujo de estados:
 // INIT (PID = PARENTPID = 1)
@@ -359,6 +374,7 @@ int deleteFromScheduler(uint16_t pid){
 
 void copyFdFromParent(int index){
     for (int i = 0; i < 2; i++){
+                //! xq no lastSelected para saber index padre?
         PCB[index]->fds[i] = PCB[getPCBIndex(PCB[index]->parentPid)]->fds[i];
     }
 }
