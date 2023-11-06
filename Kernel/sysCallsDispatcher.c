@@ -168,8 +168,8 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             postSem(sem);
             return 0;
         case 29:
-            sem = getSemByName((char *)param1);
-            closeSem(sem);
+            closeSem((char *)param1);
+            //closeSem(sem);
             return 0;
     }
 	return 0;
