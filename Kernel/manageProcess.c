@@ -105,7 +105,7 @@ int openSem(char * name, int value){
 int closeSem(char * name){
     sem_ptr sem = getSemByName(name);
     if (sem){
-        destroySem(sem);
+        //destroySem(sem);
         deleteSemFromPCB(name, 0);
         return 0;
     }
