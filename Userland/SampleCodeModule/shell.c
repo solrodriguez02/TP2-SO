@@ -84,7 +84,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 50; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -264,7 +264,7 @@ void execveNew( char ** params){
     nextPid++;
     
     if (isForeground)
-        waitChildren();
+        waitChild(pid);
     
     /* Despues hay q sacar esto, solo dejar el mensaje de error*/
     if (pid != -1){
@@ -284,7 +284,7 @@ void getInputAndPrint(char ** params){
 }
 
 void enterBg(){
-    char * params[2] = {"2", "0"};
+    char * params[2] = {"2", "1"};
     execveNew(params);
 }
 

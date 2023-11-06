@@ -148,7 +148,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             waitChildren();
             break;
         case 24:
-            waitChild();
+            waitChild(param1);
             break;
         case 25:
             //syscall_openSem(char * name, int value)
