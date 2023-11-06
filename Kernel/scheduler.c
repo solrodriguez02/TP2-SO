@@ -249,7 +249,7 @@ void initializeScheduler(){
         
         // ya recervo espacio para todas las entradas de la tabla
         
-        int sizeEntry = 20 * 8; //sizeEntry = sizeof(pcbEntryCDT); //128
+        int sizeEntry = 20 * 8; //sizeEntry = sizeof(pcbEntryCDT); //128 = 15 *8 cm antes
         
         PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
         PCB[0]->state = TERMINATED;
