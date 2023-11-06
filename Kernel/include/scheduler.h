@@ -5,7 +5,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_SIZE_PCB 6
+#define MAX_SIZE_PCB 8
 #define SIZE_ENTRY 12
 #define BLOCKBYREAD 3
 #define BLOCKBYWRITE 4

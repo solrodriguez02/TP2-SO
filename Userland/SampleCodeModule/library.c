@@ -410,7 +410,7 @@ int64_t my_yield(){
 
 
 int64_t my_wait(int64_t pid){
-    syscall_waitChildren(pid);
+    syscall_waitChildren();
     return 0;
 }
 

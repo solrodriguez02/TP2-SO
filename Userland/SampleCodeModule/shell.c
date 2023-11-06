@@ -160,9 +160,9 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if ((use_sem = satoi(argv[2])) < 0)
     return -1;
 */
-  printf("entre al proceso");
+  printf("entre al proceso\n");
   if (use_sem)
-    if (!my_sem_open(SEM_ID, 1)) {
+    if (my_sem_open(SEM_ID, 1) == -1) {
       printf("test_sync: ERROR opening semaphore\n");
       exit();
     }
@@ -178,7 +178,8 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
   if (use_sem)
     my_sem_close(SEM_ID);
-
+  
+  printf("salio todo ok\n");
   exit();
 }
 
@@ -213,6 +214,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     my_wait(pids[i + TOTAL_PAIR_PROCESSES]);
   }
   */
+  //SI SE DEJA YA NO VUELVE A LA SHELL
+  //waitChildren();
 
   printf("Final value: %d\n", global);
 
@@ -250,9 +253,7 @@ void execveNew( char ** params){
     int argc = modules[functionIndex].numParams + 1;    //+1 x el nom
     char ** argv = malloc( argc*8 );  // calculo peor escenario
     argv[0] = modules[functionIndex].name;
-    argv[1] = "probanding";
-    printf("%s what", argv[1]);
-    for (int i = 1; i < argc; i++){
+    for (int i = 1; i <= argc; i++){
         argv[i] = params[i+1];
     }
     //int pid = execve(modules[functionIndex-1].function, isForeground);

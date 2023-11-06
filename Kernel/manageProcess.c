@@ -96,13 +96,10 @@ int openSem(char * name, int value){
         addSemToPCB(name, 0);
         return 0;
     }
-    return -1;
-    /*
     else{
         addSemToPCB(name, 0);
         return 0;
     }
-    */
 }
 
 int closeSem(char * name){
