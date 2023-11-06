@@ -77,7 +77,7 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     p->rip = ptrFunction; 
     p->cs = (void *) CS; 
 
-    return addToScheduler( p->rsp, argv[0], topMem, (char * )topMem + PROCESS_STACK_SIZE, isForeground );
+    return addToScheduler( p->rsp, argv[0], topMem, (char * )topMem + PROCESS_STACK_SIZE - 1, isForeground );
 }
 
 sem_ptr getSemByName(char * name){

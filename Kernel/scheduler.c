@@ -67,6 +67,14 @@ static inline int searchProcessByPid(uint16_t pid){
     return -1;
 }
 
+static inline int getPCBIndex(int pid){
+    for (int i = 0; i < MAX_SIZE_PCB; i++){
+        if (PCB[i]->pid == pid){
+            return i;
+        }
+    }
+    return -1;
+}
 
 void tryToUnlockRead(int dim ){
     for ( int i=1; i<MAX_SIZE_PCB; i++){
@@ -112,15 +120,6 @@ int comparePid(elemType elem1, elemType elem2){
 }
 */
 
-inline int getPCBIndex(int pid){
-    for (int i = 0; i < MAX_SIZE_PCB; i++){
-        if (PCB[i]->pid == pid){
-            return i;
-        }
-    }
-    return -1;
-}
-
 int addSemToPCB(char * name, int pid){
     int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
     if (pcbIndex == -1){
@@ -164,7 +163,7 @@ void blockProcess(int pid, uint16_t blockReason){
     }
 
     int i = searchProcessByPid(pid);
-        if (PCB[i]->pid == pid){
+        if ( i>0){
             PCB[i]->state = BLOCKED;
             // aviso q info espera en struct
             PCB[i]->blockedReasonCDT.blockReason = blockReason;
@@ -250,7 +249,8 @@ void initializeScheduler(){
         
         // ya recervo espacio para todas las entradas de la tabla
         
-        char sizeEntry = 15 * 8;  //sizeof(pcbEntryCDT); 
+        int sizeEntry = 20 * 8; //sizeEntry = sizeof(pcbEntryCDT); //128
+        
         PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
         PCB[0]->state = TERMINATED;
         
@@ -360,15 +360,15 @@ int deleteFromScheduler(uint16_t pid){
             return 0;
     }
 
-    for(int i = 1; i < MAX_SIZE_PCB; i++){
-        if (PCB[i]->pid == pid){
+    int i = searchProcessByPid(pid);
+        if (i > 0){
             PCB[i]->state = TERMINATED;
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
             freeMemory(PCB[i]->topMemAllocated);
             return 0;
         }
-    }
+    
     return -1;
 }
 
@@ -460,9 +460,8 @@ int getPriority(int pid){
 
 int getAllProcessInfo(stat * arrayStats){
     // no incluimos al halt
-    int j=0,i,aux;
-
-    aux = PCB[lastSelected]->priority;
+    int j=0,i;
+    
     PCB[lastSelected]->priority = 2;
 
     for ( i=1; i<MAX_SIZE_PCB; i++){
