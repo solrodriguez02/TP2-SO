@@ -11,6 +11,7 @@ void * timer_handler(void * stackPointer) {
 	
 	updateTicks(0, ticks );
 	if ( ticks% QUANTUM == 0 ) {
+		ticks++;
 		return scheduler( stackPointer );
 	}
 	ticks++;

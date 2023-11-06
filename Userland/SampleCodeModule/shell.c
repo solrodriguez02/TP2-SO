@@ -69,6 +69,9 @@ void loadModule(char * name, char * description, void (*function)(char** params)
     modulesCount++;
 }
 
+int64_t my_create_process(char *name, uint64_t argc, char *argv[]){
+    return execve( modules[getIndexModule(name)].function , 1, argc, argv);
+}
 
 void enter(){
     //while(1){
@@ -161,7 +164,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if (use_sem)
     if (!my_sem_open(SEM_ID, 1)) {
       printf("test_sync: ERROR opening semaphore\n");
-      return -1;
+      exit();
     }
 
   uint64_t i;
@@ -176,7 +179,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if (use_sem)
     my_sem_close(SEM_ID);
 
-  return 0;
+  exit();
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
@@ -213,7 +216,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   printf("Final value: %d\n", global);
 
-  return 0;
+    exit();
 }
 
 void killProcess(char ** params){
@@ -261,6 +264,8 @@ void execveNew( char ** params){
     
     if (isForeground)
         waitChildren();
+    
+    /* Despues hay q sacar esto, solo dejar el mensaje de error*/
     if (pid != -1){
         printf("proceso creado con pid: %d", pid);
     }else{

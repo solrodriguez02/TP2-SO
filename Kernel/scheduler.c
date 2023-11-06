@@ -201,18 +201,20 @@ void unblockProcess(int pid){
 }
 
 void updateTicks(int pid, int ticks){
-    int priority = 0;  
-    if (!pid){
-        PCB[lastSelected]->ticksBeforeBlock += ticks;
-        priority = (PCB[lastSelected]->ticksBeforeBlock % QUANTUM) % 1;
+    char priority = 0;  
+    if ( halt )
+        return;
+    if (!pid ){
+        PCB[lastSelected]->ticksBeforeBlock += ++ticks;
+        priority = QUANTUM / PCB[lastSelected]->ticksBeforeBlock;
         PCB[lastSelected]->priority = priority;
         //updatePriority(0, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
         return;
     }
     int i = searchProcessByPid(pid);
     if (i>0){
-        PCB[i]->ticksBeforeBlock += ticks;
-        priority = (PCB[i]->ticksBeforeBlock % QUANTUM) % 1;
+        PCB[i]->ticksBeforeBlock += ++ticks;
+        priority = QUANTUM / PCB[i]->ticksBeforeBlock;
         PCB[i]->priority = priority;
         //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
         return;
@@ -225,13 +227,14 @@ void updatePriority(int pid, int priority){
             PCB[lastSelected]->priority = priority;
             return;
     }
-    for (int i = 1; i < MAX_SIZE_PCB; i++){
-        if (PCB[i]->pid == pid){
-            PCB[i]->priority = priority;
-            return;
-            // aviso q info espera en struct
-        }
+
+    int i = searchProcessByPid(pid);
+    if (i>0){
+        PCB[i]->priority = priority;
+        return;
+        // aviso q info espera en struct
     }
+
 }
 
 void createNewPipe(int writePid, int readPid){
@@ -297,7 +300,7 @@ void * scheduler(void * stackPointer){
         if ( PCB[i]->priority && PCB[i]->state==READY)
             break;
     }
-    if ( lastSelected==i && (PCB[i]->state!=READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
+    if ( lastSelected==i && (PCB[i]->state>READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
         for ( i=lastSelected+1; i!=lastSelected; i++ ){
             if ( i==MAX_SIZE_PCB){
                 i=1;
@@ -324,7 +327,7 @@ void * scheduler(void * stackPointer){
     halt = 0; 
     PCB[i]->state = RUNNING;
     lastSelected = i;
-    
+    PCB[lastSelected]->ticksBeforeBlock = 0; 
 
     return PCB[lastSelected]->stackPointer;
 }

@@ -408,9 +408,6 @@ int64_t my_yield(){
     return 0;
 }
 
-int64_t my_create_process(char *name, uint64_t argc, char *argv[]){
-    return execve(getIndexModule(name), 1, argc, argv);
-}
 
 int64_t my_wait(int64_t pid){
     syscall_waitChildren(pid);

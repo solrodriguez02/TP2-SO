@@ -18,6 +18,12 @@ define pcb
     b deleteFromScheduler
 end
 
+define ticks
+    b updatePriority
+    b updateTicks
+    b ps
+end
+
 python
 
 # GDB dashboard - Modular visual interface for GDB in Python.
