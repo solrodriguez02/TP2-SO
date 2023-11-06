@@ -81,7 +81,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 350; i++){
+    for (int i = 0; i < 5; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -244,9 +244,11 @@ void execveNew( char ** params){
         return;
     }
     
-    int argc = modules[functionIndex].numParams + 1;
-    char * argv[argc];
+    int argc = modules[functionIndex].numParams + 1;    //+1 x el nom
+    char ** argv = malloc( argc*8 );  // calculo peor escenario
     argv[0] = modules[functionIndex].name;
+    argv[1] = "probanding";
+    printf("%s what", argv[1]);
     for (int i = 1; i < argc; i++){
         argv[i] = params[i+1];
     }
