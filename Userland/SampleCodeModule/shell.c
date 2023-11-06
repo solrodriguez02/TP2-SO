@@ -262,7 +262,7 @@ void execveNew( char ** params){
     if (isForeground)
         waitChildren();
     if (pid != -1){
-        printf("proceso enter creado con pid: %d", pid);
+        printf("proceso creado con pid: %d", pid);
     }else{
         printf("\ncreacion de proceso fallido");
     }
@@ -372,11 +372,17 @@ void blockProcess(char ** params){
     block(pid);
 }
 
+void psWrapper(){
+    char * params[2] = {"17", "1"};
+    execveNew(params);
+}
+
 void ps() {
     // podria sino hacer un malloc
     int MAX_PROCESS = 6;
     struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
+    // ps stackpointer queda = a su basepointer
     for ( int i=0; i<end; i++ ){
         printf("\nProcess %s with pid %d:\n", arrayStats[i].name, arrayStats[i].pid);
         printf("\t Prioridad: %d", arrayStats[i].priority);
@@ -387,7 +393,7 @@ void ps() {
         printf("\t BasePointer: %x", arrayStats[i].basePointer );
     }
 
-    //exit();
+    exit();
 }
 
 void yieldFun(){
@@ -436,7 +442,7 @@ void loadAllModules() {
     loadModule("yield", "Makes the current process stop it's quantum", &yield, 1);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
     loadModule("createPipe", "Creates a pipe between 2 arbitrary processes (for now)", &runWithPipe, 1);
-    loadModule("ps", "List all processes in executions with their states", &ps, 0);
+    loadModule("ps", "List all processes in execution with their states", &ps, 0);
     loadModule("openSem", "Opens a sem for the current proccess", &openSem, 2);
     loadModule("getSemValue", "Gets the curret value in a sem", &getSemValue, 1);
     loadModule("waitSem", "Does the operation to the given sem", &waitSem, 1);
@@ -447,7 +453,7 @@ void loadAllModules() {
     loadModule("my_process_inc", "Increments a global variable", &my_process_inc, 3);
     loadModule("bgOrange", "Runs the program Enter in Background", &bgOrange, 0);
     loadModule("orange", "Tests a loop of printf's",&enterOrange, 0);
-
+    loadModule("psExec", "Wrapper for ps", &psWrapper,0);
 }
 
 /**

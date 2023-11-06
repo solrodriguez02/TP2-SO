@@ -205,19 +205,18 @@ void updateTicks(int pid, int ticks){
     if (!pid){
         PCB[lastSelected]->ticksBeforeBlock += ticks;
         priority = (PCB[lastSelected]->ticksBeforeBlock % QUANTUM) % 1;
-        updatePriority(0, priority);
+        PCB[lastSelected]->priority = priority;
         //updatePriority(0, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
         return;
     }
-    for (int i = 1; i < MAX_SIZE_PCB; i++){
-        if (PCB[i]->pid == pid){
-            PCB[i]->ticksBeforeBlock += ticks;
-            priority = (PCB[i]->ticksBeforeBlock % QUANTUM) % 1;
-            updatePriority(i, priority);
-            //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
-            return;
-            // aviso q info espera en struct
-        }
+    int i = searchProcessByPid(pid);
+    if (i>0){
+        PCB[i]->ticksBeforeBlock += ticks;
+        priority = (PCB[i]->ticksBeforeBlock % QUANTUM) % 1;
+        PCB[i]->priority = priority;
+        //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
+        return;
+        // aviso q info espera en struct
     }
 }
 
@@ -237,6 +236,7 @@ void updatePriority(int pid, int priority){
 
 void createNewPipe(int writePid, int readPid){
     pipeADT pipe = createPipe(writePid, readPid);
+    //! falta chequeo de search = si ret -1
     PCB[searchProcessByPid(readPid)]->fds[0] = pipe->buffer;
     PCB[searchProcessByPid(writePid)]->fds[1] = pipe->buffer;
 }
@@ -297,7 +297,7 @@ void * scheduler(void * stackPointer){
         if ( PCB[i]->priority && PCB[i]->state==READY)
             break;
     }
-    if ( lastSelected==i )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
+    if ( lastSelected==i && (PCB[i]->state!=READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
         for ( i=lastSelected+1; i!=lastSelected; i++ ){
             if ( i==MAX_SIZE_PCB){
                 i=1;

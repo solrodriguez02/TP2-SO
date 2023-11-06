@@ -7,10 +7,14 @@ static unsigned long ticks = 0;
  * @brief Handler para la interrupción del Timer Tick. Incrementa constantemente el valor de ticks.
  */
 void * timer_handler(void * stackPointer) {
-	updateTicks(0, ticks_before_quantum());
-	if ( ticks% QUANTUM == 0 ) 
+	//updateTicks(0, ticks_before_quantum());
+	
+	updateTicks(0, ticks );
+	if ( ticks% QUANTUM == 0 ) {
 		return scheduler( stackPointer );
+	}
 	ticks++;
+
 	return stackPointer;
 }
 
