@@ -301,7 +301,7 @@ void testSync(char ** params){
     }
     int index = getIndexModule("test_sync");
     numToStr(index, 10, argvExec[0]);
-    memcpy(argvExec[1], "1", 1);
+    memcpy(argvExec[1], "0", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
     memcpy(argvExec[3], params[1], strlen(params[1]));
     memcpy(argvExec[4], params[2], strlen(params[2]));
@@ -385,7 +385,7 @@ void psWrapper(){
 
 void ps() {
     // podria sino hacer un malloc
-    int MAX_PROCESS = 6;
+    int MAX_PROCESS = 8;
     struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
     // ps stackpointer queda = a su basepointer
