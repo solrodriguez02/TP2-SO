@@ -255,17 +255,17 @@ void blockProcess(char ** params){
 
 void ps() {
     // podria sino hacer un malloc
-    int MAX_PROCESS = 5;
-    stat arrayStats[MAX_PROCESS];
+    int MAX_PROCESS = 6;
+    struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
     for ( int i=0; i<end; i++ ){
-        printf("\nProcess %s with pid %d:\n", arrayStats[i]->name, arrayStats[i]->pid);
-        printf("\t Prioridad: %d", arrayStats[i]->priority);
+        printf("\nProcess %s with pid %d:\n", arrayStats[i].name, arrayStats[i].pid);
+        printf("\t Prioridad: %d", arrayStats[i].priority);
         printf("\t Estado: ");
-        printStatus(arrayStats[i]->state);
-        printf("\t %ssta en foreground \n", (arrayStats[i]->isForeground)? "E":"NO e" );
-        printf("\t StackPointer: %x", arrayStats[i]->stackPointer );
-        printf("\t BasePointer: %x", arrayStats[i]->basePointer );
+        printStatus(arrayStats[i].state);
+        printf("\t %ssta en foreground \n", (arrayStats[i].isForeground)? "E":"NO e" );
+        printf("\t StackPointer: %x", arrayStats[i].stackPointer );
+        printf("\t BasePointer: %x", arrayStats[i].basePointer );
     }
 
     //exit();

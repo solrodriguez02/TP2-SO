@@ -5,7 +5,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MAX_SIZE_PCB 5
+#define MAX_SIZE_PCB 6
 #define SIZE_ENTRY 12
 #define BLOCKBYREAD 3
 #define BLOCKBYWRITE 4
@@ -49,6 +49,6 @@ void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);
 void createNewPipe(int writePid, int readPid);
-int getAllProcessInfo(stat * arrayStats);
+int getAllProcessInfo(stat arrayStats);
 int addSemToPCB(char * name, int pid);
 int deleteSemFromPCB(char * name, int pid);

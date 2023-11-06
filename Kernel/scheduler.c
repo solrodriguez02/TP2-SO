@@ -458,7 +458,7 @@ int getPriority(int pid){
     return -1;
 }
 
-int getAllProcessInfo(stat * arrayStats){
+int getAllProcessInfo(stat arrayStats){
     // no incluimos al halt
     int j=0,i;
     
@@ -466,12 +466,12 @@ int getAllProcessInfo(stat * arrayStats){
 
     for ( i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state != TERMINATED ) {
-            arrayStats[j]->name = PCB[i]->name;
-            arrayStats[j]->pid = PCB[i]->pid;
-            arrayStats[j]->state = PCB[i]->state;
-            arrayStats[j]->stackPointer = PCB[i]->stackPointer;
-            arrayStats[j]->basePointer = PCB[i]->basePointer;
-            arrayStats[j++]->isForeground = PCB[i]->isForeground;
+            arrayStats[j].name = PCB[i]->name;
+            arrayStats[j].pid = PCB[i]->pid;
+            arrayStats[j].state = PCB[i]->state;
+            arrayStats[j].stackPointer = PCB[i]->stackPointer;
+            arrayStats[j].basePointer = PCB[i]->basePointer;
+            arrayStats[j++].isForeground = PCB[i]->isForeground;
         }
     }
     
