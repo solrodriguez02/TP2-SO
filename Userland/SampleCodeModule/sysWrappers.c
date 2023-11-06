@@ -141,6 +141,10 @@ void waitChildren(){
     syscall_waitChildren();
 }
 
+void waitChild(int pid){
+    syscall_waitChildren( pid );
+}
+
 int getAllProcessInfo(stat arrayStats){
     return syscall_getAllProcessInfo( arrayStats);
 }

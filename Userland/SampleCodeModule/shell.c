@@ -201,7 +201,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
 
   global = 0;
-  printf("starting test_sync\n");
+  printf("starting test_sync nombre:%s arg1:%s, arg2:%s\n", argv[0], argv[1], argv[2]);
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
     pids[i] = my_create_process("my_process_inc", 3, argvDec);
@@ -254,7 +254,7 @@ void execveNew( char ** params){
     char ** argv = malloc( argc*8 );  // calculo peor escenario
     argv[0] = modules[functionIndex].name;
     for (int i = 1; i <= argc; i++){
-        argv[i] = params[i+1];
+        argv[i] = params[i];
     }
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt

@@ -148,8 +148,8 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             waitChildren();
             break;
         case 24:
-            createNewPipe(2,3);
-            return 0;
+            waitChild();
+            break;
         case 25:
             //syscall_openSem(char * name, int value)
             return openSem((char *)param1, param2);
@@ -170,6 +170,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 29:
             sem = getSemByName((char *)param1);
             closeSem(sem);
+            return 0;
+        case 30:
+            createNewPipe(2,3);
             return 0;
     }
 	return 0;

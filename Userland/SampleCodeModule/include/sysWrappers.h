@@ -42,6 +42,7 @@ void yield();
 void updatePriority(int pid);
 int getPriority(int pid);
 void waitChildren();
+void waitChild(int pid);
 int getAllProcessInfo(stat arrayStats);
 int64_t my_getpid();
 int64_t my_create_process(char *name, uint64_t argc, char *argv[]);

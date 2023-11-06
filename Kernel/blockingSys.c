@@ -46,3 +46,7 @@ int write( int fd, void * placeholder, int count){
 void waitChildren(){
     blockProcess(0,BLOCKBYWAITCHILDREN);   
 }
+
+void waitChild(int pid){
+    blockRunningProcess(BLOCKBYWAITCHILD, pid, 0x0);   
+}

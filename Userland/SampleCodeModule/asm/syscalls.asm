@@ -18,6 +18,7 @@ GLOBAL syscall_update_priority
 GLOBAL syscall_get_priority
 GLOBAL syscall_yield
 GLOBAL syscall_waitChildren
+GLOBAL syscall_waitChild
 GLOBAL syscall_getAllProcessInfo
 GLOBAL syscall_createPipe
 GLOBAL syscall_openSem
@@ -25,6 +26,7 @@ GLOBAL syscall_getSemValue
 GLOBAL syscall_waitSem
 GLOBAL syscall_postSem
 GLOBAL syscall_closeSem
+
 
 section .text
 
@@ -204,12 +206,14 @@ syscall_waitChildren:
 	popf
 	ret
 
-syscall_createPipe:
+syscall_waitChild:
 	pushf
-	mov rdi, 24
+	mov rsi, rdi
+	mov rdi, 23
 	int 80h
 	popf
 	ret
+
 
 syscall_openSem:
 	pushf
@@ -248,6 +252,13 @@ syscall_closeSem:
 	pushf
 	mov rsi, rdi
 	mov rdi, 29
+	int 80h
+	popf
+	ret
+
+syscall_createPipe:
+	pushf
+	mov rdi, 30
 	int 80h
 	popf
 	ret
