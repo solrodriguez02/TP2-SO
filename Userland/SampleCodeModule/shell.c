@@ -146,7 +146,7 @@ void slowInc(int64_t *p, int64_t inc) {
 }
 
 uint64_t my_process_inc(uint64_t argc, char *argv[]) {
-  uint64_t n = 10;
+  uint64_t n = 550;
   int8_t inc = 1;
   int8_t use_sem = 1;
   /*
@@ -191,11 +191,12 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     return -1;
 */
   char **argvDec = malloc(3 * sizeof(char *));
-  memcpy(argvDec[0], argv[0], strlen(argv[0]));
+  //memcpy(argvDec[0], argv[0], strlen(argv[0]));
+  argvDec[0] = argv[0];
   memcpy(argvDec[1], "-1", 2);
   memcpy(argvDec[2], argv[1], strlen(argv[1]));
   char **argvInc = malloc(3 * sizeof(char *));
-  memcpy(argvInc[0], argv[0], strlen(argv[0]));
+  argvInc[0] = argv[0];
   memcpy(argvInc[1], "1", 1);
   memcpy(argvInc[2], argv[1], strlen(argv[1]));
 
@@ -254,7 +255,7 @@ void execveNew( char ** params){
     char ** argv = malloc( argc*8 );  // calculo peor escenario
     argv[0] = modules[functionIndex].name;
     for (int i = 1; i <= argc; i++){
-        argv[i] = params[i];
+        argv[i] = params[i+1];
     }
     //int pid = execve(modules[functionIndex-1].function, isForeground);
     // comentado pues x ahora usamos isForeground para identif halt
