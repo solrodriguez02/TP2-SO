@@ -267,9 +267,9 @@ void execveNew( char ** params){
         waitChild(pid);
     
     /* Despues hay q sacar esto, solo dejar el mensaje de error*/
-    if (pid != -1){
-        printf("proceso creado con pid: %d", pid);
-    }else{
+    if (pid == -1){
+        //printf("proceso creado con pid: %d", pid);
+    //}else{
         printf("\ncreacion de proceso fallido");
     }
 }

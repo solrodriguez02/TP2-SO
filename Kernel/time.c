@@ -13,7 +13,7 @@ void * timer_handler(void * stackPointer) {
 	//updateTicks(0, ticks );
 	mod = ticks% QUANTUM; 
 	if ( mod == 0 || forced ) {
-		updatePriority(0,mod);
+		updateRunningPriority(0,mod);
 		ticks++;
 		forced = 0;
 		return scheduler( stackPointer );
