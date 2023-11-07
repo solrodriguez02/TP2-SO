@@ -209,7 +209,7 @@ syscall_waitChildren:
 syscall_waitChild:
 	pushf
 	mov rsi, rdi
-	mov rdi, 23
+	mov rdi, 24
 	int 80h
 	popf
 	ret

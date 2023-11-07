@@ -142,7 +142,7 @@ void waitChildren(){
 }
 
 void waitChild(int pid){
-    syscall_waitChildren( pid );
+    syscall_waitChild( pid );
 }
 
 int getAllProcessInfo(stat arrayStats){
