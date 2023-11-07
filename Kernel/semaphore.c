@@ -1,6 +1,7 @@
 #include <semaphore.h>
 #include <MemoryManager.h>
 #include <lib.h>
+#include <interrupts.h>
 #include <sync.h>
 #include <scheduler.h>
 #define MAX_LEN_NAME 40
@@ -22,24 +23,24 @@ sem_ptr createSem(char * name, int value){
 
 void waitSem(sem_ptr sem){
     enterRegion(&sem->lockMutex);
-    if(sem->value == 0){
-        leaveRegion(&sem->lockMutex);
-        blockProcess(0, BLOCKBYIPC);
-        sem->value--;
-    }
-    else{
-        sem->value--;
-    }
+    while (1){
+        if (sem->value == 0){
+            blockRunningProcess(BLOCKBYIPC, 0, &sem->lockMutex);
+            enterRegion(&sem->lockMutex);
+            //leave_region(&sem->lockMutex);
+            //sem->value--;
+        }
+        else{
+            break;
+            //sem->value--;
+        }
+    }   
+    sem->value--;
     leaveRegion(&sem->lockMutex);
 }
 
 void postSem(sem_ptr sem){
     enterRegion(&sem->lockMutex);
-    if(sem->value <= 0){
-        //tal vez sería mejor usar la info del struct del pipe especifico en vez de buscar (por ahi hay más de un pipe abierto entre distintos procesos)
-        //! tryToUnlockSem(); 
-        tryToUnlockPipe(0);
-    }
     sem->value++;
     leaveRegion(&sem->lockMutex);
 }

@@ -5,6 +5,8 @@
 #include <semaphore.h>
 #include <videodriver.h>
 #include <pipes.h>
+#include <semaphore.h>
+#include <sync.h>
 
 #define KERNEL_STACK_BASE 0x352000 
 
@@ -89,7 +91,12 @@ void tryToUnlockRead(int dim ){
 }
 
 void tryToUnlockPipe(int dim){
-    for(int i=lastSelected; i<MAX_SIZE_PCB; i++){
+    for(int i=lastSelected+1; i != lastSelected; i++){
+        if ( i==MAX_SIZE_PCB){
+            i=1;
+            if ( i==lastSelected)
+                break;
+        }        
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
             && PCB[i]->blockedReasonCDT.size <= dim ){
                 PCB[i]->state = READY;
@@ -103,6 +110,9 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
+    if (blockReason == BLOCKBYIPC){
+        leave_region(waitingBuf);
+    }
     PCB[lastSelected]->blockedReasonCDT.size = size;
     PCB[lastSelected]->blockedReasonCDT.waitingBuf = waitingBuf;
     forceTimerInt();
