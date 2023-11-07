@@ -133,11 +133,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             }
             break;
         case 20:
-            if (getPriority(param1)== 0){
-                updatePriority(param1, 1);
-            }else{
-                updatePriority(param1, 0);
-            }
+            updatePriority(param1, param2);
             break;
         case 21:
             return getPriority(param1);

@@ -178,6 +178,7 @@ syscall_block:
 
 syscall_update_priority:
 	pushf
+	mov rdx, rsi
 	mov rsi, rdi
 	mov rdi, 20
 	int 80h

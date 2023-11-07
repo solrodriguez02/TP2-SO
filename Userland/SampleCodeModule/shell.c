@@ -92,8 +92,9 @@ void enter(){
 }
 
 void enterOrange(){
-    for (int i = 0; i < 350; i++){
-        print("--------------------------------------xxxxxxx------------",ORANGE);
+    int i; 
+    for ( i = 0; i < 350; i++){
+        print("--------------------------------------xxxxxxx------------",ORANGE + nextPid);
     }
     printf("\nSobrevivi?");
     exit();
@@ -238,7 +239,9 @@ void getProcessPriority(char ** params){
 
 void updateProcessPriority(char ** params){
     int pid = strToNum(params[0]);
-    updatePriority(pid);
+    int prior = strToNum(params[1]);
+    updatePriority(pid, prior);
+    printf("Se actualizo la prioridad del proceso con pid %d a %d", pid, prior);
 }
 
 
@@ -444,7 +447,7 @@ void loadAllModules() {
     loadModule("block", "Blocks a specific process", &blockProcess, 1);
     loadModule("b", "Blocks the last-created process", &blockLastCreated, 0);
     loadModule("getPriority", "Get priority from process", &getProcessPriority, 1);
-    loadModule("updatePriority", "Update priority from process", &updateProcessPriority, 2);
+    loadModule("nice", "Update priority from process", &updateProcessPriority, 2);
     loadModule("yield", "Makes the current process stop it's quantum", &yield, 1);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
     loadModule("createPipe", "Creates a pipe between 2 arbitrary processes (for now)", &runWithPipe, 1);

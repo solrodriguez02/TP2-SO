@@ -243,12 +243,18 @@ void updateTicks(int pid, int ticks){
 
 //void updateRunningPriority, 
 void updateRunningPriority(int pid, unsigned mod){
-    PCB[lastSelected]->priority = QUANTUM - mod; 
+    if ( !PCB[lastSelected]->ticksBeforeBlock){
+        PCB[lastSelected]->priority = QUANTUM - mod; 
+    }
+    
+    PCB[lastSelected]->ticksBeforeBlock--;
+    return;
 }
 
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
+            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*2;
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -314,8 +320,6 @@ void * scheduler(void * stackPointer){
     // si lo pongo antes, hlt stack se va a guardar=> queda afuera del while
     if ( !halt ){
         PCB[lastSelected]->stackPointer = stackPointer;
-        // ya se actualizaron los ticks  
-        PCB[lastSelected]->ticksBeforeBlock = 0; 
     }
     int i;
 
