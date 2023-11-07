@@ -241,10 +241,10 @@ void updateTicks(int pid, int ticks){
     }
 }
 
-//void updateRunningPriority, 
 void updateRunningPriority(int pid, unsigned mod){
     if ( !PCB[lastSelected]->ticksBeforeBlock){
         PCB[lastSelected]->priority = QUANTUM - mod; 
+        return;
     }
     
     PCB[lastSelected]->ticksBeforeBlock--;
@@ -254,7 +254,7 @@ void updateRunningPriority(int pid, unsigned mod){
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
-            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*2;
+            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50;
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -262,6 +262,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
+        PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50;
         return;
         // aviso q info espera en struct
     }
