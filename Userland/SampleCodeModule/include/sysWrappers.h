@@ -1,5 +1,6 @@
 #include "syscalls.h"
-#include <stdio.h>
+#include <stdint.h>
+
 #define STDIN 0
 #define STDOUT 1
 

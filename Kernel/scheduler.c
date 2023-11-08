@@ -213,8 +213,6 @@ void unblockProcess(int pid){
 
 void updateTicks(int pid, int ticks){
     char priority = 0;  
-    if ( halt )
-        return;
     if (!pid ){
         PCB[lastSelected]->ticksBeforeBlock += ++ticks;
         priority = QUANTUM / PCB[lastSelected]->ticksBeforeBlock;
@@ -255,7 +253,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
-        PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50;
+        PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50*priority;
         return;
         // aviso q info espera en struct
     }

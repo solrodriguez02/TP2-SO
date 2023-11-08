@@ -1,6 +1,7 @@
 #include <shell.h>
 #include <library.h>
 #include <stdint.h>
+#include "philosophers.h"
 
 //! VAR SOLO USADA PARA TESTS
 static int nextPid=2;
@@ -84,7 +85,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 1020; i++){
+    for (int i = 0; i < 10; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -279,8 +280,8 @@ void execveNew( char ** params){
 
 void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
-    while (1){
-        char read = getChar();
+    char read; 
+    while ( (read = getChar()) != EOF){
         print("/", BLUE);
         print(&read, 0X00FF00);
     }
@@ -424,6 +425,10 @@ void loop(){
     printf("Me despido\n");
 }
 
+void initializePhiloWrapper(){
+    initializePhilo();
+}
+
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
  * faltan: 
@@ -463,7 +468,7 @@ void loadAllModules() {
     loadModule("my_process_inc", "Increments a global variable", &my_process_inc, 3);
     loadModule("bgOrange", "Runs the program Enter in Background", &bgOrange, 0);
     loadModule("orange", "Tests a loop of printf's",&enterOrange, 0);
-    loadModule("psExec", "Wrapper for ps", &psWrapper,0);
+    loadModule("philos", "Run philosophers", &initializePhiloWrapper,0);
 }
 
 /**

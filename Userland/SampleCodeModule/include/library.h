@@ -13,6 +13,7 @@
 #define SCREEN_HEIGHT 768
 #define SCREEN_WIDTH 1018
 #define COMMAND_MAX_SIZE 80
+#define EOF 0
 
 void getInput(char * buffer);
 
@@ -23,7 +24,7 @@ int printf(const char * format, ...);
 
 void numToStr(long int num, int base, char * buffer);
 int strToNum(char* num);
-
+void * memcpy(void * destination, const void * source, uint64_t length);
 int strcmp (const char* s1, const char* s2);
 int strtok(char * s, char delim, char * array[], int arraySize);
 uint32_t GetUint();
