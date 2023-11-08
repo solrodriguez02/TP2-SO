@@ -11,10 +11,18 @@ void * timer_handler(void * stackPointer) {
 	//updateTicks(0, ticks_before_quantum());
 	
 	//updateTicks(0, ticks );
-	mod = ticks% QUANTUM; 
-	if ( mod == 0 || forced ) {
-		updateRunningPriority(0,mod);
+	//mod = ticks% QUANTUM; 
+	if ( ticks == QUANTUM || forced ) {
+		updateRunningPriority(0,ticks);
+		/*
+		mod = ticks% QUANTUM; 
+		if ( mod == 0 || forced ) { 
+			...
+		if ( mod )
+			ticks += ticks % QUANTUM; 
 		ticks++;
+		*/
+		ticks = 0; 
 		forced = 0;
 		return scheduler( stackPointer );
 	}
@@ -33,8 +41,9 @@ int ticks_elapsed() {
 }
 
 void restartTicks(){
-	//ticks =0; 
+	//ticks =0; se hace solo xq entra al if x el forced
 	forced = 1;
+	//ticks += ticks % QUANTUM; 
 }
 
 

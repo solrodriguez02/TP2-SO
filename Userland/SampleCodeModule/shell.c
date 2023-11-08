@@ -373,6 +373,7 @@ void closeSem(char ** params){
 }
 
 void blockLastCreated (){
+    if ( nextPid > 2)
     block(nextPid-1); 
 }
 
@@ -402,7 +403,6 @@ void ps() {
         printf("\t BasePointer: %x", arrayStats[i].basePointer );
     }
 
-    exit();
 }
 
 void yieldFun(){

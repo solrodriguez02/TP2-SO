@@ -113,6 +113,7 @@ void tryToUnlockPipe(int dim){
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
     if ( blockReason == BLOCKBYWAITCHILD ){
         int indexChild = searchProcessByPid(size);
+        // chequea si es hijo 
         if ( indexChild<0 || PCB[indexChild]->parentPid != PCB[lastSelected]->pid)
         return;
     }
@@ -242,6 +243,7 @@ void updateTicks(int pid, int ticks){
 }
 
 void updateRunningPriority(int pid, unsigned mod){
+
     if ( !PCB[lastSelected]->ticksBeforeBlock){
         PCB[lastSelected]->priority = QUANTUM - mod; 
         return;
@@ -254,7 +256,7 @@ void updateRunningPriority(int pid, unsigned mod){
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
-            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50;
+            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*100*priority;
             PCB[lastSelected]->priority = priority;
             return;
     }

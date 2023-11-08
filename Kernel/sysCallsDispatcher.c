@@ -87,7 +87,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
                 write(param1, param2, param3);
             break;
         case 2:
-            restartTicks();
+            //restartTicks();
             drawNextLine();
             break;
         case 3:
