@@ -24,9 +24,7 @@
 #define STDIN 0
 #define STDOUT 1
 
-#define MAX_CHILDREN_PER_PROCESS 5
-
-#define TICKS_BEFORE_LOOSING_PRIOR QUANTUM*10
+#define TICKETS_BEFORE_LOOSING_PRIOR QUANTUM*QUANTUM*10
 
 typedef struct pcbEntryCDT * pcbEntryADT;
 
@@ -43,7 +41,6 @@ void blockProcess(int pid, uint16_t blockReason);
 
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf );
 void * getFdBuffer(int pid, int i);
-void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
 inline void updateRunningPriority(unsigned lastTicks);
 int getPriority(int pid);

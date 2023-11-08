@@ -34,7 +34,7 @@ typedef struct pcbEntryCDT
     char * sems[MAX_SEM_PER_PROCESS];
     blockedReasonCDT blockedReasonCDT; 
     uint8_t priority;
-    uint16_t ticksBeforeBlock;
+    uint16_t ticketsBeforeLoosingPrior;
     uint8_t isForeground;
     uint16_t countChildren;
     uint16_t lastSemOpen;
@@ -211,41 +211,21 @@ void unblockProcess(int pid){
     
 }
 
-void updateTicks(int pid, int ticks){
-    char priority = 0;  
-    if (!pid ){
-        PCB[lastSelected]->ticksBeforeBlock += ++ticks;
-        priority = QUANTUM / PCB[lastSelected]->ticksBeforeBlock;
-        PCB[lastSelected]->priority = priority;
-        //updatePriority(0, (int) ((PCB[lastSelected]->ticksBeforeBlock % QUANTUM) / QUANTUM));
-        return;
-    }
-    int i = searchProcessByPid(pid);
-    if (i>0){
-        PCB[i]->ticksBeforeBlock += ++ticks;
-        priority = QUANTUM / PCB[i]->ticksBeforeBlock;
-        PCB[i]->priority = priority;
-        //updatePriority(i, (int) ((PCB[i]->ticksBeforeBlock % QUANTUM) / QUANTUM));
-        return;
-        // aviso q info espera en struct
-    }
-}
-
 void updateRunningPriority(unsigned lastTicks){
 
-    if ( !PCB[lastSelected]->ticksBeforeBlock){
+    if ( !PCB[lastSelected]->ticketsBeforeLoosingPrior){
         PCB[lastSelected]->priority = QUANTUM - lastTicks; 
         return;
     }
     
-    PCB[lastSelected]->ticksBeforeBlock--;
+    PCB[lastSelected]->ticketsBeforeLoosingPrior--;
     return;
 }
 
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
-            PCB[lastSelected]->ticksBeforeBlock = TICKS_BEFORE_LOOSING_PRIOR*priority;
+            PCB[lastSelected]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*priority;
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -253,7 +233,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
-        PCB[i]->ticksBeforeBlock = TICKS_BEFORE_LOOSING_PRIOR*priority;
+        PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*priority;
         return;
         // aviso q info espera en struct
     }
@@ -450,7 +430,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->pid = nextPid++;
             PCB[i]->parentPid = PCB[lastSelected]->pid;
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
-            PCB[i]->ticksBeforeBlock = 0;
+            PCB[i]->ticketsBeforeLoosingPrior = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
             PCB[i]->blockedReasonCDT = resetBlock;

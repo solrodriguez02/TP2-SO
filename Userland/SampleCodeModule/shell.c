@@ -94,7 +94,7 @@ void enter(){
 
 void enterOrange(){
     int i; 
-    for ( i = 0; i < 350; i++){
+    for ( i = 0; i < 750; i++){
         print("--------------------------------------xxxxxxx------------",ORANGE + nextPid);
     }
     printf("\nSobrevivi?");
