@@ -15,7 +15,7 @@ extern char buffer;
 int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
-uint8_t halt=0;
+uint8_t halt=1;
 typedef struct blockedReasonCDT {
     uint8_t blockReason;
     uint16_t size;
@@ -59,6 +59,10 @@ pcbEntryADT PCB[MAX_SIZE_PCB];
 // blockFunctions 
 
 // no tiene en cuenta el halt
+/**
+ * @return retorna index del proceso si es que este
+ * existe / no termino
+ */
 static inline int searchProcessByPid(uint16_t pid){
     for(int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
@@ -108,12 +112,20 @@ void tryToUnlockPipe(int dim){
 
 
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
+    if ( blockReason == BLOCKBYWAITCHILD ){
+        int indexChild = searchProcessByPid(size);
+        // chequea si es hijo 
+        if ( indexChild<0 || PCB[indexChild]->parentPid != PCB[lastSelected]->pid)
+        return;
+    } else if ( blockReason == BLOCKBYWAITCHILDREN && !PCB[lastSelected]->countChildren )
+        return;
+
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
     if (blockReason == BLOCKBYIPC){
         leave_region(waitingBuf);
-    }
+    } 
     PCB[lastSelected]->blockedReasonCDT.size = size;
     PCB[lastSelected]->blockedReasonCDT.waitingBuf = waitingBuf;
     forceTimerInt();
@@ -221,8 +233,21 @@ void updateTicks(int pid, int ticks){
     }
 }
 
+void updateRunningPriority(int pid, unsigned mod){
+
+    if ( !PCB[lastSelected]->ticksBeforeBlock){
+        PCB[lastSelected]->priority = QUANTUM - mod; 
+        return;
+    }
+    
+    PCB[lastSelected]->ticksBeforeBlock--;
+    return;
+}
+
 void updatePriority(int pid, int priority){
+    //!  NO VA A IMPORTARRRR
     if (!pid){
+            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*100*priority;
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -230,6 +255,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
+        PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50;
         return;
         // aviso q info espera en struct
     }
@@ -303,8 +329,9 @@ void * scheduler(void * stackPointer){
     
     // GUARDA EL STACK  
     // si lo pongo antes, hlt stack se va a guardar=> queda afuera del while
-    if ( !halt )
+    if ( !halt ){
         PCB[lastSelected]->stackPointer = stackPointer;
+    }
     int i;
 
     for ( i=lastSelected+1; i!=lastSelected; i++){
@@ -343,7 +370,6 @@ void * scheduler(void * stackPointer){
     halt = 0; 
     PCB[i]->state = RUNNING;
     lastSelected = i;
-    PCB[lastSelected]->ticksBeforeBlock = 0; 
 
     return PCB[lastSelected]->stackPointer;
 }
@@ -415,7 +441,8 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
     }
 
     PCB[lastSelected]->countChildren++;
-    
+    blockedReasonCDT resetBlock;
+
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             PCB[i]->name = name;
@@ -425,6 +452,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->ticksBeforeBlock = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->state = READY;
+            PCB[i]->blockedReasonCDT = resetBlock;
             copyFdFromParent(i);
             for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
                 PCB[i]->sems[i] = NULL;
@@ -487,6 +515,7 @@ int getAllProcessInfo(stat arrayStats){
         if ( PCB[i]->state != TERMINATED ) {
             arrayStats[j].name = PCB[i]->name;
             arrayStats[j].pid = PCB[i]->pid;
+            arrayStats[j].priority = PCB[i]->priority;
             arrayStats[j].state = PCB[i]->state;
             arrayStats[j].stackPointer = PCB[i]->stackPointer;
             arrayStats[j].basePointer = PCB[i]->basePointer;

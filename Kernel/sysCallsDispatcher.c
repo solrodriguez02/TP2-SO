@@ -87,7 +87,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
                 write(param1, param2, param3);
             break;
         case 2:
-            restartTicks();
+            //restartTicks();
             drawNextLine();
             break;
         case 3:
@@ -133,11 +133,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             }
             break;
         case 20:
-            if (getPriority(param1)== 0){
-                updatePriority(param1, 1);
-            }else{
-                updatePriority(param1, 0);
-            }
+            updatePriority(param1, param2);
             break;
         case 21:
             return getPriority(param1);
@@ -148,8 +144,8 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             waitChildren();
             break;
         case 24:
-            createNewPipe((char **) param1, (char **) param2);
-            return 0;
+            waitChild(param1);
+            break;
         case 25:
             //syscall_openSem(char * name, int value)
             return openSem((char *)param1, param2);
@@ -170,6 +166,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 29:
             closeSem((char *)param1);
             //closeSem(sem);
+            return 0;
+        case 30:
+            createNewPipe((char **) param1, (char **) param2);
             return 0;
     }
 	return 0;

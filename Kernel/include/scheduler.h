@@ -43,6 +43,7 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
 void * getFdBuffer(int pid, int i);
 void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
+void updateRunningPriority(int pid, unsigned mod);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
 void tryToUnlockPipe(int dim );

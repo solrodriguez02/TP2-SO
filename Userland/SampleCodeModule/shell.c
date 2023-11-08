@@ -92,8 +92,9 @@ void enter(){
 }
 
 void enterOrange(){
-    for (int i = 0; i < 350; i++){
-        print("--------------------------------------xxxxxxx------------",ORANGE);
+    int i; 
+    for ( i = 0; i < 350; i++){
+        print("--------------------------------------xxxxxxx------------",ORANGE + nextPid);
     }
     printf("\nSobrevivi?");
     exit();
@@ -191,17 +192,18 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     return -1;
 */
   char **argvDec = malloc(3 * sizeof(char *));
-  memcpy(argvDec[0], argv[0], strlen(argv[0]));
+  //memcpy(argvDec[0], argv[0], strlen(argv[0]));
+  argvDec[0] = argv[0];
   memcpy(argvDec[1], "-1", 2);
   memcpy(argvDec[2], argv[1], strlen(argv[1]));
   char **argvInc = malloc(3 * sizeof(char *));
-  memcpy(argvInc[0], argv[0], strlen(argv[0]));
+  argvInc[0] = argv[0];
   memcpy(argvInc[1], "1", 1);
   memcpy(argvInc[2], argv[1], strlen(argv[1]));
 
 
   global = 0;
-  printf("starting test_sync\n");
+  printf("starting test_sync nombre:%s arg1:%s, arg2:%s\n", argv[0], argv[1], argv[2]);
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
     pids[i] = my_create_process("my_process_inc", 3, argvDec);
@@ -237,7 +239,9 @@ void getProcessPriority(char ** params){
 
 void updateProcessPriority(char ** params){
     int pid = strToNum(params[0]);
-    updatePriority(pid);
+    int prior = strToNum(params[1]);
+    updatePriority(pid, prior);
+    printf("Se actualizo la prioridad del proceso con pid %d a %d", pid, prior);
 }
 
 
@@ -263,12 +267,12 @@ void execveNew( char ** params){
     nextPid++;
     
     if (isForeground)
-        waitChildren();
+        waitChild(pid);
     
     /* Despues hay q sacar esto, solo dejar el mensaje de error*/
-    if (pid != -1){
-        printf("proceso creado con pid: %d", pid);
-    }else{
+    if (pid == -1){
+        //printf("proceso creado con pid: %d", pid);
+    //}else{
         printf("\ncreacion de proceso fallido");
     }
 }
@@ -284,7 +288,7 @@ void getInputAndPrint(char ** params){
 }
 
 void enterBg(){
-    char * params[2] = {"2", "0"};
+    char * params[2] = {"2", "1"};
     execveNew(params);
 }
 
@@ -301,7 +305,7 @@ void testSync(char ** params){
     }
     int index = getIndexModule("test_sync");
     numToStr(index, 10, argvExec[0]);
-    memcpy(argvExec[1], "1", 1);
+    memcpy(argvExec[1], "0", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
     memcpy(argvExec[3], params[1], strlen(params[1]));
     memcpy(argvExec[4], params[2], strlen(params[2]));
@@ -370,6 +374,7 @@ void closeSem(char ** params){
 }
 
 void blockLastCreated (){
+    if ( nextPid > 2)
     block(nextPid-1); 
 }
 
@@ -385,7 +390,7 @@ void psWrapper(){
 
 void ps() {
     // podria sino hacer un malloc
-    int MAX_PROCESS = 6;
+    int MAX_PROCESS = 8;
     struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
     // ps stackpointer queda = a su basepointer
@@ -399,7 +404,6 @@ void ps() {
         printf("\t BasePointer: %x", arrayStats[i].basePointer );
     }
 
-    exit();
 }
 
 void yieldFun(){
@@ -444,7 +448,7 @@ void loadAllModules() {
     loadModule("block", "Blocks a specific process", &blockProcess, 1);
     loadModule("b", "Blocks the last-created process", &blockLastCreated, 0);
     loadModule("getPriority", "Get priority from process", &getProcessPriority, 1);
-    loadModule("updatePriority", "Update priority from process", &updateProcessPriority, 2);
+    loadModule("nice", "Update priority from process", &updateProcessPriority, 2);
     loadModule("yield", "Makes the current process stop it's quantum", &yield, 1);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
     loadModule("createPipe", "Creates a pipe between 2 arbitrary processes (for now)", &runWithPipe, 1);
