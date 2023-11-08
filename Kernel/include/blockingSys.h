@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <interrupts.h>
-#include <scheduler.h>
 #include <keyboardDriver.h>
 
 int read(int fd, char * placeholder, int count);

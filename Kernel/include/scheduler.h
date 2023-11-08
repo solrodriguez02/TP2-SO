@@ -48,7 +48,7 @@ void tryToUnlockRead(int dim );
 void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);
-void createNewPipe(int writePid, int readPid);
+void createNewPipe(char ** params1, char ** params2);
 int getAllProcessInfo(stat arrayStats);
 int addSemToPCB(char * name, int pid);
 int deleteSemFromPCB(char * name, int pid);

@@ -4,7 +4,7 @@
 #define TOTAL_MODULES 29
 #define COMMAND_MIN_SIZE 4
 #define TIME_BUFF_SIZE 9
-#define MAX_NUM_ARGUMENTS 4
+#define MAX_NUM_ARGUMENTS 12
 
 void startShell();
 void loadModule(char * name, char * description, void (*function)(char** params), int numParams);

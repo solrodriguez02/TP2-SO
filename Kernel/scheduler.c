@@ -7,6 +7,7 @@
 #include <pipes.h>
 #include <semaphore.h>
 #include <sync.h>
+#include <blockingSys.h>
 
 #define KERNEL_STACK_BASE 0x352000 
 
@@ -117,18 +118,6 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
     PCB[lastSelected]->blockedReasonCDT.waitingBuf = waitingBuf;
     forceTimerInt();
 }
-
-// en realidad solo se llama cuando el user lo bloquea
-// => blockReason = BLOCKBYUSER
-//voy creando lista
-/*
-listADT processList;
-
-//creo funcion para comparar por id
-int comparePid(elemType elem1, elemType elem2){
-    return elem1->pid - elem2->pid;
-}
-*/
 
 int addSemToPCB(char * name, int pid){
     int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
@@ -247,21 +236,38 @@ void updatePriority(int pid, int priority){
 
 }
 
-void createNewPipe(int writePid, int readPid){
-    pipeADT pipe = createPipe(writePid, readPid);
-    //! falta chequeo de search = si ret -1
-    PCB[searchProcessByPid(readPid)]->fds[0] = pipe->buffer;
-    PCB[searchProcessByPid(writePid)]->fds[1] = pipe->buffer;
+void createNewPipe(char ** params1, char ** params2){
+//int execve(void * ptrFunction, char isForeground, int argc, char ** argv )
+// params {ptrFunction, isForeground, argc, argv..., ptrFunction, isForeground, argc, argv..., }
+    void * ptrfunction1 = (void *) params1[0];
+    char isForeground1 = (char) params1[1];
+    int argc1 = (int) params1[2];
+    char ** argv1 ;
+    for (int i = 0; i < argc1; i++){
+        argv1[i] = params1[3+i];
+    }
+    void * ptrfunction2 = params2[0];//3+argc1
+    char isForeground2 = params2[1];
+    int argc2 = params2[2];
+    char ** argv2 ;
+
+    for (int i = 0; i < argc2; i++){
+        argv2[i] = params2[i+3];
+    }
+  
+    pipeADT pipe = createPipe();
+    PCB[1]->fds[1] = pipe;
+    int pid1 = execve(ptrfunction1, isForeground1, argc1, argv1);
+    PCB[1]->fds[1] = BASEDIRVIDEO;
+    PCB[1]->fds[0] = pipe;
+    int pid2 = execve(ptrfunction2, isForeground2, argc2, argv2);
+    PCB[1]->fds[0] = &buffer;
 }
 
 void initializeScheduler(){
         nextPid = 0;
         lastSelected =0;
-        //processList = newList(comparePid);
-        
-        
-        // ya recervo espacio para todas las entradas de la tabla
-        
+       
         int sizeEntry = 20 * 8; //sizeEntry = sizeof(pcbEntryCDT); //128 = 15 *8 cm antes
         
         PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );

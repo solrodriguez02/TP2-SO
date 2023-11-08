@@ -206,6 +206,8 @@ syscall_waitChildren:
 
 syscall_createPipe:
 	pushf
+	mov rdx, rsi	
+	mov rsi, rdi	
 	mov rdi, 24
 	int 80h
 	popf

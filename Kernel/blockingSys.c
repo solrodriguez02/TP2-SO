@@ -1,6 +1,7 @@
 #include <blockingSys.h>
 #include <lib.h>
 #include <videodriver.h>
+#include <scheduler.h>
 #include <pipes.h>
 
 extern char buffer;
@@ -10,11 +11,12 @@ extern char buffer;
  */
 int read(int fd, char * placeholder, int count){
     
-    void * buf = getFdBuffer(0, fd);
+    void * buf = getFdBuffer(0, STDIN);
 
     // ya fuerza interrup 
     //blockProcess(RUNNING_PROCESS, BLOCKBYREAD);
-    blockRunningProcess(BLOCKBYREAD,count, fd);
+    if ( buf == &buffer)
+        blockRunningProcess(BLOCKBYREAD,count, fd);
 
     // ojo con los EOF!
     if ( buf == &buffer)

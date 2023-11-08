@@ -2,62 +2,62 @@
 #include "MemoryManager.h"
 #include <sync.h>
 
-void * createPipe(int writePid, int readPid){
+void * createPipe(){
     pipeADT pipe = allocMemory(sizeof(pipeCDT));
     pipe->buffer = allocMemory(BUFFER_SIZE);
-    pipe->numWrites = createSem("numWrites", 0);
-    pipe->hasAccess = createSem("numWrites", 1);
+    pipe->writesAvailable = createSem("numWrites", BUFFER_SIZE);
+    pipe->readsAvailable = createSem("numReads", 0);
+    pipe->hasAccess = createSem("hasAccess", 1);
     pipe->readPos = 0;
     pipe->writePos = 0;
-    pipe->readPid = readPid;
-    pipe->writePid = writePid;
     return pipe;
 }
 
 //se devuelve el numero de chars que fueron leidos
-int readPipe(pipeADT pipe, char * buffer, int size){
+void readPipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size){
-        waitSem(pipe->numWrites);
-        if( i ==0){
-            waitSem(pipe->hasAccess);
-        }
+        //priorizo que haya varios lectores
+        /* se maneja con semaforos
         if(pipe->readPos == pipe->writePos){
             postSem(pipe->hasAccess);
             return i;
         }
+        */
+        waitSem(pipe->readsAvailable);
+        waitSem(pipe->hasAccess);
         buffer[i] = pipe->buffer[pipe->readPos];
         pipe->readPos = (pipe->readPos + 1) % BUFFER_SIZE;
         i++;
+        postSem(pipe->writesAvailable);
+        postSem(pipe->hasAccess);
     }
-    postSem(pipe->hasAccess);
-    return i;
 }
 
-int writePipe(pipeADT pipe, char * buffer, int size){
+void writePipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size){
-        if( i ==0){
-            //se le da prioridad a un solo writer
-            waitSem(pipe->hasAccess);
-            postSem(pipe->numWrites);
-        }
+        /*
         if(pipe->writePos == BUFFER_SIZE){
             //! no deberia bloquearse si llega a BUFFER_SIZE?
             //! hasta q no se haga un read ?
             postSem(pipe->hasAccess);
             return i;
         }
+        */
+        waitSem(pipe->writesAvailable);
+        waitSem(pipe->hasAccess);
         pipe->buffer[pipe->writePos] = buffer[i];
         pipe->writePos = (pipe->writePos + 1) % BUFFER_SIZE;
         i++;
+        postSem(pipe->readsAvailable);
+        postSem(pipe->hasAccess);
     }
-    postSem(pipe->hasAccess);
-    return i;
 }
 
 void destroyPipe(pipeADT pipe){
-    destroySem(pipe->numWrites);
+    destroySem(pipe->readsAvailable);
+    destroySem(pipe->writesAvailable);
     destroySem(pipe->hasAccess);
     freeMemory(pipe->buffer);
     freeMemory(pipe);

@@ -2,10 +2,8 @@
 #include <scheduler.h>
 
 void enterRegion(int * lock){
-    int isBusy = enter_region(lock);
-    if (isBusy){
+    while (enter_region(lock)){
         blockProcess(0, BLOCKBYIPC);
-        enter_region(lock);
     }
 }
 

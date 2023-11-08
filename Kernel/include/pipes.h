@@ -7,7 +7,8 @@
 
 typedef struct pipeCDT {
     char * buffer;
-    sem_ptr numWrites;
+    sem_ptr writesAvailable;
+    sem_ptr readsAvailable;
     sem_ptr hasAccess;
     int readPos;
     int writePos;
@@ -17,7 +18,7 @@ typedef struct pipeCDT {
 
 typedef struct pipeCDT * pipeADT;
 
-void * createPipe(int writePid, int readPid);
-int writePipe(pipeADT pipe, char * buffer, int size);
-int readPipe(pipeADT pipe, char * buffer, int size);
+void * createPipe();
+void writePipe(pipeADT pipe, char * buffer, int size);
+void readPipe(pipeADT pipe, char * buffer, int size);
 void destroyPipe(pipeADT pipe);

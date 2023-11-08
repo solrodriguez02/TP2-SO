@@ -4,7 +4,7 @@
 
 //! VAR SOLO USADA PARA TESTS
 static int nextPid=2;
-
+int maxCantArg;
 #define RUNNING 0
 #define READY 1 
 #define BLOCKED 2
@@ -48,7 +48,7 @@ void startShell() {
         printf("\n");
         print("$ ", BLUE);
         getInput(input);
-        strtok(input,' ', command, MAX_NUM_ARGUMENTS);
+        maxCantArg = strtok(input,' ', command, MAX_NUM_ARGUMENTS);
         runModule(command);
     }
 }
@@ -84,7 +84,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 1020; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -146,7 +146,7 @@ void slowInc(int64_t *p, int64_t inc) {
 }
 
 uint64_t my_process_inc(uint64_t argc, char *argv[]) {
-  uint64_t n = 2000;
+  uint64_t n = 50000;
   int8_t inc = 1;
   int8_t use_sem = 1;
   /*
@@ -277,9 +277,10 @@ void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
     while (1){
         char read = getChar();
-        print("proceso get&print:", BLUE);
-        print(&read, 0XFF0000);
+        print("/", BLUE);
+        print(&read, 0X00FF00);
     }
+    exit();
 }
 
 void enterBg(){
@@ -433,7 +434,7 @@ void loadAllModules() {
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp, 0);
     loadModule("clear", "Clears the screen of the shell", &clear, 0);
     loadModule("enter", "Tests a loop of printf's",&enter, 0);
-    loadModule("getInputAndPrint", "Prints the values in STDIN",&getInputAndPrint, 0);
+    loadModule("print", "Prints the values in STDIN",&getInputAndPrint, 0);
     loadModule("getPid", "Returns current process PID", &getCurrentPid, 0);
     loadModule("getstatus", "Gets the current status from process", &getDefinedStatus, 1);
     loadModule("kill", "Kills a given process", &killProcess, 1);
@@ -476,7 +477,41 @@ void runModule(const char * input[]){
                 modules[i].function(1);
                 return;
             }
-            //debería pasarle el array de parametros y directamente que cada uno lo maneje a su gusto
+            int numParams1 = modules[i].numParams;
+            if (maxCantArg > numParams1 + 1){
+                int numParams2;
+                //debería pasarle el array de parametros y directamente que cada uno lo maneje a su gusto
+                if (strcmp(input[numParams1 + 1],"|")){
+                            char ** params1;
+                            params1 = malloc((4 + numParams1) * sizeof(char *));
+                            params1[0] = (char *) modules[i].function;
+                            params1[1] = (char *) 1;//foreground por ahora
+                            params1[2] = numParams1 + 1;
+                            params1[3] = modules[i].name;
+                            for (int j = 0; j < numParams1; j++){
+                                params1[j+4] = input[j+1];
+                            }
+                    for(int i=0;i<TOTAL_MODULES;i++){
+                        if (strcmp(modules[i].name,input[numParams1 + 2])){
+                            char ** params2;
+                            numParams2 = modules[i].numParams;
+                            params2 = malloc((4 + numParams2) * sizeof(char *));
+                            params2[0] = (char *) modules[i].function;//numParams1 + 4
+                            params2[1] = (char *) 1;//foreground por ahora
+                            params2[2] = numParams2 + 1;
+                            params2[3] = modules[i].name;
+                            for (int j = 0; j < numParams2; j++){
+                                params2[j+4] = input[j+numParams1+2];
+                            }
+                            syscall_createPipe(params1, params2);
+                            waitChildren();
+                            return;
+                        }
+                    }
+                    printf("Invalid command: for a list of available functionalities type 'help'");
+                    return;
+                }
+            }
             modules[i].function(&input[1]);
             return;
         }
