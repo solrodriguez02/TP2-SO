@@ -26,12 +26,14 @@
 
 #define MAX_CHILDREN_PER_PROCESS 5
 
+#define TICKS_BEFORE_LOOSING_PRIOR QUANTUM*10
+
 typedef struct pcbEntryCDT * pcbEntryADT;
 
 typedef struct statProcess * stat;
 
 void initializeScheduler();
-void * scheduler(void * stackPointer);
+void * scheduler(void * stackPointer, unsigned lastTicks);
 int deleteFromScheduler(uint16_t pid);
 int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground);
 int getPid();
@@ -43,7 +45,7 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
 void * getFdBuffer(int pid, int i);
 void updateTicks(int pid, int ticks);
 void updatePriority(int pid, int priority);
-void updateRunningPriority(int pid, unsigned mod);
+inline void updateRunningPriority(unsigned lastTicks);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
 void tryToUnlockPipe(int dim );

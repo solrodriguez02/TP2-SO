@@ -231,10 +231,10 @@ void updateTicks(int pid, int ticks){
     }
 }
 
-void updateRunningPriority(int pid, unsigned mod){
+void updateRunningPriority(unsigned lastTicks){
 
     if ( !PCB[lastSelected]->ticksBeforeBlock){
-        PCB[lastSelected]->priority = QUANTUM - mod; 
+        PCB[lastSelected]->priority = QUANTUM - lastTicks; 
         return;
     }
     
@@ -245,7 +245,7 @@ void updateRunningPriority(int pid, unsigned mod){
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
-            PCB[lastSelected]->ticksBeforeBlock = QUANTUM*100*priority;
+            PCB[lastSelected]->ticksBeforeBlock = TICKS_BEFORE_LOOSING_PRIOR*priority;
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -253,7 +253,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
-        PCB[lastSelected]->ticksBeforeBlock = QUANTUM*50*priority;
+        PCB[i]->ticksBeforeBlock = TICKS_BEFORE_LOOSING_PRIOR*priority;
         return;
         // aviso q info espera en struct
     }
@@ -306,7 +306,7 @@ void initializeScheduler(){
         }
 }
 
-void * scheduler(void * stackPointer){
+void * scheduler(void * stackPointer, unsigned lastTicks ){
     
     /* reinicio ticks en 
         + sysDispa sys block 
@@ -329,8 +329,11 @@ void * scheduler(void * stackPointer){
     // si lo pongo antes, hlt stack se va a guardar=> queda afuera del while
     if ( !halt ){
         PCB[lastSelected]->stackPointer = stackPointer;
+        updateRunningPriority(lastTicks);
     }
     int i;
+
+    
 
     for ( i=lastSelected+1; i!=lastSelected; i++){
         if ( i==MAX_SIZE_PCB){

@@ -1,9 +1,9 @@
 #include <time.h>
 #include <scheduler.h>
 
-static unsigned long ticks = 0;
+static unsigned ticks = 0;
 static char forced = 0;
-static unsigned mod =0;
+static unsigned lastTicks =0;
 /**
  * @brief Handler para la interrupción del Timer Tick. Incrementa constantemente el valor de ticks.
  */
@@ -13,7 +13,8 @@ void * timer_handler(void * stackPointer) {
 	//updateTicks(0, ticks );
 	//mod = ticks% QUANTUM; 
 	if ( ticks == QUANTUM || forced ) {
-		updateRunningPriority(0,ticks);
+		//updateRunningPriority(0,ticks);
+		lastTicks = ticks;
 		/*
 		mod = ticks% QUANTUM; 
 		if ( mod == 0 || forced ) { 
@@ -24,7 +25,7 @@ void * timer_handler(void * stackPointer) {
 		*/
 		ticks = 0; 
 		forced = 0;
-		return scheduler( stackPointer );
+		return scheduler( stackPointer, lastTicks );
 	}
 	ticks++;
 
