@@ -116,7 +116,9 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
         // chequea si es hijo 
         if ( indexChild<0 || PCB[indexChild]->parentPid != PCB[lastSelected]->pid)
         return;
-    }
+    } else if ( blockReason == BLOCKBYWAITCHILDREN && !PCB[lastSelected]->countChildren )
+        return;
+
     PCB[lastSelected]->state = BLOCKED;
     // aviso q info espera en struct
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
