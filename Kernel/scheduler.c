@@ -91,12 +91,31 @@ void tryToUnlockRead(int dim ){
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYREAD
             && PCB[i]->blockedReasonCDT.waitingBuf == STDIN ){
             
-                if ( PCB[i]->blockedReasonCDT.size == dim )
+                if ( PCB[i]->blockedReasonCDT.size == dim ){
                     PCB[i]->state = READY;
+                    //PCB[i]->priority = 1;
+                }
                 return;
         }
     }
 }
+
+void tryToUnlockSem(void * semLock){
+    for(int i=lastSelected+1; i != lastSelected; i++){
+        if ( i==MAX_SIZE_PCB){
+            i=1;
+            if ( i==lastSelected)
+                break;
+        }        
+        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
+            && PCB[i]->blockedReasonCDT.waitingBuf == semLock  ){
+                // PCB[i]->blockedReasonCDT.size <= dim
+                PCB[i]->state = READY;
+                return;
+        }
+    }
+}
+
 
 void tryToUnlockPipe(int dim){
     for(int i=lastSelected+1; i != lastSelected; i++){
@@ -444,8 +463,8 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->state = READY;
             PCB[i]->blockedReasonCDT = resetBlock;
             copyFdFromParent(i);
-            for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
-                PCB[i]->sems[i] = NULL;
+            for (int j = 0; j < MAX_SEM_PER_PROCESS; j++){
+                PCB[i]->sems[j] = NULL;
             }
             PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;

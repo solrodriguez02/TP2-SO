@@ -20,7 +20,7 @@
 #define TERMINATED 3
 
 #define MAX_FD_PER_PROCESS 4
-#define MAX_SEM_PER_PROCESS 2
+#define MAX_SEM_PER_PROCESS 5
 #define STDIN 0
 #define STDOUT 1
 
@@ -42,9 +42,10 @@ void blockProcess(int pid, uint16_t blockReason);
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf );
 void * getFdBuffer(int pid, int i);
 void updatePriority(int pid, int priority);
-inline void updateRunningPriority(unsigned lastTicks);
+void updateRunningPriority(unsigned lastTicks);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
+void tryToUnlockSem(void * semLock);
 void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);

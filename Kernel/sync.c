@@ -24,6 +24,7 @@ void enterRegion(int * lock){
 
 void leaveRegion(int * lock){
     leave_region(lock);
-    tryToUnlockPipe(0);
+    //tryToUnlockPipe(0);
+    tryToUnlockSem(lock);
     //no se vuelve a setear en 0 porque la idea es que al desbloquear el otro procesa corra desde donde quedo bloqueado
 }
