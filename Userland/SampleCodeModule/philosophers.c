@@ -70,9 +70,9 @@ void addPhilo(){
     numToStr(n,10,argv+10);                                     
     argv[1] = argv+10;
     pids[n] = execve(&philo, 1, 2, argv );
-    my_sem_wait(SEM_MUTEX_ID);
+    //my_sem_wait(SEM_MUTEX_ID);
     n++;
-    my_sem_post(SEM_MUTEX_ID);
+    //my_sem_post(SEM_MUTEX_ID);
 }
 
 
