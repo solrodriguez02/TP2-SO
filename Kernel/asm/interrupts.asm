@@ -176,10 +176,6 @@ _irq01Handler:
 	mov rax, 0	;limpio el registro para no alterar el valor en rax tras leer el byte del puerto 60h
 	in al, 60h 	;en la direccion 60h esta el scancode de la tecla que haya sido presionada
 
-;	cmp al, 38h ;scancode del left Alt: si se presiono alt guarda los registros, sino no
-;	jne .dontSaveR
-
-
     mov rsi, rax
 	mov rdi, 1 ; numero de interrupción para el teclado (IRQ1)
 	call irqDispatcher
