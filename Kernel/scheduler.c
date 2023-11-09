@@ -228,7 +228,7 @@ void updateRunningPriority(unsigned lastTicks){
 void updatePriority(int pid, int priority){
     //!  NO VA A IMPORTARRRR
     if (!pid){
-            PCB[lastSelected]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*priority;
+            PCB[lastSelected]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
             PCB[lastSelected]->priority = priority;
             return;
     }
@@ -236,7 +236,7 @@ void updatePriority(int pid, int priority){
     int i = searchProcessByPid(pid);
     if (i>0){
         PCB[i]->priority = priority;
-        PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*priority;
+        PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
         return;
         // aviso q info espera en struct
     }

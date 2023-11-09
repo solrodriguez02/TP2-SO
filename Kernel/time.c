@@ -47,6 +47,9 @@ void restartTicks(){
 	//ticks += ticks % QUANTUM; 
 }
 
+void completeQuantum(){
+	ticks = QUANTUM; 
+}
 
 int ticks_before_quantum(){
 	return ticks_elapsed()%QUANTUM;

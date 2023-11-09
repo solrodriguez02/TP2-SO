@@ -21,15 +21,14 @@ void initializePhilo(){
     printf("Preparo filosofos default\n");
     state = malloc(DEFAULT_NUM_PHILO*MORE_MEM_SPACE);
     if (my_sem_open(SEM_MUTEX_ID, 1) == -1) {
-      printf("test_sync: ERROR opening semaphore\n");
-      exit();
+      printf("initialize: ERROR opening semaphore\n");
+      return;
     }
+    updatePriority(0,15);
     for (int i=0; i<n; i++){
         char ** argv = malloc( ARGV_SIZE );
         argv[0] = PHILO_NAME;
-
-        numToStr(i,10,argv+10);    //!no se si lo va a tomar
-                                 // si lo desreferencio podria obtener i 
+        numToStr(i,10,argv+10);                                     
         argv[1] = argv+10;
         pids[i] = execve(&philo, 1, 2, argv );
     }
@@ -84,27 +83,25 @@ void philo(int argc, char ** argv){
       printf("test_sync: ERROR opening semaphore\n");
       exit();
     }
-    yield();
-    yield();
-    yield();
-    yield();
+    yield();    
     /* incorpora los sem */
     /* abro solo los sem q me importan */   
     /* o podria hacerlo siempre q vea los costados = muy ineficiente */
-    if (my_sem_open(semPhi[LEFT(i,n)], 0) == -1) {
-      printf("test_sync: ERROR opening semaphore\n");
-      exit();
-    }
-    if (my_sem_open(semPhi[RIGHT(i,n)], 0) == -1) {
-      printf("test_sync: ERROR opening semaphore\n");
-      exit();
-    }
-    
     if (my_sem_open(SEM_MUTEX_ID, 1) == -1) {
-      printf("test_sync: ERROR opening semaphore\n");
+      printf("philo %d: ERROR opening semaphore\n", i);
       exit();
     }
     
+    if (my_sem_open(semPhi[LEFT(i,n)], 0) == -1) {
+      printf("philo %d: ERROR opening semaphore\n", i);
+      exit();
+    }
+    
+    if (my_sem_open(semPhi[RIGHT(i,n)], 0) == -1) {
+      printf("philo %d: ERROR opening semaphore\n", i);
+      exit();
+    }
+        
     while ( 1 ){
         // thinks
         takeForks(i);
@@ -118,7 +115,9 @@ void philo(int argc, char ** argv){
 /* para poder imprimir */
 /* si o si deberia haber 1 comiendo */
 void eat(){
+    // sleep?
     yield();
+    // yield le va a dar prioridad
     my_sem_wait(SEM_MUTEX_ID);
     for ( int i=0; i<n; i++){
         if ( state[i]==EATING)
