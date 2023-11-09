@@ -19,10 +19,13 @@
 #define BLOCKED 2
 #define TERMINATED 3
 
-#define MAX_FD_PER_PROCESS 4
+#define MAX_FD_PER_PROCESS 2
 #define MAX_SEM_PER_PROCESS 5
 #define STDIN 0
 #define STDOUT 1
+
+#define MUTEX 0
+#define WAITING 1
 
 #define TICKETS_BEFORE_LOOSING_PRIOR QUANTUM*QUANTUM
 
@@ -45,7 +48,7 @@ void updatePriority(int pid, int priority);
 void updateRunningPriority(unsigned lastTicks);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );
-void tryToUnlockSem(void * semLock);
+void tryToUnlockSem(void * semLock, int reason);
 void tryToUnlockPipe(int dim );
 int getForegroundPid();
 void signalHandler(int signal);

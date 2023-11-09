@@ -22,6 +22,9 @@
 #define RDI_REL_POSITION 6 * SIZE_ADRESS // (QUEDO ARRIBA)
 #define RSI_REL_POSITION RDI_REL_POSITION - SIZE_ADRESS
 
+#define SIZE_ARRAY_SEMS MAX_SEM_PER_PROCESS * MAX_SIZE_PCB
+#define FREE 0x0
+
 typedef unsigned long long u_int64_t;
 
 typedef struct processStackCDT{
@@ -34,19 +37,9 @@ typedef struct processStackCDT{
     //align
 } processStackCDT;
 
-uint16_t lastSemCreated = 0;
+int lastSemCreated = -1;
 
-sem_ptr sems[MAX_SEM_PER_PROCESS * MAX_SIZE_PCB];
-
-void initializeSems(){
-    int i;
-    for (i = 0; i < MAX_SEM_PER_PROCESS * MAX_SIZE_PCB; i++){
-        sems[i] = allocMemory(sizeof(sem_ptr));
-    }
-}
-
-// debe terminar en NULL
-
+sem_ptr sems[SIZE_ARRAY_SEMS];
 
 // le paso el puntero a funcion asm para que pushee al stack
 typedef processStackCDT * processStackADT;
@@ -80,40 +73,74 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     return addToScheduler( p->rsp, argv[0], topMem, (char * )topMem + PROCESS_STACK_SIZE - 1, isForeground );
 }
 
+void haltProcess(){
+    
+    while(1){
+        _hlt();
+    }
+}
+
+/* -------------------------------- SEMAPHORES -------------------------------- */
+
 sem_ptr getSemByName(char * name){
     int i;
-    for (i = 0; i < lastSemCreated; i++){
-        if (strCmp(name, getSemName(sems[i]))){
+    for (i = 0; i < SIZE_ARRAY_SEMS; i++){
+        if ( sems[i]!=FREE && strCmp(name, getSemName(sems[i]))){
             return sems[i];
         }
     }
     return NULL;
 }
 
+int getSemIndex(sem_ptr sem){
+    for (int i = 0; i < SIZE_ARRAY_SEMS; i++){
+        if ( sems[i] == sem ){
+            return i;
+        }
+    }
+    return -1;    
+}
+
+void initializeSems(){
+    int i;
+    for (i = 0; i < SIZE_ARRAY_SEMS ; i++){
+        sems[i] = TERMINATED;
+    }
+}
+
+
 int openSem(char * name, int value){
-    if (getSemByName(name) == NULL){
-        sems[lastSemCreated++] = createSem(name, value);
-        addSemToPCB(name, 0);
+    int i;
+    sem_ptr sem = getSemByName(name);
+    if ( sem == NULL){
+        for ( i=lastSemCreated+1; i!=lastSemCreated; i++ ){
+            if ( i == SIZE_ARRAY_SEMS )
+                i=0;
+            if ( sems[i]==FREE )
+                break;
+        }
+        /* si no hay mas espacio disponible */
+        if ( i==lastSemCreated)
+            return -1; 
+        lastSemCreated = i;
+        sems[i] = createSem(name, value);
+    }
+    
+    if ( addSemToPCB(name, 0) == 0){
+        processConnected(sem);
         return 0;
     }
-    else{
-        addSemToPCB(name, 0);
-        return 0;
-    }
+    return -1;
 }
 
 int closeSem(char * name){
     sem_ptr sem = getSemByName(name);
     if (sem){
-        //destroySem(sem);
-        deleteSemFromPCB(name, 0);
+        if ( deleteSemFromPCB(name, 0)==0 && disconnectProcess(sem) == 0){
+                destroySem(sem);
+                sems[ getSemIndex(sem) ] = FREE;           
+        }
         return 0;
     }
     return -1;
-}
-void haltProcess(){
-    
-    while(1){
-        _hlt();
-    }
 }

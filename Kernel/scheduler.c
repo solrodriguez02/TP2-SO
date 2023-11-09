@@ -100,7 +100,7 @@ void tryToUnlockRead(int dim ){
     }
 }
 
-void tryToUnlockSem(void * semLock){
+void tryToUnlockSem(void * semLock, int reason){
     for(int i=lastSelected+1; i != lastSelected; i++){
         if ( i==MAX_SIZE_PCB){
             i=1;
@@ -108,8 +108,7 @@ void tryToUnlockSem(void * semLock){
                 break;
         }        
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
-            && PCB[i]->blockedReasonCDT.waitingBuf == semLock  ){
-                // PCB[i]->blockedReasonCDT.size <= dim
+            && PCB[i]->blockedReasonCDT.waitingBuf == semLock &&  PCB[i]->blockedReasonCDT.size == reason ){
                 PCB[i]->state = READY;
                 return;
         }
@@ -154,7 +153,7 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
 }
 
 int addSemToPCB(char * name, int pid){
-    int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
+    int pcbIndex = (pid != 0) ? searchProcessByPid(pid) : lastSelected;
     if (pcbIndex == -1){
         return -1;
     }
@@ -169,7 +168,7 @@ int addSemToPCB(char * name, int pid){
 }
 
 int deleteSemFromPCB(char * name, int pid){
-    int pcbIndex = (pid != 0) ? getPCBIndex(pid) : lastSelected;
+    int pcbIndex = (pid != 0) ? searchProcessByPid(pid) : lastSelected;
     if (pcbIndex == -1){
         return -1;
     }
@@ -427,7 +426,7 @@ int deleteFromScheduler(uint16_t pid){
 }
 
 void copyFdFromParent(int index){
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < MAX_FD_PER_PROCESS; i++){
                 //! xq no lastSelected para saber index padre?
         PCB[index]->fds[i] = PCB[getPCBIndex(PCB[index]->parentPid)]->fds[i];
     }
