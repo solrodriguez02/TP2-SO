@@ -24,7 +24,7 @@ void initializePhilo(){
       printf("initialize: ERROR opening semaphore\n");
       return;
     }
-    updatePriority(0,15);
+    updatePriority(0,10*DEFAULT_NUM_PHILO);
     for (int i=0; i<n; i++){
         char ** argv = malloc( ARGV_SIZE );
         argv[0] = PHILO_NAME;
@@ -63,13 +63,16 @@ void addPhilo(){
         memcpy(aux,semPhi,DEFAULT_NUM_PHILO*MORE_MEM_SPACE);
         free(semPhi);
         semPhi = aux2;
-        
     }
+    
     char ** argv = malloc( ARGV_SIZE );
-    argv[0] = "philo";
-    //!no se si lo va a tomar
-    argv[1] = (char) n++;
-    pids[n-1] = execve(&philo, 1, 2, argv );
+    argv[0] = PHILO_NAME;
+    numToStr(n,10,argv+10);                                     
+    argv[1] = argv+10;
+    pids[n] = execve(&philo, 1, 2, argv );
+    my_sem_wait(SEM_MUTEX_ID);
+    n++;
+    my_sem_post(SEM_MUTEX_ID);
 }
 
 
@@ -119,7 +122,7 @@ void philo(int argc, char ** argv){
 void eat(){
     // sleep?
     yield();
-    bussy_wait(WAIT);
+    bussy_wait(WAIT*2);
     // yield le va a dar prioridad
     my_sem_wait(SEM_MUTEX_ID);
     for ( int i=0; i<n; i++){

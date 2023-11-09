@@ -5,7 +5,7 @@
 #define HUNGRY 1
 #define EATING 2
 
-#define DEFAULT_NUM_PHILO 3
+#define DEFAULT_NUM_PHILO 5
 #define MORE_MEM_SPACE 20*8
 #define ARGV_SIZE 15
 
