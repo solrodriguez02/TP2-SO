@@ -85,7 +85,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 1000; i++){
+    for (int i = 0; i < 500; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -148,7 +148,7 @@ void slowInc(int64_t *p, int64_t inc) {
 }
 
 uint64_t my_process_inc(uint64_t argc, char *argv[]) {
-  uint64_t n = 50000;
+  uint64_t n = 5;
   int8_t inc = 1;
   int8_t use_sem = 1;
   /*
@@ -282,6 +282,8 @@ void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
     char read; 
     while ( (read = getChar()) != EOF){
+        bussy_wait(WAIT*100);
+        
         print("/", BLUE);
         print(&read, 0X00FF00);
     }
@@ -306,7 +308,7 @@ void testSync(char ** params){
     }
     int index = getIndexModule("test_sync");
     numToStr(index, 10, argvExec[0]);
-    memcpy(argvExec[1], "0", 1);
+    memcpy(argvExec[1], "1", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
     memcpy(argvExec[3], params[1], strlen(params[1]));
     memcpy(argvExec[4], params[2], strlen(params[2]));
@@ -513,7 +515,7 @@ void runModule(const char * input[]){
                                 params2[j+4] = input[j+numParams1+2];
                             }
                             syscall_createPipe(params1, params2);
-                            waitChildren();
+                            //waitChildren();
                             return;
                         }
                     }
