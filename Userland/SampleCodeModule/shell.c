@@ -85,7 +85,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 1000; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -93,9 +93,9 @@ void enter(){
 }
 
 void enterOrange(){
-    int i; 
+    int i, aux = nextPid; 
     for ( i = 0; i < 750; i++){
-        print("--------------------------------------xxxxxxx------------",ORANGE + nextPid);
+        print("--------------------------------------xxxxxxx------------",ORANGE << aux);
     }
     printf("\nSobrevivi?");
     exit();
@@ -289,7 +289,7 @@ void getInputAndPrint(char ** params){
 }
 
 void enterBg(){
-    char * params[2] = {"2", "1"};
+    char * params[2] = {"2", "0"};
     execveNew(params);
 }
 

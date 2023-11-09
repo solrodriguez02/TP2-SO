@@ -16,6 +16,9 @@ int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
 uint8_t halt=1;
+uint16_t lastNormal = 1; 
+uint16_t lastWithPrior = 1; 
+
 typedef struct blockedReasonCDT {
     uint8_t blockReason;
     uint16_t size;
@@ -313,31 +316,37 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
     }
     int i;
 
-    
-
-    for ( i=lastSelected+1; i!=lastSelected; i++){
+    for ( i=lastWithPrior+1; i!=lastWithPrior; i++){
         if ( i==MAX_SIZE_PCB){
             i=1;
-            if ( i==lastSelected)
+            if ( i==lastWithPrior)
                 break;
         }
-        if ( PCB[i]->priority && PCB[i]->state==READY)
+        if ( PCB[i]->priority && PCB[i]->state==READY){
             break;
+        }
     }
-    if ( lastSelected==i && (PCB[i]->state>READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
-        for ( i=lastSelected+1; i!=lastSelected; i++ ){
+
+    if ( i==lastWithPrior && ( i!=lastSelected || PCB[lastSelected]->state > READY)) {
+    //if (  lastSelected==i && (PCB[i]->state>READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
+        for ( i=lastNormal+1; i!=lastNormal; i++ ){
             if ( i==MAX_SIZE_PCB){
                 i=1;
-                if ( i==lastSelected)
+                if ( i==lastNormal)
                     break;
             }
-            if ( PCB[i]->state==READY) // si pongo priority==0 => va a ser 1 comparacion +
+            if ( PCB[i]->state==READY ){ // si pongo priority==0 => va a ser 1 comparacion +
                                         // => lo evito total si ready y de prior 1, lo agarraria =
+                lastNormal = i; 
                 break;
+            }
         }
+    } else 
+        lastWithPrior = i;
 
     // retorno una direccion xq asm no tiene null
-    if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
+    if (  i==lastSelected && PCB[lastSelected]->state > READY ) {
+    //if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
             halt = 1; 
             return PCB[0]->stackPointer; 
     }
