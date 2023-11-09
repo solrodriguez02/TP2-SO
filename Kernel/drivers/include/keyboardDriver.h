@@ -12,6 +12,8 @@
 #define CTRL_KEY_DOWN 0x1D
 #define CTRL_KEY_UP CTRL_KEY_DOWN + BREAK_CODE
 #define BREAK_CODE 128 
+#define MAX_SIZE_BUF 40
+
 
 extern char readScanCode();
 char keyboard_handler(char character);

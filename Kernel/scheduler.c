@@ -11,7 +11,7 @@
 
 #define KERNEL_STACK_BASE 0x352000 
 
-extern char buffer;
+extern char buffer[MAX_SIZE_BUF];
 int lock;
 uint16_t nextPid; 
 uint16_t lastSelected;
@@ -108,7 +108,7 @@ void tryToUnlockSem(void * semLock, int reason){
                 break;
         }        
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
-            && PCB[i]->blockedReasonCDT.waitingBuf == semLock &&  PCB[i]->blockedReasonCDT.size == reason ){
+            && PCB[i]->blockedReasonCDT.waitingBuf == semLock ){
                 PCB[i]->state = READY;
                 return;
         }
@@ -215,7 +215,23 @@ int getForegroundPid(){
 
 void signalHandler(int signal){
     if ( signal == CTRLD){
-        updatePriority(lastSelected, 1);//para cambiar en funcion de lo que preguntemos
+        void * buf = getFdBuffer(0, STDIN);
+        if (buf == &buffer){
+            *buffer = -1;
+            return;
+        }
+        else {
+            pipeADT pipe = (pipeADT) buf;
+            char c = -1;
+            writePipe(pipe, &c, 1);
+            return;
+        }
+        buf = getFdBuffer(0, STDOUT);
+        if (buf != BASEDIRVIDEO) {
+            pipeADT pipe = (pipeADT) buf;
+            closePipe(pipe);
+        }
+
     }else if ( signal == CTRLC){
         deleteFromScheduler(getForegroundPid());
     }
@@ -287,6 +303,8 @@ void createNewPipe(char ** params1, char ** params2){
     PCB[1]->fds[0] = pipe;
     int pid2 = execve(ptrfunction2, isForeground2, argc2, argv2);
     PCB[1]->fds[0] = &buffer;
+    //pipe->writePid = pid1;
+    //pipe->readPid = pid2;
 }
 
 void initializeScheduler(){
@@ -363,7 +381,7 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
         lastWithPrior = i;
 
     // retorno una direccion xq asm no tiene null
-    if (  i==lastSelected && PCB[lastSelected]->state > READY ) {
+    if (  (i==lastSelected && PCB[lastSelected]->state > READY) || (i == lastNormal && PCB[lastNormal]->state > READY)) {
     //if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
             halt = 1; 
             return PCB[0]->stackPointer; 
@@ -409,6 +427,12 @@ int deleteFromScheduler(uint16_t pid){
             PCB[lastSelected]->state = TERMINATED;
             //* aca se sacaria al nodo de la lista y desp free
             freeMemory(PCB[lastSelected]->topMemAllocated);
+            if (PCB[lastSelected]->fds[0] != &buffer){
+                closePipe(PCB[lastSelected]->fds[0]);
+            }
+            if (PCB[lastSelected]->fds[1] != BASEDIRVIDEO){
+                closePipe(PCB[lastSelected]->fds[1]);
+            }
             forceTimerInt();
             return 0;
     }
@@ -418,6 +442,12 @@ int deleteFromScheduler(uint16_t pid){
             PCB[i]->state = TERMINATED;
             deadChild(i);
             //* aca se sacaria al nodo de la lista y desp free
+            if (PCB[i]->fds[0] != &buffer){
+                closePipe(PCB[i]->fds[0]);
+            }
+            if (PCB[i]->fds[1] != BASEDIRVIDEO){
+                closePipe(PCB[i]->fds[1]);
+            }
             freeMemory(PCB[i]->topMemAllocated);
             return 0;
         }

@@ -282,7 +282,7 @@ void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
     char read; 
     while ( (read = getChar()) != EOF){
-        bussy_wait(WAIT*100);
+        //bussy_wait(WAIT*100);
         
         print("/", BLUE);
         print(&read, 0X00FF00);
@@ -427,6 +427,37 @@ void loop(){
     printf("Me despido\n");
 }
 
+void cat(){
+    char read;
+    while ((read = getChar()) != EOFILE){
+        printf("%c", read);
+    }
+    exit();
+}
+
+void wc(){
+    int count = 1;
+    char read;
+    while ((read = getChar()) != EOFILE){
+        printf("%c", read);
+        if (read == '\n'){
+            count++;
+        }
+    }
+    printf("\nCantidad de lineas: %d", count);
+    exit();
+}
+
+void filter(){
+    char read;
+    while ((read = getChar()) != EOFILE){
+        if (read != 'a' && read != 'e' && read != 'i' && read != 'o' && read != 'u'){
+            printf("%c", read);
+        }
+    }
+    exit();
+}
+
 void initializePhiloWrapper(){
     initializePhilo();
 }
@@ -470,7 +501,11 @@ void loadAllModules() {
     loadModule("my_process_inc", "Increments a global variable", &my_process_inc, 3);
     loadModule("bgOrange", "Runs the program Enter in Background", &bgOrange, 0);
     loadModule("orange", "Tests a loop of printf's",&enterOrange, 0);
-    loadModule("philos", "Run philosophers", &initializePhiloWrapper,0);
+    loadModule("psExec", "Wrapper for ps", &psWrapper,0);
+    loadModule("cat", "program 'cat'", &cat,0);
+    loadModule("wc", "program 'wc'", &wc,0);
+    loadModule("filter", "program 'filter'", &filter,0);
+    loadModule("philos", "Run philosophers", &initializePhiloWrapper,1);
 }
 
 /**
@@ -489,7 +524,7 @@ void runModule(const char * input[]){
                 return;
             }
             int numParams1 = modules[i].numParams;
-            if (maxCantArg > numParams1 + 1){
+            if (maxCantArg >= numParams1 + 1){
                 int numParams2;
                 //debería pasarle el array de parametros y directamente que cada uno lo maneje a su gusto
                 if (strcmp(input[numParams1 + 1],"|")){
@@ -515,11 +550,25 @@ void runModule(const char * input[]){
                                 params2[j+4] = input[j+numParams1+2];
                             }
                             syscall_createPipe(params1, params2);
-                            //waitChildren();
+     
+                            if (!strcmp(input[numParams1 + 3],"&")){
+                                waitChildren();
+                            }
                             return;
                         }
                     }
                     printf("Invalid command: for a list of available functionalities type 'help'");
+                    return;
+                }
+                if (strcmp(input[numParams1+1], "&")){
+                    char ** params1;
+                    params1 = malloc((4 + numParams1) * sizeof(char *));
+                    params1[0] = (char *) modules[i].function;
+                    params1[1] = (char *) 0; //background
+                    for (int j = 0; j < numParams1; j++){
+                        params1[j+4] = input[j+1];
+                    }
+                    execveNew(params1);
                     return;
                 }
             }

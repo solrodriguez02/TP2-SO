@@ -2,14 +2,14 @@
 #include <scheduler.h>
 #include <interrupts.h>
 
-#define MAX_SIZE_BUF 10
+#define MAX_SIZE_BUF 40
 const unsigned char ascii[TOTAL_SCANCODES][2] = {
 	{  0, 0  }, { 27, 27 } , {'1', '!'}, {'2', '@'}, {'3', '#'}, {'4', '$'}, {'5', '%'}, {'6', '^'},
 	{'7', '&'}, {'8', '*'}, {'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {127, 127}, {  9, 9  },
 	{'q', 'Q'}, {'w', 'W'}, {'e', 'E'}, {'r', 'R'}, {'t', 'T'}, {'y', 'Y'}, {'u', 'U'}, {'i', 'I'},
 	{'o', 'O'}, {'p', 'P'}, {'[', '{'}, {']', '}'}, {'\n','\n'}, { 0, 0  }, {'a', 'A'}, {'s', 'S'},
 	{'d', 'D'}, {'f', 'F'}, {'g', 'G'}, {'h', 'H'}, {'j', 'J'}, {'k', 'K'}, {'l', 'L'}, {';', ':'},
-	{'\'', '"'}, {'`', '~'}, { 0, 0 }, {'\\', '|'}, {'z', 'Z'}, {'x', 'X'}, {'c', 'C'}, {'v', 'V'},
+	{'\'', '"'}, {'|', '~'}, { 0, 0 }, {'\\', '`'}, {'z', 'Z'}, {'x', 'X'}, {'c', 'C'}, {'v', 'V'},
 	{'b', 'B'}, {'n', 'N'}, {'m', 'M'}, {',', '<'}, {'.', '>'}, {'/', '?'}, {  0, 0  }, {'*', '*'},
 	{  0, 0  }, {' ', ' '}, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  },
 	{  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {  0, 0  }, {'7', '7'},
@@ -37,6 +37,11 @@ char keyboard_handler(char character) {
     if ( !character ){
         return 0; 
     }
+    if (character == -1){
+        //ojo que si se ctrl d se deja un EOF que se lee despues
+        bufferSize++;
+        return 1;
+    }
     //se pisan las letras si escribis rapido
     //buffer[bufferSize++] = character;
     buffer[0] = character;
@@ -54,13 +59,13 @@ unsigned char scanCodeToASCII(unsigned char scanCode) {
 	if(scanCode & 0x80)
 		return 0;
     
-    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'c'){
+    else if(ctrlActivated && scanCode == 46){
         signalHandler(CTRLC);
-        //buffer[0] = 'C'; //testing
+        return -1;
     }
-    else if(ctrlActivated && scanCodeToASCII(scanCode) == 'd'){
+    else if(ctrlActivated && scanCode == 32){
         signalHandler(CTRLD);
-        //buffer[0] = 'D'; //testing
+        return -1;
     }
     if(getCapslock()) {
         if(isLetter(scanCode)) {
@@ -79,19 +84,20 @@ char consumeKeyFromBuffer(){
         return 0;
     }
 	char toReturn = buffer[0];
-/* se pisan las letras si escribis rapido
+    
+    //se pisan las letras si escribis rapido
     //muevo todo un lugar a la izquierda
-	for (int i = 1; i < bufferSize; i++){
+	/* for (int i = 1; i < bufferSize; i++){
 		buffer[i-1] = buffer[i];
-	}
+	} */
 	//actualizo el size
-  */
+    clearKeyboardBuffer();
     bufferSize--;
     return toReturn;
 }   
 
 void clearKeyboardBuffer(){
-    bufferSize = 0;
+    buffer[0] = 0;
 }
 
 
@@ -113,7 +119,6 @@ void checkConditions(unsigned char scanCode) {
     //PARA CTRL+D y CTRL+C
     else if ( scanCode== CTRL_KEY_DOWN ){ 
         ctrlActivated = 1;
-        //buffer[0] = 'C';
     }
     else if ( scanCode== CTRL_KEY_UP ) 
         ctrlActivated = 0;

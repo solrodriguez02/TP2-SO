@@ -268,6 +268,10 @@ void drawCharAt(unsigned char c, int FGColor, int BGColor, uint64_t horizontalOf
  * color rojo, GG el código de color verde, y BB el código de color azul.
  */
 void drawChar(unsigned char c, int FGColor, int BGColor) {
+	if (c == '\n') {
+		drawNextLine();
+		return;
+	}
 	drawCharAt(c, FGColor, BGColor, horizontal_offset, vertical_offset);
 	moveWritePointer();
 }
