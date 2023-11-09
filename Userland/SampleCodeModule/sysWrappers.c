@@ -95,7 +95,7 @@ void * malloc(unsigned int size){
 
 void free(void * ptr){
     // conviene validar aca, evitar ir a kernel
-    if ( ptr==NULL)
+    if ( ptr==0x0)
         return;
     syscall_free(ptr);
 }

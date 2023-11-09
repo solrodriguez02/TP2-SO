@@ -1,6 +1,7 @@
 #include <shell.h>
 #include <library.h>
 #include <stdint.h>
+#include "philosophers.h"
 
 //! VAR SOLO USADA PARA TESTS
 static int nextPid=2;
@@ -84,7 +85,7 @@ void enter(){
     printf("bloqueo proceso\n");
     blockProcess(0);
     */
-    for (int i = 0; i < 1020; i++){
+    for (int i = 0; i < 1000; i++){
         print("--------------------------------------xxxxxxx------------",0xFF0000);
     }
     printf("\nSobrevivi?");
@@ -92,9 +93,9 @@ void enter(){
 }
 
 void enterOrange(){
-    int i; 
-    for ( i = 0; i < 350; i++){
-        print("--------------------------------------xxxxxxx------------",ORANGE + nextPid);
+    int i, aux = nextPid; 
+    for ( i = 0; i < 750; i++){
+        print("--------------------------------------xxxxxxx------------",ORANGE << aux);
     }
     printf("\nSobrevivi?");
     exit();
@@ -279,8 +280,8 @@ void execveNew( char ** params){
 
 void getInputAndPrint(char ** params){
     printf("estoy en el proceso que lee del pipe e imprime");
-    while (1){
-        char read = getChar();
+    char read; 
+    while ( (read = getChar()) != EOF){
         print("/", BLUE);
         print(&read, 0X00FF00);
     }
@@ -288,7 +289,7 @@ void getInputAndPrint(char ** params){
 }
 
 void enterBg(){
-    char * params[2] = {"2", "1"};
+    char * params[2] = {"2", "0"};
     execveNew(params);
 }
 
@@ -455,6 +456,10 @@ void filter(){
     exit();
 }
 
+void initializePhiloWrapper(){
+    initializePhilo();
+}
+
 /**
  * @brief Carga todas los módulos/funcionalidades de la Shell disponibles para el usuario.
  * faltan: 
@@ -498,6 +503,7 @@ void loadAllModules() {
     loadModule("cat", "program 'cat'", &cat,0);
     loadModule("wc", "program 'wc'", &wc,0);
     loadModule("filter", "program 'filter'", &filter,0);
+    loadModule("philos", "Run philosophers", &initializePhiloWrapper,0);
 }
 
 /**

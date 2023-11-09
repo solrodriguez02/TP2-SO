@@ -11,6 +11,8 @@ int seconds_elapsed();
 
 void restartTicks();
 
+void completeQuantum();
+
 int ticks_before_quantum();
 
 #endif

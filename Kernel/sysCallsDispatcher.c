@@ -140,7 +140,9 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             break;
         case 21:
             return getPriority(param1);
-        case 22: 
+        case 22:
+            // le da prioridad 0 en prox ejecucion
+            completeQuantum();
             forceTimerInt();
             break;
         case 23:
