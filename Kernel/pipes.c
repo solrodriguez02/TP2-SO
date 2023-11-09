@@ -10,13 +10,15 @@ void * createPipe(){
     pipe->hasAccess = createSem("hasAccess", 1);
     pipe->readPos = 0;
     pipe->writePos = 0;
+    pipe->brokenPipe = 0;
+    pipe->cantProcessesConnected = 2;
     return pipe;
 }
 
 //se devuelve el numero de chars que fueron leidos
-void readPipe(pipeADT pipe, char * buffer, int size){
+int readPipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
-    while(i < size){
+    while(i < size && !pipe->brokenPipe){
         //priorizo que haya varios lectores
         /* se maneja con semaforos
         if(pipe->readPos == pipe->writePos){
@@ -32,11 +34,16 @@ void readPipe(pipeADT pipe, char * buffer, int size){
         postSem(pipe->writesAvailable);
         postSem(pipe->hasAccess);
     }
+    if (pipe->brokenPipe){
+        buffer[i] = EOF;
+        return -1;
+    }
+    return 0;
 }
 
-void writePipe(pipeADT pipe, char * buffer, int size){
+int writePipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
-    while(i < size){
+    while(i < size && !pipe->brokenPipe){
         /*
         if(pipe->writePos == BUFFER_SIZE){
             //! no deberia bloquearse si llega a BUFFER_SIZE?
@@ -52,6 +59,18 @@ void writePipe(pipeADT pipe, char * buffer, int size){
         i++;
         postSem(pipe->readsAvailable);
         postSem(pipe->hasAccess);
+    }
+     if (pipe->brokenPipe){
+        return -1;
+    }
+    return 0;
+}
+
+void closePipe(pipeADT pipe){
+    pipe->brokenPipe = 1;
+    pipe->cantProcessesConnected--;
+    if (pipe->cantProcessesConnected == 0){
+        destroyPipe(pipe);
     }
 }
 

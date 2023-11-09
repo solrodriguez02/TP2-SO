@@ -4,7 +4,7 @@
 #include <scheduler.h>
 #include <pipes.h>
 
-extern char buffer;
+extern char buffer[MAX_SIZE_BUF];
 /**
  * @brief Lee del buffer correspondiente al fd 
  * 
@@ -19,10 +19,13 @@ int read(int fd, char * placeholder, int count){
         blockRunningProcess(BLOCKBYREAD,count, fd);
 
     // ojo con los EOF!
-    if ( buf == &buffer)
+    if ( buf == &buffer){
+        //__asm__("sti");
+        //__asm__("int $0x20");
         while ( count--){
             *placeholder++ = consumeKeyFromBuffer(fd);
         }
+    }
     else {
         // tal vez se pueda traer consumeKeyFromBuff 
         // y usarlo pa todos los buff
@@ -35,7 +38,6 @@ int read(int fd, char * placeholder, int count){
        pipeADT pipe = (pipeADT) buf;
        readPipe(pipe,placeholder,dim);
     }
-    
     return 0;
 }
 

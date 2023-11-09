@@ -4,6 +4,7 @@
 #define FDSPERPIPE 2
 #define READEXT 0
 #define WRITEEXT 1
+#define EOF '\377'
 
 typedef struct pipeCDT {
     char * buffer;
@@ -14,11 +15,14 @@ typedef struct pipeCDT {
     int writePos;
     int readPid;
     int writePid;
+    int brokenPipe;
+    int cantProcessesConnected;
 } pipeCDT;
 
 typedef struct pipeCDT * pipeADT;
 
 void * createPipe();
-void writePipe(pipeADT pipe, char * buffer, int size);
-void readPipe(pipeADT pipe, char * buffer, int size);
+int writePipe(pipeADT pipe, char * buffer, int size);
+int readPipe(pipeADT pipe, char * buffer, int size);
+void closePipe(pipeADT pipe);
 void destroyPipe(pipeADT pipe);
