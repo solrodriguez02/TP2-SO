@@ -121,7 +121,7 @@ void philo(int argc, char ** argv){
 /* si o si deberia haber 1 comiendo */
 void eat(){
     // sleep?
-    yield();
+    //yield();
     bussy_wait(WAIT*2);
     // yield le va a dar prioridad
     my_sem_wait(SEM_MUTEX_ID);

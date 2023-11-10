@@ -77,7 +77,7 @@ static inline int searchProcessByPid(uint16_t pid){
     return -1;
 }
 
-static inline int getPCBIndex(int pid){
+static int getPCBIndex(int pid){
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
             return i;
@@ -108,7 +108,7 @@ void tryToUnlockSem(void * semLock, int reason){
                 break;
         }        
         if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
-            && PCB[i]->blockedReasonCDT.waitingBuf == semLock ){
+            && PCB[i]->blockedReasonCDT.waitingBuf == semLock &&  PCB[i]->blockedReasonCDT.size == reason){
                 PCB[i]->state = READY;
                 return;
         }
@@ -284,24 +284,31 @@ void createNewPipe(char ** params1, char ** params2){
     char isForeground1 = (char) params1[1];
     int argc1 = (int) params1[2];
     char ** argv1 ;
+//! argv1 y argv2 no tienen espacio reservado
+
+//! este for es el q genera la invalid operation
+// => no estoy pasando como argum argv1 ni 2 a execve
+// pero en teoria con asignarles espacio con malloc va a funcionar
+  /*
     for (int i = 0; i < argc1; i++){
         argv1[i] = params1[3+i];
     }
+*/
     void * ptrfunction2 = params2[0];//3+argc1
     char isForeground2 = params2[1];
     int argc2 = params2[2];
     char ** argv2 ;
-
+/*
     for (int i = 0; i < argc2; i++){
         argv2[i] = params2[i+3];
     }
-  
+*/
     pipeADT pipe = createPipe();
-    PCB[1]->fds[1] = pipe;
-    int pid1 = execve(ptrfunction1, isForeground1, argc1, argv1);
+    PCB[1]->fds[1] = (void *) pipe;
+    int pid1 = execve(ptrfunction1, isForeground1, argc1, 0x0);
     PCB[1]->fds[1] = BASEDIRVIDEO;
     PCB[1]->fds[0] = pipe;
-    int pid2 = execve(ptrfunction2, isForeground2, argc2, argv2);
+    int pid2 = execve(ptrfunction2, isForeground2, argc2, 0X0);
     PCB[1]->fds[0] = &buffer;
     //pipe->writePid = pid1;
     //pipe->readPid = pid2;
@@ -350,44 +357,56 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
         PCB[lastSelected]->stackPointer = stackPointer;
         updateRunningPriority(lastTicks);
     }
-    int i;
+    int i, found = 0;
 
     for ( i=lastWithPrior+1; i!=lastWithPrior; i++){
         if ( i==MAX_SIZE_PCB){
             i=1;
-            if ( i==lastWithPrior)
-                break;
+            if ( i==lastWithPrior) 
+                break; 
         }
-        if ( PCB[i]->priority && PCB[i]->state==READY){
+        if ( PCB[i]->priority && PCB[i]->state<=READY){
+            found = 1;
+            lastWithPrior = i;
             break;
         }
     }
+    // i = lasWithPrior si !found
+    /* 1. Si, found => sigo */
+    /* 2. check si ultimo ready */
 
-    if ( i==lastWithPrior && ( i!=lastSelected || PCB[lastSelected]->state > READY)) {
+    if ( !found ) {
+        // se mantiene lastWithPrior
+        if ( PCB[lastWithPrior]->priority && PCB[lastWithPrior]->state <= READY )
+            found = 1; 
+        else {
     //if (  lastSelected==i && (PCB[i]->state>READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
-        for ( i=lastNormal+1; i!=lastNormal; i++ ){
-            if ( i==MAX_SIZE_PCB){
-                i=1;
-                if ( i==lastNormal)
+            for ( i=lastNormal+1; i!=lastNormal; i++ ){
+                if ( i==MAX_SIZE_PCB){
+                    i=1;
+                    if ( i==lastNormal)
+                        break;
+                }
+                if ( PCB[i]->state<=READY ){ // si pongo priority==0 => va a ser 1 comparacion +
+                                            // => lo evito total si ready y de prior 1, lo agarraria =
+                    lastNormal = i; 
+                    found = 1; 
                     break;
+                }
             }
-            if ( PCB[i]->state==READY ){ // si pongo priority==0 => va a ser 1 comparacion +
-                                        // => lo evito total si ready y de prior 1, lo agarraria =
-                lastNormal = i; 
-                break;
+        // si llegue a lastNormal==i => se mantiene lastNormal, no hay q actualizarlo
+
+        // sale <=> found || i==lastNormal
+
+            // como antes, no encontre nada 
+            if ( !found && PCB[lastNormal]->state > READY ) {
+            //if (  (i==lastSelected && PCB[lastSelected]->state > READY) || (i == lastNormal && PCB[lastNormal]->state > READY)) {
+            //if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
+                    halt = 1; 
+                    return PCB[0]->stackPointer; 
             }
         }
-    } else 
-        lastWithPrior = i;
-
-    // retorno una direccion xq asm no tiene null
-    if (  (i==lastSelected && PCB[lastSelected]->state > READY) || (i == lastNormal && PCB[lastNormal]->state > READY)) {
-    //if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
-            halt = 1; 
-            return PCB[0]->stackPointer; 
     }
-
-    
     // Si es el =, se v an a pisar => evi comparacion 
      // SI proceso no fue ni bloqueado ni terminado
     if ( PCB[lastSelected]->state == RUNNING ){
@@ -457,7 +476,6 @@ int deleteFromScheduler(uint16_t pid){
 
 void copyFdFromParent(int index){
     for (int i = 0; i < MAX_FD_PER_PROCESS; i++){
-                //! xq no lastSelected para saber index padre?
         PCB[index]->fds[i] = PCB[getPCBIndex(PCB[index]->parentPid)]->fds[i];
     }
 }
@@ -479,7 +497,6 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
     }
 
     PCB[lastSelected]->countChildren++;
-    blockedReasonCDT resetBlock;
 
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
@@ -489,8 +506,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
             PCB[i]->ticketsBeforeLoosingPrior = 0;
             PCB[i]->stackPointer = stackPointer;
-            PCB[i]->state = READY;
-            PCB[i]->blockedReasonCDT = resetBlock;
+            PCB[i]->blockedReasonCDT.blockReason = 0;
             copyFdFromParent(i);
             for (int j = 0; j < MAX_SEM_PER_PROCESS; j++){
                 PCB[i]->sems[j] = NULL;
