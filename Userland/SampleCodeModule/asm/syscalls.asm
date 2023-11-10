@@ -26,7 +26,7 @@ GLOBAL syscall_getSemValue
 GLOBAL syscall_waitSem
 GLOBAL syscall_postSem
 GLOBAL syscall_closeSem
-
+GLOBAL syscall_mem
 
 section .text
 
@@ -262,6 +262,14 @@ syscall_createPipe:
 	mov rdx, rsi	
 	mov rsi, rdi
 	mov rdi, 30
+	int 80h
+	popf
+	ret
+
+syscall_mem:
+	pushf
+	mov rsi, rdi
+	mov rdi, 31
 	int 80h
 	popf
 	ret

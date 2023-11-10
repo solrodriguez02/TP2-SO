@@ -31,5 +31,5 @@ unsigned int getTotalMemory();
 
 unsigned int getFreeMemory();
 
-
+void getState(char * state);
 #endif
