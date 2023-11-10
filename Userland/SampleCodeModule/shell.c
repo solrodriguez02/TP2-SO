@@ -224,6 +224,113 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     exit();
 }
 
+enum State { RUN,
+             BLOCK,
+             KILLED };
+
+typedef struct P_rq {
+  int32_t pid;
+  enum State state;
+} p_rq;
+
+int64_t test_processes(uint64_t argc, char *argv[]) {
+  uint8_t rq;
+  uint8_t alive = 0;
+  uint8_t action;
+  uint64_t max_processes = 4;
+  char *argvAux[] = {"endless_loop",0};
+
+  if (argc != 1)
+    return -1;
+
+  /* if ((max_processes = satoi(argv[0])) <= 0)
+    return -1; */
+
+  p_rq p_rqs[max_processes];
+
+  while (1) {
+
+    // Create max_processes processes
+    for (rq = 0; rq < max_processes; rq++) {
+      p_rqs[rq].pid = my_create_process("endless_loop", 0, argvAux);
+
+      if (p_rqs[rq].pid == -1) {
+        printf("test_processes: ERROR creating process\n");
+        return -1;
+      } else {
+        printf("Se creo el proceso con pid: %d\n", p_rqs[rq].pid);
+        p_rqs[rq].state = RUN;
+        alive++;
+      }
+    }
+
+    // Randomly kills, blocks or unblocks processes until every one has been killed
+    while (alive > 0) {
+
+      for (rq = 0; rq < max_processes; rq++) {
+        action = GetUniform(100) % 2;
+
+        switch (action) {
+          case 0:
+            if (p_rqs[rq].state == RUN|| p_rqs[rq].state == BLOCK) {
+              if (my_kill(p_rqs[rq].pid) == -1) {
+                printf("test_processes: ERROR killing process\n");
+                return -1;
+              }
+              printf("murio el proceso con pid: %d\n", p_rqs[rq].pid);
+              p_rqs[rq].state = KILLED;
+              alive--;
+            }
+            break;
+
+          case 1:
+            if (p_rqs[rq].state == RUN) {
+              if (my_block(p_rqs[rq].pid) == -1) {
+                printf("test_processes: ERROR blocking process\n");
+                return -1;
+              }
+              printf("bloqueo el proceso con pid: %d\n", p_rqs[rq].pid);
+              p_rqs[rq].state = BLOCK;
+            }
+            break;
+        }
+      }
+
+      // Randomly unblocks processes
+      for (rq = 0; rq < max_processes; rq++)
+        if (p_rqs[rq].state == BLOCK && GetUniform(100) % 2) {
+          if (my_unblock(p_rqs[rq].pid) == -1) {
+            printf("test_processes: ERROR unblocking process\n");
+            return -1;
+          }
+          printf("desbloqueo el proceso con pid: %d\n", p_rqs[rq].pid);
+          p_rqs[rq].state = RUN;
+        }
+    }
+  }
+}
+
+
+void endless_loop() {
+  printf("entre al loop\n");
+  while (1)
+    ;
+}
+
+void testProcess(char ** params){
+    char * *argvExec;
+    argvExec = (char**) malloc(5 * sizeof(char *));
+    for (int i = 0; i < 5; i++){
+        argvExec[i] = (char*) malloc(3 * sizeof(char));
+    }
+    int index = getIndexModule("test_process");
+    numToStr(index, 10, argvExec[0]);
+    memcpy(argvExec[1], "1", 1);
+    memcpy(argvExec[2], "1", 1);
+    memcpy(argvExec[3], params[1], strlen(params[1]));
+    execveNew(argvExec);
+}
+
 void killProcess(char ** params){
     int pid = strToNum(params[0]);
     if ( pid==0)
@@ -389,6 +496,17 @@ void psWrapper(){
     execveNew(params);
 }
 
+void mem(){
+    char * state = malloc(257);
+    syscall_mem(state);
+    int i = 0;
+    printf("ESTADO DE LA MEMORIA:\n");
+    while(state[i] != '\0'){
+        printf("Bloque %d: %s", i+1, (state[i] != -1)? "Ocupado\n":"Libre\n");
+        i++;
+    }
+}
+
 void ps() {
     // podria sino hacer un malloc
     int MAX_PROCESS = 8;
@@ -414,15 +532,18 @@ void yieldFun(){
 }
 
 void loop(){
+    long int i = 0;
     while(1){
-        print("Hola soy Oscar", ORANGE );
+        if (i % 2000000000000000){
+            print("Hola soy Oscar\n", ORANGE );
+        }
+        i++;
         //    syscall_wait(2);
         //!  esta haciendo busy waiting!!! 
         // => conviene usar int RTC
         //  PERO q el lo desbloquee es costoso
 
     }
-    printf("Me despido\n");
 }
 
 void cat(){
@@ -486,6 +607,7 @@ void loadAllModules() {
     loadModule("getPriority", "Get priority from process", &getProcessPriority, 1);
     loadModule("nice", "Update priority from process", &updateProcessPriority, 2);
     loadModule("yield", "Makes the current process stop it's quantum", &yield, 1);
+    loadModule("mem", "Prints the memory status", &mem, 0);
     loadModule("sleep", "Sleep (param= #ticks)", &sleep, 1);
     loadModule("createPipe", "Creates a pipe between 2 arbitrary processes (for now)", &runWithPipe, 1);
     loadModule("ps", "List all processes in execution with their states", &ps, 0);
@@ -503,7 +625,11 @@ void loadAllModules() {
     loadModule("cat", "program 'cat'", &cat,0);
     loadModule("wc", "program 'wc'", &wc,0);
     loadModule("filter", "program 'filter'", &filter,0);
+    loadModule("loop", "program 'loop'", &loop,0);
     loadModule("philos", "Run philosophers", &initializePhiloWrapper,0);
+    loadModule("test_process", "Runs actual test", &test_processes,0);
+    loadModule("endless_loop", "Runs endless loop", &endless_loop,0);
+    loadModule("testProcess", "Runs a test of processes", &testProcess,0);
 }
 
 /**
@@ -560,10 +686,12 @@ void runModule(const char * input[]){
                 if (strcmp(input[numParams1+1], "&")){
                     char ** params1;
                     params1 = malloc((4 + numParams1) * sizeof(char *));
-                    params1[0] = (char *) modules[i].function;
-                    params1[1] = (char *) 0; //background
+                    params1[0] = malloc(3);
+                    params1[1] = malloc(3);
+                    numToStr(i, 10, params1[0]);
+                    numToStr(0, 10, params1[1]); //background
                     for (int j = 0; j < numParams1; j++){
-                        params1[j+4] = input[j+1];
+                        params1[j+2] = input[j+1];
                     }
                     execveNew(params1);
                     return;

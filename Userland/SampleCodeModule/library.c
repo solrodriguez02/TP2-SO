@@ -18,7 +18,7 @@
 void getInput(char * buff){
     char c;
     int buffidx=0, screenptr=0;
-    while((c=getChar())!='\n') {
+    while((c=getChar())!='\n' && c != EOFILE) {
         if (c == 127 /* DEL ASCII */ ){
             if ( buffidx!=0 ){
                 putChar(c, FGCOLOR_WHITE);
@@ -33,6 +33,9 @@ void getInput(char * buff){
             screenptr++;
         }
     }  
+    if (c == EOFILE){
+        exit();
+    }
     buff[buffidx] = '\0';
 }
 
@@ -375,11 +378,6 @@ void bussy_wait(uint64_t n) {
     ;
 }
 
-void endless_loop() {
-  while (1)
-    ;
-}
-
 void endless_loop_print(uint64_t wait) {
   int64_t pid = my_getpid();
 
@@ -416,4 +414,18 @@ int64_t my_wait(int64_t pid){
 
 int64_t my_getpid(){
     return syscall_getPid();
+}
+
+int64_t my_kill(uint64_t pid) {
+    return syscall_kill(pid);
+}
+
+int64_t my_block(uint64_t pid){
+    syscall_block(pid);
+    return 0;
+}
+
+int64_t my_unblock(uint64_t pid){
+    syscall_block(pid);
+    return 0;
 }
