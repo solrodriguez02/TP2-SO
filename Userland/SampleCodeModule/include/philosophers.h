@@ -13,8 +13,7 @@
 #define PHILO_NAME "philo"
 #define SIZE_NAME 5
 
-/* builtin shell */
-/* => no se corre en bg */
+
 void initializePhilo();
 void philo(int argc, char ** argv);
 void test(int i);

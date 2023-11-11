@@ -1,8 +1,7 @@
 #include "philosophers.h"
 #include <library.h>
 
-//! EOF deberia def en library
-int n;      /* numero de filosofos */
+int n;                          /* numero de filosofos */
 int state[MAX_NUM_PHILO];
 char ** semPhi;
 int pids[MAX_NUM_PHILO];
@@ -11,8 +10,6 @@ int pids[MAX_NUM_PHILO];
 #define RIGHT(i,n) (i+1)%n 
 
 
-/* builtin shell */
-/* => no se corre en bg */
 void initializePhilo(){
     printf("Preparing default philosophers..\n");
     
@@ -114,11 +111,10 @@ void philo(int argc, char ** argv){
     yield();
     while ( 1 ){
         /* thinks */
-      //  bussy_wait(WAIT* 3 );
         takeForks(i);
         eat();
         putForks(i);
-       bussy_wait(WAIT*(GetUint()%10+3 ));
+        bussy_wait(WAIT*(GetUint()%10+3 ));
     }
 }
 
