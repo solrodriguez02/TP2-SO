@@ -308,7 +308,6 @@ void initializeScheduler(){
 }
 
 void * scheduler(void * stackPointer, unsigned lastTicks ){
-    
     /* identificio rsp del kernel para no guardarlo */
     if ( lastSelected==0 ){
         halt = 0; 
