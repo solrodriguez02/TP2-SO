@@ -9,10 +9,20 @@ int pids[MAX_NUM_PHILO];
 #define LEFT(i,n) (i+n-1)%n
 #define RIGHT(i,n) (i+1)%n 
 
+void printInstructions(){
+    printf("-------------------------------------\n");
+    printf("Press \'a\' to add a philosopher\n");
+    printf("Press \'r\' to remove a philosopher\n");
+    printf("Press \'Ctrl d\' to end test\n");
+    printf("-------------------------------------\n");
+}
+
 
 void initializePhilo(){
-    printf("Preparing default philosophers..\n");
     
+    printInstructions();
+    printf("Preparing default philosophers..\n");
+
     if (my_sem_open(SEM_MUTEX_ID, 1) == -1) {
       printf("initialize: ERROR opening semaphore\n");
       return;

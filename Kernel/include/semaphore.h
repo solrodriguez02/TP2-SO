@@ -1,4 +1,3 @@
-//implementacion para un semaforo naive
 
 typedef struct sem_t * sem_ptr;
 

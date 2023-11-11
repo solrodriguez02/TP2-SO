@@ -12,8 +12,6 @@ typedef struct sem_t{
     int connectedProcesses;
 };
 
-//para wrapper en syscall;
-
 sem_ptr createSem(char * name, int value){
     sem_ptr sem = allocMemory(sizeof(struct sem_t));
     memcpy(sem->name, name, strlen(name));
@@ -28,12 +26,9 @@ void waitSem(sem_ptr sem){
         if (sem->value == 0){
             blockRunningProcess(BLOCKBYIPC, WAITING, &sem->lockMutex);
             enterRegion(&sem->lockMutex);
-            //leave_region(&sem->lockMutex);
-            //sem->value--;
         }
         else{
             break;
-            //sem->value--;
         }
     }   
     sem->value--;
