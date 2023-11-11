@@ -31,9 +31,6 @@ void * irqDispatcher(uint64_t irq, uint64_t param1) {
  * @brief Función correspondiente a la interrupción número 20h, sobre el Timer Tick.
  */
 void * int_20(void * stackPointer) {
-	// 1 pues sys no bloquante
-	// ya sys fue llamada con int => = interrup
-	// => stack tmb cargado 
 	return timer_handler(stackPointer);
 }
 

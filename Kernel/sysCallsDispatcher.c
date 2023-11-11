@@ -12,31 +12,7 @@
 #include <blockingSys.h>
 #include <scheduler.h>
 
-extern char buffer;
-extern pcbEntryADT PCB[MAX_SIZE_PCB]; 
-extern uint16_t lastSelected;
 sem_ptr sem;
-
-
-/**
- * @brief Escribe sobre la pantalla un caracter con su color deseado.
- * 
- * @param c Caracter al cual se quiere escribir sobre la pantalla.
- * @param FGColor Color del caracter deseado en el formato 0xRRGGBB, siendo RR el byte para el código de 
- * color rojo, GG el código de color verde, y BB el código de color azul.
- * @param BGColor Color de fondo del caracter deseado en el formato 0xRRGGBB, siendo RR el byte para el código de 
- * color rojo, GG el código de color verde, y BB el código de color azul.
- */
-static void write(unsigned char c, int FGColor, int BGColor) { 
-    if (getFdBuffer(0, STDOUT) == BASEDIRVIDEO){
-        drawChar(c, FGColor, BGColor);
-        return;
-    }
-    int result = writePipe(getFdBuffer(0,STDOUT), &c, 1);
-    if (result == -1){
-        deleteFromScheduler(0);
-    }
-}
 
 
 /**
@@ -55,8 +31,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
 
     switch (syscall) {
 		case 0:
-        return read(param1,(char *) param2,param3);
-			return readVIEJO();
+            return read(param1,(char *) param2,param3);
         case 1:
             if (param1==127)    
                 deleteChar();
