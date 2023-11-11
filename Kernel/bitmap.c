@@ -105,3 +105,14 @@ unsigned int getTotalMemory(){
 unsigned int getFreeMemory(){
 	return ( NUM_BLOCKS - getOccupiedBlocks(memoryManager) ) *BLOCK_SIZE;
 } 
+
+void getState(char * state){
+	int i; 
+	for (i = 0; i < NUM_BLOCKS; i++){
+		if ( memoryManager->bitmap[i] == FREE_BLOCK )
+			state[i] = -1;
+		else
+			state[i] = 1;
+	}
+	state[i] = '\0';
+}

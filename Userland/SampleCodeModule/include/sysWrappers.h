@@ -1,21 +1,8 @@
-#include "syscalls.h"
+#include <syscalls.h>
 #include <stdint.h>
 
 #define STDIN 0
 #define STDOUT 1
-
-struct statProcess{
-    uint8_t * name;
-    int16_t pid;
-    uint8_t state;
-    uint8_t priority;
-    uint8_t isForeground;
-    void * stackPointer;
-    void * basePointer;
-    //FDS? 
-};
-
-typedef struct statProcess * stat;
 
 int getChar();
 
@@ -44,7 +31,6 @@ void updatePriority(int pid, int priority );
 int getPriority(int pid);
 void waitChildren();
 void waitChild(int pid);
-int getAllProcessInfo(stat arrayStats);
 int64_t my_getpid();
 int64_t my_create_process(char *name, uint64_t argc, char *argv[]);
 int64_t my_nice(uint64_t pid, uint64_t newPrio);
