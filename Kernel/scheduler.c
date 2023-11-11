@@ -39,7 +39,6 @@ typedef struct pcbEntryCDT
     uint16_t ticketsBeforeLoosingPrior;
     uint8_t isForeground;
     uint16_t countChildren;
-    uint16_t lastSemOpen;
 } pcbEntryCDT;
 
 /* Informacion disponible para el usuario con ps */
@@ -94,7 +93,7 @@ void tryToUnlockRead(int dim ){
             
                 if ( PCB[i]->blockedReasonCDT.size == dim ){
                     PCB[i]->state = READY;
-                    PCB[i]->priority = 1;
+                    //PCB[i]->priority = 1;
                 }
                 return;
         }
@@ -143,12 +142,12 @@ int addSemToPCB(char * name, int pid){
     }
     /* 1º chequeo de que ya no este incluido */
     int i;
-    for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
+    for ( i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if ( PCB[pcbIndex]->sems[i]!=NULL && strCmp(PCB[pcbIndex]->sems[i], name)){
             return 1;
         }
     }
-    
+    /* 2º busco espacio libre */
     for ( i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if (PCB[pcbIndex]->sems[i] == NULL){
             PCB[pcbIndex]->sems[i] = name;
@@ -205,7 +204,7 @@ int getForegroundPid(){
 
 void signalHandler(int signal){
     if ( signal == CTRLD){
-        void * buf = getFdBuffer(0, STDIN);
+        void * buf = getFdBuffer(RUNNING, STDIN);
         if (buf == &buffer){
             *buffer = -1;
             return;
@@ -216,7 +215,7 @@ void signalHandler(int signal){
             writePipe(pipe, &c, 1);
             return;
         }
-        buf = getFdBuffer(0, STDOUT);
+        buf = getFdBuffer(RUNNING, STDOUT);
         if (buf != BASEDIRVIDEO) {
             pipeADT pipe = (pipeADT) buf;
             closePipe(pipe);
@@ -227,7 +226,6 @@ void signalHandler(int signal){
     }
 }
 
-
 void unblockProcess(int pid){
     int i = searchProcessByPid(pid);
     
@@ -235,34 +233,24 @@ void unblockProcess(int pid){
         PCB[i]->state = READY;
         PCB[i]->priority = 1;
     }
-    
 }
 
+/* ---------------------------------------- PRIORIDADES ---------------------------------------- */
 void updateRunningPriority(unsigned lastTicks){
-
     if ( !PCB[lastSelected]->ticketsBeforeLoosingPrior){
         PCB[lastSelected]->priority = QUANTUM - lastTicks; 
         return;
     }
-    
     PCB[lastSelected]->ticketsBeforeLoosingPrior--;
-    return;
 }
 
 void updatePriority(int pid, int priority){
+    int i = (pid != 0) ? searchProcessByPid(pid) : lastSelected;
+    if ( i==-1)
+        return;
     
-    if (!pid){
-            PCB[lastSelected]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
-            PCB[lastSelected]->priority = priority;
-            return;
-    }
-
-    int i = searchProcessByPid(pid);
-    if (i>0){
-        PCB[i]->priority = priority;
-        PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
-    }
-
+    PCB[i]->priority = priority;
+    PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
 }
 
 void createNewPipe(char ** params1, char ** params2){
@@ -311,7 +299,6 @@ void initializeScheduler(){
         PCB[0] = allocMemory( sizeEntry*MAX_SIZE_PCB );
         PCB[0]->state = TERMINATED;
         
-        //chequeado que funciona
         for ( int i=1; i<MAX_SIZE_PCB; i++){
             PCB[i] = (char*) PCB[i-1] + sizeEntry;
             PCB[i]->state = TERMINATED;
@@ -330,8 +317,6 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
         return PCB[1]->stackPointer;
     } 
     
-    // GUARDA EL STACK  
-    // si lo pongo antes, hlt stack se va a guardar=> queda afuera del while
     if ( !halt ){
         PCB[lastSelected]->stackPointer = stackPointer;
         updateRunningPriority(lastTicks);
@@ -350,44 +335,30 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
             break;
         }
     }
-    // i = lasWithPrior si !found
-    /* 1. Si, found => sigo */
-    /* 2. check si ultimo ready */
 
     if ( !found ) {
-        // se mantiene lastWithPrior
         if ( PCB[lastWithPrior]->priority && PCB[lastWithPrior]->state <= READY )
             found = 1; 
         else {
-    //if (  lastSelected==i && (PCB[i]->state>READY || !PCB[i]->priority) )//&& || !PCB[lastSelected]->priority ) lo saco xq no se si tiene inanicion
             for ( i=lastNormal+1; i!=lastNormal; i++ ){
                 if ( i==MAX_SIZE_PCB){
                     i=1;
                     if ( i==lastNormal)
                         break;
                 }
-                if ( PCB[i]->state<=READY ){ // si pongo priority==0 => va a ser 1 comparacion +
-                                            // => lo evito total si ready y de prior 1, lo agarraria =
+                if ( PCB[i]->state<=READY ){ 
                     lastNormal = i; 
                     found = 1; 
                     break;
                 }
             }
-        // si llegue a lastNormal==i => se mantiene lastNormal, no hay q actualizarlo
-
-        // sale <=> found || i==lastNormal
-
-            // como antes, no encontre nada 
             if ( !found && PCB[lastNormal]->state > READY ) {
-            //if (  (i==lastSelected && PCB[lastSelected]->state > READY) || (i == lastNormal && PCB[lastNormal]->state > READY)) {
-            //if ( i==lastSelected && (PCB[lastSelected]->state == TERMINATED || PCB[lastSelected]->state == BLOCKED) ){
                     halt = 1; 
                     return PCB[0]->stackPointer; 
             }
         }
     }
-    // Si es el =, se v an a pisar => evi comparacion 
-     // SI proceso no fue ni bloqueado ni terminado
+
     if ( PCB[lastSelected]->state == RUNNING ){
         PCB[lastSelected]->state = READY;
     }
@@ -399,22 +370,16 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
 }
 
 static void deadChild(uint16_t index){
-    // obtengo padre
     int parent = searchProcessByPid( PCB[index]->parentPid );
-    if ( parent<0 )
+    if ( parent==-1 )
         return;
     PCB[parent]->countChildren--;
     if ( PCB[parent]->state == BLOCKED && ( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
     ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid ) )
         PCB[parent]->state = READY;
-    // no fuerzo interrupt pues el hijo al morir la genera
+    /* no fuerzo interrupt pues el hijo al morir la genera */
 }
 
-
-//flujo de estados:
-// INIT (PID = PARENTPID = 1)
-// Arranca en running pero despues siempre
-//* RUNNING asi se evita syscall getpid 
 int deleteFromScheduler(uint16_t pid){
     PCB[lastSelected]->priority = 1;
 
@@ -426,9 +391,6 @@ int deleteFromScheduler(uint16_t pid){
             /* aviso al padre */
             deadChild(lastSelected);
 
-            // PCB[lastSelected]->state = TERMINATED;
-            // freeMemory(PCB[lastSelected]->topMemAllocated);
-            
             if (PCB[lastSelected]->fds[0] != &buffer){
                 closePipe(PCB[lastSelected]->fds[0]);
             }
@@ -448,23 +410,24 @@ int deleteFromScheduler(uint16_t pid){
     }
 
     int i = searchProcessByPid(pid);
-        if (i > 0){
-            PCB[i]->state = TERMINATED;
-            deadChild(i);
-            if (PCB[i]->fds[0] != &buffer){
-                closePipe(PCB[i]->fds[0]);
-            }
-            if (PCB[i]->fds[1] != BASEDIRVIDEO){
-                closePipe(PCB[i]->fds[1]);
-            }
-            /* cierro semaforos */
-            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
-                if ( PCB[i]->sems[j] != NULL)
-                    closeSem( PCB[i]->sems[j] );
-            
-            freeMemory(PCB[i]->topMemAllocated);
-            return 0;
+    if (i > 0){
+        /* Ya con TERMINATED asi scheduler no lo elige */
+        PCB[i]->state = TERMINATED;
+        deadChild(i);
+        if (PCB[i]->fds[0] != &buffer){
+            closePipe(PCB[i]->fds[0]);
         }
+        if (PCB[i]->fds[1] != BASEDIRVIDEO){
+            closePipe(PCB[i]->fds[1]);
+        }
+        /* cierro semaforos */
+        for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
+            if ( PCB[i]->sems[j] != NULL)
+                closeSem( PCB[i]->sems[j] );
+        
+        freeMemory(PCB[i]->topMemAllocated);
+        return 0;
+    }
     
     return -1;
 }
@@ -481,7 +444,7 @@ void changeFd(int index, int fd, void * buffer){
 
 int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, void * basePointer, uint8_t isForeground){
     
-    // creo halt
+    /* creo halt */
     if ( nextPid==0){
         PCB[0]->pid = nextPid++;
         PCB[0]->state = TERMINATED;
@@ -498,7 +461,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->name = name;
             PCB[i]->pid = nextPid++;
             PCB[i]->parentPid = PCB[lastSelected]->pid;
-            PCB[i]->priority = 1;//es de los primeros que se ejecutaran pero podría haber un proceso con prioridad 1 que tenga menos ticks para terminar
+            PCB[i]->priority = 1;
             PCB[i]->ticketsBeforeLoosingPrior = 0;
             PCB[i]->stackPointer = stackPointer;
             PCB[i]->blockedReasonCDT.blockReason = 0;
@@ -506,7 +469,6 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             for (int j = 0; j < MAX_SEM_PER_PROCESS; j++){
                 PCB[i]->sems[j] = NULL;
             }
-            //PCB[i]->lastSemOpen = 0;
             PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
