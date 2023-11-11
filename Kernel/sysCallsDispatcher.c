@@ -17,17 +17,6 @@ extern pcbEntryADT PCB[MAX_SIZE_PCB];
 extern uint16_t lastSelected;
 sem_ptr sem;
 
-/**
- * @brief Retorna el valor ASCII guardado en la variable buffer que se modifica con la interrupción 21h.
- * 
- * @return Valor ASCII guardado en la variable buffer.
- */
-static unsigned char readVIEJO() {
-    _sti();
-    buffer = 0; 
-    while ( buffer == 0);
-    return buffer;
-}
 
 /**
  * @brief Escribe sobre la pantalla un caracter con su color deseado.
@@ -49,15 +38,6 @@ static void write(unsigned char c, int FGColor, int BGColor) {
     }
 }
 
-/**
- * @brief Función que espera al transcurso de los segundos deseados que se reciben como parámetro.
- * 
- * @param seconds Segundos que se desean esperar.
- */
-void wait(int seconds){
-    int initial = ticks_elapsed();
-	while ( (double) (ticks_elapsed()-initial)/18.0 < 2 );
-}
 
 /**
  * @brief Llama a los distintos Handlers para cada interrupción de software.
@@ -72,13 +52,7 @@ void wait(int seconds){
  * retorna el valor 0.
  */
 long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2, uint64_t param3, uint64_t param4, uint64_t param5) {
-    // va a entrar al scheduler si o si, pues ticks=0 => (0%quantum == 0) = true 
-    /*
-    if ( syscall > 16 || syscall == 8){
-        updateTicks(0, ticks_before_quantum());
-        restartTicks();
-    }
-    */  
+
     switch (syscall) {
 		case 0:
         return read(param1,(char *) param2,param3);
@@ -90,13 +64,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
                 write(param1, param2, param3);
             break;
         case 2:
-            //restartTicks();
             drawNextLine();
-            break;
-        case 3:
-        //! con BUSY WAITING        	
-            // haria un forceIntTimer() pues se bloquearia
-            wait(param1);
             break;
         case 4:
             timeToStr((char*)param1);
@@ -141,7 +109,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 21:
             return getPriority(param1);
         case 22:
-            // le da prioridad 0 en prox ejecucion
+            /* le da prioridad 0 en prox ejecucion */
             completeQuantum();
             forceTimerInt();
             break;
@@ -152,20 +120,22 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             waitChild(param1);
             break;
         case 25:
-            //syscall_openSem(char * name, int value)
             return openSem((char *)param1, param2);
         case 26:
-            //syscall_getsemvalue(char * name)
             sem = getSemByName((char *)param1);
+            if ( sem == NULL)
+                return -1;
             return getSemValue(sem);
         case 27:
-            //syscall_waitsem(char * name)
             sem = getSemByName((char *)param1);
-            //se podría probar que otro proceso sea el que hace el waitSem
+            if ( sem == NULL)
+                return -1;
             waitSem(sem);
             return 0;
         case 28:
             sem = getSemByName((char *)param1);
+            if ( sem == NULL)
+                return -1;
             postSem(sem);
             return 0;
         case 29:

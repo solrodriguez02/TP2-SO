@@ -83,7 +83,6 @@ void * initializeKernelBinary() {
 
 int main() {	
 
-	// la cre o antes asi no lo puede interrumpir 
 	createMemoryManager();
 	
 	initializeScheduler();
@@ -100,7 +99,7 @@ int main() {
 	argv[0] = "sh";
 	execve((void*)0x400000, 1, 1, argv);
 
-	// Carga de descriptores del IDT.
+	/* Carga de descriptores del IDT. */
 	load_idt(); 	
 	
 	
@@ -137,11 +136,6 @@ int main() {
 	drawString( space+10, 0XFF00FF, 0X000000 );
 
 	
-	//!deberia deshabili desp
-	//*sino puedo poner int 20h
 	return 0;
-	
-	// Llamado a la Shell.
-//	((EntryPoint)sampleCodeModuleAddress)();
 	
 }

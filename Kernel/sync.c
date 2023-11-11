@@ -8,23 +8,12 @@ void enterRegion(int * lock){
      * no es busy waiting
      * 
      */
-    // 
     while( enter_region(lock) ){
         blockRunningProcess(BLOCKBYIPC,MUTEX,lock);
     }
-    /* version anterior */
-    /* 
-        int isBusy = enter_region(lock);
-        if (isBusy){
-            blockProcess(0, BLOCKBYIPC);
-            enter_region(lock);
-        }
-    */
 }
 
 void leaveRegion(int * lock, int reason){
     leave_region(lock);
-    //tryToUnlockPipe(0);
-    tryToUnlockSem(lock,reason);
-    //no se vuelve a setear en 0 porque la idea es que al desbloquear el otro procesa corra desde donde quedo bloqueado
+    tryToUnlockSem(lock,reason);    
 }
