@@ -9,7 +9,7 @@ void enterRegion(int * lock){
      * 
      */
     while( enter_region(lock) ){
-        blockRunningProcess(BLOCKBYIPC,MUTEX,lock);
+        blockRunningProcess(BLOCKBYSYNC,MUTEX,lock);
     }
 }
 

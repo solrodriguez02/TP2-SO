@@ -24,7 +24,7 @@ void waitSem(sem_ptr sem){
     enterRegion(&sem->lockMutex);
     while (1){
         if (sem->value == 0){
-            blockRunningProcess(BLOCKBYIPC, WAITING, &sem->lockMutex);
+            blockRunningProcess(BLOCKBYSYNC, WAITING, &sem->lockMutex);
             enterRegion(&sem->lockMutex);
         }
         else{

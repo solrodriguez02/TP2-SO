@@ -94,7 +94,7 @@ void tryToUnlockRead(int dim ){
             
                 if ( PCB[i]->blockedReasonCDT.size == dim ){
                     PCB[i]->state = READY;
-                    //PCB[i]->priority = 1;
+                    PCB[i]->priority = 1;
                 }
                 return;
         }
@@ -108,7 +108,7 @@ void tryToUnlockSem(void * semLock, int reason){
             if ( i==lastSelected)
                 break;
         }        
-        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
+        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYSYNC
             && PCB[i]->blockedReasonCDT.waitingBuf == semLock &&  PCB[i]->blockedReasonCDT.size == reason){
                 PCB[i]->state = READY;
                 return;
@@ -128,7 +128,7 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
     PCB[lastSelected]->state = BLOCKED;
     
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
-    if (blockReason == BLOCKBYIPC){
+    if (blockReason == BLOCKBYSYNC){
         leave_region(waitingBuf);
     } 
     PCB[lastSelected]->blockedReasonCDT.size = size;
