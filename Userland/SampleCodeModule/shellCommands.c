@@ -58,33 +58,33 @@ int getAllProcessInfo(stat arrayStats){
 static void printStatus(int status){
     switch(status){
             case RUNNING:
-                printf("running\n");
+                printf("running");
                 break;
             case READY:
-                printf("ready\n");
+                printf("ready");
                 break;
             case BLOCKED:
-                printf("bloqueado\n");
+                printf("blocked");
                 break;
             case TERMINATED:
-                printf("terminado\n");
+                printf("terminated");
                 break;
         }
 }
 
 void ps() {
-    int MAX_PROCESS = 8;
+    int MAX_PROCESS = 14;
     struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
-    // ps stackpointer queda = a su basepointer
     for ( int i=0; i<end; i++ ){
-        printf("\nProcess %s with pid %d:\n", arrayStats[i].name, arrayStats[i].pid);
-        printf("\t Prioridad: %d", arrayStats[i].priority);
-        printf("\t Estado: ");
+        print("PID ",0xEE00FF);
+        printf("%d: NAME: %s", arrayStats[i].pid, arrayStats[i].name);
+        printf("\t PRIORITY: %d", arrayStats[i].priority);
+        printf("\t FG: %s \n", (arrayStats[i].isForeground)? "YES":"NO" );
+        printf("\t STATE: ");
         printStatus(arrayStats[i].state);
-        printf("\t %ssta en foreground \n", (arrayStats[i].isForeground)? "E":"NO e" );
-        printf("\t StackPointer: %x", arrayStats[i].stackPointer );
-        printf("\t BasePointer: %x", arrayStats[i].basePointer );
+        printf("\t SP: %x", arrayStats[i].stackPointer );
+        printf("\t BP: %x\n", arrayStats[i].basePointer );
     }
 
 }
