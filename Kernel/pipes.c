@@ -15,17 +15,9 @@ void * createPipe(){
     return pipe;
 }
 
-//se devuelve el numero de chars que fueron leidos
 int readPipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size && !pipe->brokenPipe){
-        //priorizo que haya varios lectores
-        /* se maneja con semaforos
-        if(pipe->readPos == pipe->writePos){
-            postSem(pipe->hasAccess);
-            return i;
-        }
-        */
         waitSem(pipe->readsAvailable);
         waitSem(pipe->hasAccess);
         buffer[i] = pipe->buffer[pipe->readPos];
@@ -44,14 +36,6 @@ int readPipe(pipeADT pipe, char * buffer, int size){
 int writePipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size && !pipe->brokenPipe){
-        /*
-        if(pipe->writePos == BUFFER_SIZE){
-            //! no deberia bloquearse si llega a BUFFER_SIZE?
-            //! hasta q no se haga un read ?
-            postSem(pipe->hasAccess);
-            return i;
-        }
-        */
         waitSem(pipe->writesAvailable);
         waitSem(pipe->hasAccess);
         pipe->buffer[pipe->writePos] = buffer[i];

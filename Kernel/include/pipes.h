@@ -13,8 +13,6 @@ typedef struct pipeCDT {
     sem_ptr hasAccess;
     int readPos;
     int writePos;
-    int readPid;
-    int writePid;
     int brokenPipe;
     int cantProcessesConnected;
 } pipeCDT;
