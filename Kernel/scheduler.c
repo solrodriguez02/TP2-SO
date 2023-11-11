@@ -9,7 +9,6 @@
 #include <sync.h>
 #include <blockingSys.h>
 
-#define KERNEL_STACK_BASE 0x352000 
 
 extern char buffer[MAX_SIZE_BUF];
 int lock;
@@ -43,7 +42,7 @@ typedef struct pcbEntryCDT
     uint16_t lastSemOpen;
 } pcbEntryCDT;
 
-// la informacion que tendra disponible el usuario
+/* Informacion disponible para el usuario con ps */
 struct statProcess{
     uint8_t * name;
     int16_t pid;
@@ -52,19 +51,18 @@ struct statProcess{
     uint8_t isForeground;
     void * stackPointer;
     void * basePointer;
-    //FDS? 
 };
 
 typedef struct pcbEntryCDT * pcbEntryADT;
-
-// ticks no modu => block 
+ 
 pcbEntryADT PCB[MAX_SIZE_PCB]; 
-// blockFunctions 
 
-// no tiene en cuenta el halt
+
 /**
  * @return retorna index del proceso si es que este
  * existe / no termino
+ * 
+ * no tiene en cuenta el halt
  */
 static inline int searchProcessByPid(uint16_t pid){
     for(int i = 1; i < MAX_SIZE_PCB; i++){
@@ -85,6 +83,9 @@ static int getPCBIndex(int pid){
     }
     return -1;
 }
+
+
+/* ----------------------------- ( DES ) BLOQUEAR PROCESOS ----------------------------- */
 
 void tryToUnlockRead(int dim ){
     for ( int i=1; i<MAX_SIZE_PCB; i++){
@@ -116,33 +117,16 @@ void tryToUnlockSem(void * semLock, int reason){
 }
 
 
-void tryToUnlockPipe(int dim){
-    for(int i=lastSelected+1; i != lastSelected; i++){
-        if ( i==MAX_SIZE_PCB){
-            i=1;
-            if ( i==lastSelected)
-                break;
-        }        
-        if ( PCB[i]->state == BLOCKED && PCB[i]->blockedReasonCDT.blockReason == BLOCKBYIPC
-            && PCB[i]->blockedReasonCDT.size <= dim ){
-                PCB[i]->state = READY;
-                return;
-        }
-    }
-}
-
-
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf ){
     if ( blockReason == BLOCKBYWAITCHILD ){
         int indexChild = searchProcessByPid(size);
-        // chequea si es hijo 
         if ( indexChild<0 || PCB[indexChild]->parentPid != PCB[lastSelected]->pid)
         return;
     } else if ( blockReason == BLOCKBYWAITCHILDREN && !PCB[lastSelected]->countChildren )
         return;
 
     PCB[lastSelected]->state = BLOCKED;
-    // aviso q info espera en struct
+    
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
     if (blockReason == BLOCKBYIPC){
         leave_region(waitingBuf);
@@ -157,7 +141,7 @@ int addSemToPCB(char * name, int pid){
     if (pcbIndex == -1){
         return -1;
     }
-    // 1. check q no esta
+    /* 1º chequeo de que ya no este incluido */
     int i;
     for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if ( PCB[pcbIndex]->sems[i]!=NULL && strCmp(PCB[pcbIndex]->sems[i], name)){
@@ -168,7 +152,6 @@ int addSemToPCB(char * name, int pid){
     for ( i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if (PCB[pcbIndex]->sems[i] == NULL){
             PCB[pcbIndex]->sems[i] = name;
-            //PCB[pcbIndex]->lastSemOpen++;
             return 0;
         }
     }
@@ -190,13 +173,13 @@ int deleteSemFromPCB(char * name, int pid){
 }
 
 void blockProcess(int pid, uint16_t blockReason){
-    // doy prioridad para disminuir la posibilidad de que el proximo
-    // proceso que escoja el scheduler sea el que se quiere bloquear    
+     
+    /*  doy prioridad para disminuir la posibilidad de que el proximo
+    proceso que escoja el scheduler sea el que se quiere bloquear    */
     PCB[lastSelected]->priority = 1;
     
     if ( pid == PCB[lastSelected]->pid || pid == RUNNING ){
             PCB[lastSelected]->state = BLOCKED;
-            // aviso q info espera en struct
             PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
             forceTimerInt();
             return;
@@ -205,7 +188,6 @@ void blockProcess(int pid, uint16_t blockReason){
     int i = searchProcessByPid(pid);
         if ( i>0){
             PCB[i]->state = BLOCKED;
-            // aviso q info espera en struct
             PCB[i]->blockedReasonCDT.blockReason = blockReason;
             return;
         }
@@ -240,7 +222,7 @@ void signalHandler(int signal){
             closePipe(pipe);
         }
 
-    }else if ( signal == CTRLC){
+    } else if ( signal == CTRLC){
         deleteFromScheduler(getForegroundPid());
     }
 }
@@ -268,7 +250,7 @@ void updateRunningPriority(unsigned lastTicks){
 }
 
 void updatePriority(int pid, int priority){
-    //!  NO VA A IMPORTARRRR
+    
     if (!pid){
             PCB[lastSelected]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
             PCB[lastSelected]->priority = priority;
@@ -279,8 +261,6 @@ void updatePriority(int pid, int priority){
     if (i>0){
         PCB[i]->priority = priority;
         PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
-        return;
-        // aviso q info espera en struct
     }
 
 }
@@ -342,16 +322,7 @@ void initializeScheduler(){
 
 void * scheduler(void * stackPointer, unsigned lastTicks ){
     
-    /* reinicio ticks en 
-        + sysDispa sys block 
-        + add
-        + delete si el era el q estaba corriendo
-    => sig int llama al scheduler 
-    restartTicks();
-    
-*/
-
-    //* identificio rsp del kernel para no guardarlo 
+    /* identificio rsp del kernel para no guardarlo */
     if ( lastSelected==0 ){
         halt = 0; 
         lastSelected = 1;  
