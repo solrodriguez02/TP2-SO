@@ -2,6 +2,7 @@
 #include <library.h> 
 #include <time.h>
 #include <shell.h>
+#include "syscall.h"
 
 #define FBCOLOR_BLACK 0x000000
 #define FGCOLOR_WHITE 0xFFFFFF
@@ -318,8 +319,7 @@ void * memcpy(void * destination, const void * source, uint64_t length) {
 	return destination;
 }
 
-//test
-#include "syscall.h"
+// ------------------------------------- PARA TESTEOS DE LA CATEDRA ------------------------------------- //
 
 // Random
 static uint32_t m_z = 362436069;
@@ -371,21 +371,6 @@ int64_t satoi(char *str) {
   return res * sign;
 }
 
-// Dummies
-void bussy_wait(uint64_t n) {
-  uint64_t i;
-  for (i = 0; i < n; i++)
-    ;
-}
-
-void endless_loop_print(uint64_t wait) {
-  int64_t pid = my_getpid();
-
-  while (1) {
-    printf("%d ", pid);
-    bussy_wait(wait);
-  }
-}
 
 int64_t my_sem_open(char *sem_id, uint64_t initialValue){
     return syscall_openSem(sem_id, initialValue);
@@ -406,9 +391,17 @@ int64_t my_yield(){
     return 0;
 }
 
+int64_t my_nice(uint64_t pid, uint64_t newPrio) {
+  syscall_update_priority(pid, newPrio);
+  return 0;
+}
+
+int64_t my_create_process(char *name, uint64_t argc, char *argv[]){
+    return execve(getFunctionPointer(getIndexModule(name)), 0, argc, argv);
+}
 
 int64_t my_wait(int64_t pid){
-    syscall_waitChildren();
+    syscall_waitChild(pid);
     return 0;
 }
 

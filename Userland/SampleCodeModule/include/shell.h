@@ -1,14 +1,30 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#define TOTAL_MODULES 38
+#define TOTAL_MODULES 28
 #define COMMAND_MIN_SIZE 4
 #define TIME_BUFF_SIZE 9
 #define MAX_NUM_ARGUMENTS 12
-#define EOFILE '\377'
+
+#define RUNNING 0
+#define READY 1 
+#define BLOCKED 2
+#define TERMINATED 3
+
+/**
+ * @brief Estructura que contiene el nombre, la descripción y la dirección de la función correspondinte al módulo.
+ */
+typedef struct {
+    char * name;
+    char * description;
+    void (*function)(char ** params);
+    int numParams;
+} module;
+
 
 void startShell();
 void loadModule(char * name, char * description, void (*function)(char** params), int numParams);
+void * getFunctionPointer(int index);
 void loadAllModules();
 void runModule(const char * input[]);
 void printHelp();

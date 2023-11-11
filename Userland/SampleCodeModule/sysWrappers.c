@@ -1,4 +1,4 @@
-#include "sysWrappers.h"
+#include <sysWrappers.h>
 #define FBCOLOR_BLACK 0x000000
 #define FGCOLOR_WHITE 0xFFFFFF
 
@@ -145,6 +145,3 @@ void waitChild(int pid){
     syscall_waitChild( pid );
 }
 
-int getAllProcessInfo(stat arrayStats){
-    return syscall_getAllProcessInfo( arrayStats);
-}
