@@ -169,8 +169,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             postSem(sem);
             return 0;
         case 29:
-            closeSem((char *)param1);
-            //closeSem(sem);
+            closeSemSyscall((char *)param1);
             return 0;
         case 30:
             createNewPipe((char **) param1, (char **) param2);

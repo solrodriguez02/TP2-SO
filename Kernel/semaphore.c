@@ -55,7 +55,7 @@ char * getSemName(sem_ptr sem){
 }
 
 void processConnected( sem_ptr sem ){
-    sem->connectedProcesses++;
+    ++sem->connectedProcesses;
 }
 
 /**

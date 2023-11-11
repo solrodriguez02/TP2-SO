@@ -7,5 +7,6 @@ void haltProcess();
 void initializeSems();
 int openSem(char * name, int value);
 int closeSem(char * name);
+int closeSemSyscall(char * name);
 sem_ptr getSemByName(char * name);
 int getSemIndex(sem_ptr sem);

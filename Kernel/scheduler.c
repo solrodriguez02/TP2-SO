@@ -458,9 +458,9 @@ int deleteFromScheduler(uint16_t pid){
                 closePipe(PCB[lastSelected]->fds[1]);
             }
             /* cierro semaforos */
-            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
+            for ( int j=0; j<PCB[lastSelected]->lastSemOpen; j++)
                 if ( PCB[lastSelected]->sems[j] != NULL)
-                    closeSem( getSemName(PCB[lastSelected]->sems[j]) );
+                    closeSem( PCB[lastSelected]->sems[j] ); 
             
             /* lo dejo al final por si hay una interrupcion => lo vuelve a agarrar */
             PCB[lastSelected]->state = TERMINATED;
@@ -480,9 +480,9 @@ int deleteFromScheduler(uint16_t pid){
                 closePipe(PCB[i]->fds[1]);
             }
             /* cierro semaforos */
-            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
-                if ( PCB[lastSelected]->sems[j] != NULL)
-                    closeSem( getSemName(PCB[lastSelected]->sems[j]) );
+            for ( int j=0; j<PCB[i]->lastSemOpen; j++)
+                if ( PCB[i]->sems[j] != NULL)
+                    closeSem( PCB[i]->sems[j] );
             
             freeMemory(PCB[i]->topMemAllocated);
             return 0;

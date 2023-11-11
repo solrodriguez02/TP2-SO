@@ -17,7 +17,6 @@ void printInstructions(){
     printf("-------------------------------------\n");
 }
 
-
 void initializePhilo(){
     
     printInstructions();

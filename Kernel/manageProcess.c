@@ -114,8 +114,11 @@ int openSem(char * name, int value){
     sem_ptr sem = getSemByName(name);
     if ( sem == NULL){
         for ( i=lastSemCreated+1; i!=lastSemCreated; i++ ){
-            if ( i == SIZE_ARRAY_SEMS )
+            if ( i == SIZE_ARRAY_SEMS ){
                 i=0;
+                if ( i==lastSemCreated)
+                    break;
+            }
             if ( sems[i]==FREE )
                 break;
         }
@@ -124,10 +127,23 @@ int openSem(char * name, int value){
             return -1; 
         lastSemCreated = i;
         sems[i] = createSem(name, value);
+        sem = sems[i];
     }
     
-    if ( addSemToPCB(name, 0) == 0){
+    if ( addSemToPCB(name, RUNNING) == 0){
         processConnected(sem);
+        return 0;
+    }
+    return -1;
+}
+
+int closeSemSyscall(char * name){
+    sem_ptr sem = getSemByName(name);
+    if (sem){
+        if ( deleteSemFromPCB(name, RUNNING) && disconnectProcess(sem) == 0 ){
+                destroySem(sem);
+                sems[ getSemIndex(sem) ] = FREE;           
+        }
         return 0;
     }
     return -1;
@@ -136,7 +152,7 @@ int openSem(char * name, int value){
 int closeSem(char * name){
     sem_ptr sem = getSemByName(name);
     if (sem){
-        if ( deleteSemFromPCB(name, 0)==0 && disconnectProcess(sem) == 0){
+        if ( disconnectProcess(sem) == 0 ){
                 destroySem(sem);
                 sems[ getSemIndex(sem) ] = FREE;           
         }
