@@ -15,7 +15,6 @@
 #define MAX_SIZE_BUF 40
 
 
-extern char readScanCode();
 char keyboard_handler(char character);
 unsigned char scanCodeToASCII(unsigned char scanCode);
 void checkConditions(unsigned char scanCode);
