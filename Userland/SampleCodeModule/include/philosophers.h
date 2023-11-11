@@ -6,11 +6,12 @@
 #define EATING 2
 
 #define DEFAULT_NUM_PHILO 5
-#define MORE_MEM_SPACE 20*8
+#define MAX_NUM_PHILO 12
 #define ARGV_SIZE 15
 
 #define SEM_MUTEX_ID "mutexPhilo"
-
+#define PHILO_NAME "philo"
+#define SIZE_NAME 5
 
 /* builtin shell */
 /* => no se corre en bg */

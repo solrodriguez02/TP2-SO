@@ -2,34 +2,39 @@
 #include <library.h>
 
 //! EOF deberia def en library
-int n=DEFAULT_NUM_PHILO;      /* numero de filosofos */
-int * state;
+int n;      /* numero de filosofos */
+int state[MAX_NUM_PHILO];
 char ** semPhi;
-int pids[DEFAULT_NUM_PHILO*8];
+int pids[MAX_NUM_PHILO];
+
 #define LEFT(i,n) (i+n-1)%n
 #define RIGHT(i,n) (i+1)%n 
 
-#define PHILO_NAME "philo"
-#define POS_NUM_PHILO 5
-//! ojo con n, hay q protejerlo 
-//! solo shell lo altera, pero el resto lo usa para calcular LEFT, RIGHT 
-//! => lo debo alterar en mutex
 
 /* builtin shell */
 /* => no se corre en bg */
 void initializePhilo(){
-    printf("Preparo filosofos default\n");
-    state = malloc(DEFAULT_NUM_PHILO*MORE_MEM_SPACE);
+    printf("Preparing default philosophers..\n");
+    
     if (my_sem_open(SEM_MUTEX_ID, 1) == -1) {
       printf("initialize: ERROR opening semaphore\n");
       return;
     }
-    updatePriority(0,10*DEFAULT_NUM_PHILO);
+    
+    char * names[MAX_NUM_PHILO];
+    char * space = malloc( MAX_NUM_PHILO*SIZE_NAME );
+    for ( int i=0; i<MAX_NUM_PHILO; i++ ){
+        space += SIZE_NAME*i;
+        numToStr(i,10, space );
+        names[i] = space;
+    }
+    semPhi = names; 
+
+    n = DEFAULT_NUM_PHILO; 
     for (int i=0; i<n; i++){
         char ** argv = malloc( ARGV_SIZE );
         argv[0] = PHILO_NAME;
-        numToStr(i,10,argv+10);                                     
-        argv[1] = argv+10;
+        argv[1] = names[i];
         pids[i] = execve(&philo, 1, 2, argv );
     }
     
@@ -37,93 +42,88 @@ void initializePhilo(){
     while ( (c=getChar()) != EOF){
         if ( c == 'a')
             addPhilo();
-        if ( c == 'r')
+        else if ( c == 'r')
             removePhilo();
     }
 
-    //todo: matar a todos los hijos 
+    my_sem_wait(SEM_MUTEX_ID);
+    for ( int i=0; i<n; i++ ){
+        /* sem se cierran con el kill */
+        kill(pids[i]);
+    }
+    my_sem_post(SEM_MUTEX_ID);
+    
+    free(space);
+    printf("\nFin\n");
 }
 
-/* tengo que cerrar el sem en semPhi[i] para LEFT y RIGHT */
 void removePhilo(){
-    int aux;
+    if ( n == 2 ){
+        printf("\nError: There should be at least 2 philosophers\n");
+        return;     
+    }
+    
     my_sem_wait(SEM_MUTEX_ID);
-    aux = --n;
+    state[--n] = THINKING;
+    kill(pids[n]);
     my_sem_post(SEM_MUTEX_ID);
-    kill(pids[aux]);
+    
 }
 
 void addPhilo(){
-    if ( DEFAULT_NUM_PHILO*MORE_MEM_SPACE == n*MORE_MEM_SPACE){
-        int * aux = malloc(DEFAULT_NUM_PHILO*MORE_MEM_SPACE*DEFAULT_NUM_PHILO);
-        memcpy(aux,state,DEFAULT_NUM_PHILO*MORE_MEM_SPACE);
-        free(state);
-        state = aux; 
-        char * aux2 = malloc(DEFAULT_NUM_PHILO*MORE_MEM_SPACE*DEFAULT_NUM_PHILO);
-        memcpy(aux,semPhi,DEFAULT_NUM_PHILO*MORE_MEM_SPACE);
-        free(semPhi);
-        semPhi = aux2;
+    if ( n==MAX_NUM_PHILO ){
+        printf("\nMax amount of philosophers reached\n");    
+        return;
     }
-    
     char ** argv = malloc( ARGV_SIZE );
     argv[0] = PHILO_NAME;
-    numToStr(n,10,argv+10);                                     
-    argv[1] = argv+10;
-    pids[n] = execve(&philo, 1, 2, argv );
-    //my_sem_wait(SEM_MUTEX_ID);
+    argv[1] = semPhi[n];
+    my_sem_wait(SEM_MUTEX_ID);
     n++;
-    //my_sem_post(SEM_MUTEX_ID);
+    my_sem_post(SEM_MUTEX_ID);
+    pids[n-1] = execve(&philo, 1, 2, argv );
+    
 }
 
 
 void philo(int argc, char ** argv){
     int i = satoi(argv[1]);
-    printf("Soy el filo %d", i);
+    printf("I am the new philosopher %d\n", i+1);
+
     /* añado mi sem */
-//    char name[3]; 
-//    numToStr(i, 10, name);
-    semPhi[i] = argv[1];
     if (my_sem_open(semPhi[i], 0) == -1) {
-      printf("test_sync: ERROR opening semaphore\n");
+      printf("philo %d: ERROR opening semaphore\n", i+1);
       exit();
     }
-    yield();    
-    /* incorpora los sem */
-    /* abro solo los sem q me importan */   
-    /* o podria hacerlo siempre q vea los costados = muy ineficiente */
+
+    /* abro solo los sem que le importan */   
     if (my_sem_open(SEM_MUTEX_ID, 1) == -1) {
-      printf("philo %d: ERROR opening semaphore\n", i);
+      printf("philo %d: ERROR opening semaphore\n", i+1);
       exit();
     }
-    yield();
 
     if (my_sem_open(semPhi[LEFT(i,n)], 0) == -1) {
-      printf("philo %d: ERROR opening semaphore\n", i);
+      printf("philo %d: ERROR opening semaphore\n", i+1);
       exit();
     }
     
     if (my_sem_open(semPhi[RIGHT(i,n)], 0) == -1) {
-      printf("philo %d: ERROR opening semaphore\n", i);
+      printf("philo %d: ERROR opening semaphore\n", i+1);
       exit();
     }
     yield();
     while ( 1 ){
-        // thinks
+        /* thinks */
+        bussy_wait(WAIT* GetUint()%10 );
         takeForks(i);
-        // eat
         eat();
         putForks(i);
-
+    
     }
 }
 
-/* para poder imprimir */ 
-/* si o si deberia haber 1 comiendo */
 void eat(){
-    // sleep?
-    //yield();
-    bussy_wait(WAIT*2);
-    // yield le va a dar prioridad
+
     my_sem_wait(SEM_MUTEX_ID);
     for ( int i=0; i<n; i++){
         if ( state[i]==EATING)
@@ -133,7 +133,8 @@ void eat(){
     }
     printf("\n");
     my_sem_post(SEM_MUTEX_ID);   
-
+    
+    bussy_wait(WAIT*2);
 }
 
 void takeForks(int i){
@@ -150,6 +151,7 @@ void putForks(int i){
     test(LEFT(i,n));
     test(RIGHT(i,n));
     my_sem_post(SEM_MUTEX_ID);   
+    yield();
 }
 
 /* estoy en mutex */

@@ -441,17 +441,30 @@ int deleteFromScheduler(uint16_t pid){
     PCB[lastSelected]->priority = 1;
 
     if ( pid == lastSelected || pid == RUNNING){
-            // aviso al padre
+            /* evito que scheduler lo agarre si no estaba corriendo */
+            if ( pid != RUNNING)
+                PCB[lastSelected]->state = TERMINATED;
+            
+            /* aviso al padre */
             deadChild(lastSelected);
-            PCB[lastSelected]->state = TERMINATED;
-            //* aca se sacaria al nodo de la lista y desp free
-            freeMemory(PCB[lastSelected]->topMemAllocated);
+
+            // PCB[lastSelected]->state = TERMINATED;
+            // freeMemory(PCB[lastSelected]->topMemAllocated);
+            
             if (PCB[lastSelected]->fds[0] != &buffer){
                 closePipe(PCB[lastSelected]->fds[0]);
             }
             if (PCB[lastSelected]->fds[1] != BASEDIRVIDEO){
                 closePipe(PCB[lastSelected]->fds[1]);
             }
+            /* cierro semaforos */
+            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
+                if ( PCB[lastSelected]->sems[j] != NULL)
+                    closeSem( getSemName(PCB[lastSelected]->sems[j]) );
+            
+            /* lo dejo al final por si hay una interrupcion => lo vuelve a agarrar */
+            PCB[lastSelected]->state = TERMINATED;
+            freeMemory(PCB[lastSelected]->topMemAllocated);
             forceTimerInt();
             return 0;
     }
@@ -460,13 +473,17 @@ int deleteFromScheduler(uint16_t pid){
         if (i > 0){
             PCB[i]->state = TERMINATED;
             deadChild(i);
-            //* aca se sacaria al nodo de la lista y desp free
             if (PCB[i]->fds[0] != &buffer){
                 closePipe(PCB[i]->fds[0]);
             }
             if (PCB[i]->fds[1] != BASEDIRVIDEO){
                 closePipe(PCB[i]->fds[1]);
             }
+            /* cierro semaforos */
+            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
+                if ( PCB[lastSelected]->sems[j] != NULL)
+                    closeSem( getSemName(PCB[lastSelected]->sems[j]) );
+            
             freeMemory(PCB[i]->topMemAllocated);
             return 0;
         }

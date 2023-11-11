@@ -104,7 +104,7 @@ int getSemIndex(sem_ptr sem){
 void initializeSems(){
     int i;
     for (i = 0; i < SIZE_ARRAY_SEMS ; i++){
-        sems[i] = TERMINATED;
+        sems[i] = FREE;
     }
 }
 
