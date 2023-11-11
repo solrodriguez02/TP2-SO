@@ -5,14 +5,9 @@
 
 void * timer_handler(void * stackPointer);
 
-int ticks_elapsed();
-
-int seconds_elapsed();
-
-void restartTicks();
 
 void completeQuantum();
 
-int ticks_before_quantum();
+void forceScheduler();
 
 #endif

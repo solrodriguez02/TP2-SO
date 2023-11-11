@@ -25,7 +25,7 @@ EXTERN exceptionDispatcher
 EXTERN getStackBase
 EXTERN waitForEnter
 EXTERN getAltTouched
-EXTERN restartTicks
+EXTERN forceScheduler
 
 section .text
 
@@ -149,7 +149,7 @@ syscallsHandler:
 
 
 forceTimerInt:
-	call restartTicks
+	call forceScheduler
 	int 0x20
 	ret
 
