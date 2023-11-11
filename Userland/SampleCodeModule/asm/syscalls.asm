@@ -27,6 +27,7 @@ GLOBAL syscall_waitSem
 GLOBAL syscall_postSem
 GLOBAL syscall_closeSem
 GLOBAL syscall_mem
+GLOBAL syscall_getTotalMemory
 
 section .text
 
@@ -58,7 +59,7 @@ syscall_nextLine:
     popf
     ret
 
-syscall_wait:
+syscall_getTotalMemory:
 	pushf
 	mov rsi,rdi 	; # de segundos
 	mov rdi,3

@@ -89,15 +89,37 @@ void ps() {
 
 }
 
+#define FREE 0
+#define USED 1
+#define BOUNDRY 2
+
 void mem(){
     char * state = malloc(257);
-    syscall_mem(state);
-    int blockIndex = 0;
-    printf("ESTADO DE LA MEMORIA:\n");
+    int blockIndex = 0, size, usedMem=0, allocations=0;
+    size = getMemStatus(state);
+    printf("MEMORY STATE:\n");
     while(state[blockIndex] != '\0'){
-        printf("Bloque %d: %s", blockIndex+1, (state[blockIndex] != -1)? "Ocupado\n":"Libre\n");
+        printf("|%s", (state[blockIndex] != FREE)? "1":"0");
+        if ( state[blockIndex]==USED )
+            usedMem++;
+        else if ( state[blockIndex]==BOUNDRY )
+            allocations++;
         blockIndex++;
+        //printf("Bloque %d: %s", blockIndex+1, (state[blockIndex] != -1)? "Ocupado\n":"Libre\n");
+        
     }
+    long unsigned totalMem = getTotalMemory();
+
+    printf("SIZE PER BLOCK: %d", size );
+    printf("TOTAL MEM: %d bytes\n", totalMem);
+    printf("OCCUPIED MEM: %d bytes\n", size*usedMem );
+    printf("ALLOCATED MEM: %d bytes\n", size*allocations);
+    /*
+    
+    printf("TOTAL OCCUPIED BLOCKS: %d", blockIndex);
+    
+    printf("TOTAL ALLOCATIONS: %d", blockIndex);
+*/
 }
 
 void initializePhiloWrapper(){

@@ -98,7 +98,7 @@ unsigned int getOccupiedMemory(){
 	return getOccupiedBlocks(memoryManager) *BLOCK_SIZE;
 } 
 
-unsigned int getTotalMemory(){
+unsigned long getTotalMemory(){
 	return MEM_AVAILABLE;
 }
 
@@ -106,13 +106,15 @@ unsigned int getFreeMemory(){
 	return ( NUM_BLOCKS - getOccupiedBlocks(memoryManager) ) *BLOCK_SIZE;
 } 
 
-void getState(char * state){
+unsigned getState(char * state){
 	int i; 
 	for (i = 0; i < NUM_BLOCKS; i++){
-		if ( memoryManager->bitmap[i] == FREE_BLOCK )
-			state[i] = -1;
-		else
-			state[i] = 1;
+		state[i] = memoryManager->bitmap[i];
 	}
 	state[i] = '\0';
+	return getSizeMemBlock();
+}
+
+unsigned int getSizeMemBlock(){
+	return BLOCK_SIZE;
 }

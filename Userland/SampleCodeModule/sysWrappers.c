@@ -49,15 +49,6 @@ int putChar(char c, int FGColor){
 // ------------------------------------- SCREEN CONTROL ------------------------------------- //
 
 /**
- * @brief Función que espera la cantidad de segundos deseada recibida como parámetro.
- * 
- * @param seconds Cantidad de segundos a esperar.
- */
-void sleep(int seconds){
-    syscall_wait(seconds);
-}
-
-/**
  * @brief Carga el segundo buffer guardado.
  */
 void loadScreen() {
@@ -98,6 +89,15 @@ void free(void * ptr){
     if ( ptr==0x0)
         return;
     syscall_free(ptr);
+}
+
+
+unsigned getMemStatus(char * state){
+    return syscall_mem(state);
+}
+
+unsigned long getTotalMemory(){
+    return syscall_getTotalMemory();
 }
 
 // -------------------------------------- PROCESSES ------------------------------------- //
