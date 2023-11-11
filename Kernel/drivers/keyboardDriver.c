@@ -2,7 +2,7 @@
 #include <scheduler.h>
 #include <interrupts.h>
 
-#define MAX_SIZE_BUF 40
+#define MAX_SIZE_BUF 5
 const unsigned char ascii[TOTAL_SCANCODES][2] = {
 	{  0, 0  }, { 27, 27 } , {'1', '!'}, {'2', '@'}, {'3', '#'}, {'4', '$'}, {'5', '%'}, {'6', '^'},
 	{'7', '&'}, {'8', '*'}, {'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {127, 127}, {  9, 9  },
@@ -31,19 +31,15 @@ char bufferSize = 0;
  * @return Código ASCII correspondiente al make-code leído del mapa de entrada y salida.
  */
 char keyboard_handler(char character) {
-	//character = readScanCode();
 	checkConditions(character);
 	character= scanCodeToASCII(character);
     if ( !character ){
         return 0; 
     }
     if (character == -1){
-        //ojo que si se ctrl d se deja un EOF que se lee despues
         bufferSize++;
         return 1;
     }
-    //se pisan las letras si escribis rapido
-    //buffer[bufferSize++] = character;
     buffer[0] = character;
     bufferSize++;
     return 1;
@@ -72,25 +68,16 @@ unsigned char scanCodeToASCII(unsigned char scanCode) {
             return ascii[scanCode][!getShift()];
         }
     }
-    /*if( scancode de D & ctrlActivated)
-        excep
-    */
+
     return ascii[scanCode][getShift()];
 }
 
-//trato al buffer como una queue
 char consumeKeyFromBuffer(){
     if (bufferSize==0){
         return 0;
     }
 	char toReturn = buffer[0];
     
-    //se pisan las letras si escribis rapido
-    //muevo todo un lugar a la izquierda
-	/* for (int i = 1; i < bufferSize; i++){
-		buffer[i-1] = buffer[i];
-	} */
-	//actualizo el size
     clearKeyboardBuffer();
     bufferSize--;
     return toReturn;
@@ -116,7 +103,6 @@ void checkConditions(unsigned char scanCode) {
     else if(scanCode == CAPSLOCK_DOWN) {
         capslockActivated = !capslockActivated;
     } 
-    //PARA CTRL+D y CTRL+C
     else if ( scanCode== CTRL_KEY_DOWN ){ 
         ctrlActivated = 1;
     }
