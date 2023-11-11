@@ -89,9 +89,9 @@ void ps() {
 
 }
 
-#define FREE 0
-#define USED 1
-#define BOUNDRY 2
+#define FREE 1
+#define USED 2
+#define BOUNDRY 3
 
 void mem(){
     char * state = malloc(257);
@@ -100,17 +100,18 @@ void mem(){
     printf("MEMORY STATE:\n");
     while(state[blockIndex] != '\0'){
         printf("|%s", (state[blockIndex] != FREE)? "1":"0");
+        
         if ( state[blockIndex]==USED )
             usedMem++;
         else if ( state[blockIndex]==BOUNDRY )
-            allocations++;
+            allocations++; 
         blockIndex++;
         //printf("Bloque %d: %s", blockIndex+1, (state[blockIndex] != -1)? "Ocupado\n":"Libre\n");
         
     }
     long unsigned totalMem = getTotalMemory();
 
-    printf("SIZE PER BLOCK: %d", size );
+    printf("\nSIZE PER BLOCK: %d\n", size );
     printf("TOTAL MEM: %d bytes\n", totalMem);
     printf("OCCUPIED MEM: %d bytes\n", size*usedMem );
     printf("ALLOCATED MEM: %d bytes\n", size*allocations);

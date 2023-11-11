@@ -109,7 +109,7 @@ unsigned int getFreeMemory(){
 unsigned getState(char * state){
 	int i; 
 	for (i = 0; i < NUM_BLOCKS; i++){
-		state[i] = memoryManager->bitmap[i];
+		state[i] = memoryManager->bitmap[i]+1;
 	}
 	state[i] = '\0';
 	return getSizeMemBlock();
