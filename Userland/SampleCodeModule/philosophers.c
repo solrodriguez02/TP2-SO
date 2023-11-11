@@ -114,11 +114,11 @@ void philo(int argc, char ** argv){
     yield();
     while ( 1 ){
         /* thinks */
-        bussy_wait(WAIT* GetUint()%10 );
+      //  bussy_wait(WAIT* 3 );
         takeForks(i);
         eat();
         putForks(i);
-    
+       bussy_wait(WAIT*(GetUint()%10+3 ));
     }
 }
 
@@ -134,7 +134,7 @@ void eat(){
     printf("\n");
     my_sem_post(SEM_MUTEX_ID);   
     
-    bussy_wait(WAIT*2);
+    bussy_wait(WAIT*3 );
 }
 
 void takeForks(int i){
