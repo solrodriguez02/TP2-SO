@@ -3,10 +3,8 @@
 
 MemoryManagerADT memoryManager; 
 
-// no genera mucha fragmentacion externa? 
 typedef struct MemoryManagerCDT {
     unsigned char bitmap[NUM_BLOCKS];
-	//para el test
 	void * user_adress;
 } MemoryManagerCDT;
 
@@ -14,7 +12,6 @@ typedef struct MemoryManagerCDT {
 void createMemoryManager() {
 	
     memoryManager = (MemoryManagerADT) ADRESS_MEM_FOR_MMANAGER;
-	
 	memoryManager->user_adress = (void*) ADRESS_MEM_FOR_USER;
 
 	for ( int i=0; i<NUM_BLOCKS; i++)
@@ -27,27 +24,23 @@ void *allocMemory(const size_t memoryToAllocate) {
 	if ( memoryToAllocate > MEM_AVAILABLE )
 		return NULL;
 
-	//1. REDONDEO A BLOQUE
+	/* 1º Redondeo el bloque */
 	int requiredblocks = memoryToAllocate / BLOCK_SIZE + ((memoryToAllocate % BLOCK_SIZE) > 0 ? 1 : 0);
 
-	//2. busco bloques libres
+	/* 2º Busco bloques libres */
 	int location = 0;
 	int limit = NUM_BLOCKS - requiredblocks, i;
 	while (location <= limit) {
 		
-		// Busco blocks libres
 		for ( i = 0; i < requiredblocks; i++) {
 			if ( memoryManager->bitmap[location + i] != FREE_BLOCK)
 				break;
 		}
 
 		if (i == requiredblocks) {
-			//char * allocation =  ADRESS_MEM_FOR_USER+ BLOCK_SIZE * location;
-
-			//* para test
 			void * allocation = memoryManager->user_adress + BLOCK_SIZE * location;
 
-			// Mark the blocks as used
+			/* Marco los bloques como usados */
 			memoryManager->bitmap[location++] = BOUNDARY_BLOCK;
 			for ( i = 1; i < requiredblocks; i++){
 				memoryManager->bitmap[location++] = USED_BLOCK;
@@ -59,9 +52,7 @@ void *allocMemory(const size_t memoryToAllocate) {
 		location = location + i + 1;
 	}
 
-	// Allocation failed, return NULL
 	return NULL;
-
 }
 
 void freeMemory(void *const restrict memoryToFree ){
@@ -69,25 +60,22 @@ void freeMemory(void *const restrict memoryToFree ){
 	if (memoryToFree == NULL || memoryToFree < memoryManager->user_adress)
 		return;
 
-	// Convert pointer to block index
-	//int block = (int)(memoryToFree - ADRESS_MEM_FOR_USER) / BLOCK_SIZE;
-
-	//* para test
+	/* Calculo indice del bloque */
 	int block = (int)( memoryToFree - memoryManager->user_adress);
 
-	// Ensure this is the start of the allocation
+	/* Aseguro que sea el inicio de un bloque */
 	if ( ( block % BLOCK_SIZE) != 0 )
-		// el memoryToFree no es valido
 		return;
 
 	block /= BLOCK_SIZE;
 	
+	/* Aseguro que sea el bloque sea el inicio de una alocacion */
 	if ( memoryManager->bitmap[block] != BOUNDARY_BLOCK){
 		//	perror("no se calculo bien el index del bloq");
 		return;
 	}
 	
-	// Mark blocks as free
+	/* Marco los bloques como FREE */
 	memoryManager->bitmap[block++] = FREE_BLOCK;
 	while (block < NUM_BLOCKS && memoryManager->bitmap[block] == USED_BLOCK)	{
 		memoryManager->bitmap[block++] = FREE_BLOCK;
@@ -105,7 +93,7 @@ static unsigned int getOccupiedBlocks(){
 	return occupied;
 }
 
-// in bytes
+/* Recupero la mem ocupada en bytes */
 unsigned int getOccupiedMemory(){
 	return getOccupiedBlocks(memoryManager) *BLOCK_SIZE;
 } 
