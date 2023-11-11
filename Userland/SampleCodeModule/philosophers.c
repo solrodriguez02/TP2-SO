@@ -45,7 +45,7 @@ void initializePhilo(){
     }
     
     char c; 
-    while ( (c=getChar()) != EOF){
+    while ( (c=getChar()) != EOFILE){
         if ( c == 'a')
             addPhilo();
         else if ( c == 'r')
