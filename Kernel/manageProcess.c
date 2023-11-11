@@ -5,51 +5,43 @@
 #include <lib.h>
 
 #define GPR 15 
-#define SIZE_ADRESS 8   // 8bytes
+#define SIZE_ADRESS 8   /* 8 bytes */
 #define INT_PUSHED_R 5
 #define SS 0x0
 #define RFLAGS 0x202
 #define CS 0x8
 
-// SIZES estan en bits
 #define SIZE_GPT SIZE_ADRESS * GPR 
 #define SIZE_INT_PUSHED_R SIZE_ADRESS * INT_PUSHED_R
 #define SIZE_INITIAL_STACK  SIZE_GPT + SIZE_INT_PUSHED_R
 
-#define PROCESS_STACK_SIZE 4096 //4kb
+#define PROCESS_STACK_SIZE 4096  /* 4kb */
 #define POSTION_REL_STRUCT PROCESS_STACK_SIZE - SIZE_INT_PUSHED_R
 
-#define RDI_REL_POSITION 6 * SIZE_ADRESS // (QUEDO ARRIBA)
+#define RDI_REL_POSITION 6 * SIZE_ADRESS 
 #define RSI_REL_POSITION RDI_REL_POSITION - SIZE_ADRESS
 
 #define SIZE_ARRAY_SEMS MAX_SEM_PER_PROCESS * MAX_SIZE_PCB
-#define FREE 0x0
 
-typedef unsigned long long u_int64_t;
 
 typedef struct processStackCDT{
-   //15 reg 
     void *  rip;
     void *  cs;
     void *  rflags;
     void *  rsp;
     void *  ss;
-    //align
 } processStackCDT;
 
-int lastSemCreated = -1;
-
-sem_ptr sems[SIZE_ARRAY_SEMS];
-
-// le paso el puntero a funcion asm para que pushee al stack
 typedef processStackCDT * processStackADT;
 
-// q mantenga pipes
+int lastSemCreated = -1;
+sem_ptr sems[SIZE_ARRAY_SEMS];
+
+
 int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
-    // pido espacio 
+    
     void * topMem = allocMemory(PROCESS_STACK_SIZE);
 	
-    // si no hay mas espa => ret -1
     if ( topMem == NULL )
         return -1;
     
@@ -57,7 +49,7 @@ int execve(void * ptrFunction, char isForeground, int argc, char ** argv ){
     processStackADT p = (processStackADT) memForStack; 
     
     p->ss = (void *) SS;
-    // + SIZE_ADRESS para asegurar que no pisa los gpr
+
     p->rsp = (void *) p - SIZE_ADRESS*GPR; 
 
     int * rdi = (char *)memForStack - RDI_REL_POSITION ;
@@ -85,7 +77,7 @@ void haltProcess(){
 sem_ptr getSemByName(char * name){
     int i;
     for (i = 0; i < SIZE_ARRAY_SEMS; i++){
-        if ( sems[i]!=FREE && strCmp(name, getSemName(sems[i]))){
+        if ( sems[i]!=NULL && strCmp(name, getSemName(sems[i]))){
             return sems[i];
         }
     }
@@ -104,7 +96,7 @@ int getSemIndex(sem_ptr sem){
 void initializeSems(){
     int i;
     for (i = 0; i < SIZE_ARRAY_SEMS ; i++){
-        sems[i] = FREE;
+        sems[i] = NULL;
     }
 }
 
@@ -119,20 +111,21 @@ int openSem(char * name, int value){
                 if ( i==lastSemCreated)
                     break;
             }
-            if ( sems[i]==FREE )
+            if ( sems[i]==NULL )
                 break;
         }
         /* si no hay mas espacio disponible */
-        if ( i==lastSemCreated)
+        if ( i==lastSemCreated && sems[i]!=NULL)
             return -1; 
         lastSemCreated = i;
         sems[i] = createSem(name, value);
         sem = sems[i];
     }
     
-    if ( addSemToPCB(name, RUNNING) == 0){
-        processConnected(sem);
-        return 0;
+    if ( (i=addSemToPCB(name, RUNNING)) >= 0){
+        if ( i==0)
+            processConnected(sem);
+        return 0; 
     }
     return -1;
 }
@@ -140,9 +133,9 @@ int openSem(char * name, int value){
 int closeSemSyscall(char * name){
     sem_ptr sem = getSemByName(name);
     if (sem){
-        if ( deleteSemFromPCB(name, RUNNING) && disconnectProcess(sem) == 0 ){
+        if ( deleteSemFromPCB(name, RUNNING)==0 && disconnectProcess(sem) == 0 ){
                 destroySem(sem);
-                sems[ getSemIndex(sem) ] = FREE;           
+                sems[ getSemIndex(sem) ] = NULL;           
         }
         return 0;
     }
@@ -154,7 +147,7 @@ int closeSem(char * name){
     if (sem){
         if ( disconnectProcess(sem) == 0 ){
                 destroySem(sem);
-                sems[ getSemIndex(sem) ] = FREE;           
+                sems[ getSemIndex(sem) ] = NULL;           
         }
         return 0;
     }

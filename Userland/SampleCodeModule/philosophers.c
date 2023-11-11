@@ -59,6 +59,7 @@ void initializePhilo(){
     }
     my_sem_post(SEM_MUTEX_ID);
     
+    my_sem_close(SEM_MUTEX_ID);
     free(space);
     printf("\nFin\n");
 }

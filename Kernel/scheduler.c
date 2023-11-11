@@ -157,10 +157,18 @@ int addSemToPCB(char * name, int pid){
     if (pcbIndex == -1){
         return -1;
     }
+    // 1. check q no esta
+    int i;
     for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
+        if ( PCB[pcbIndex]->sems[i]!=NULL && strCmp(PCB[pcbIndex]->sems[i], name)){
+            return 1;
+        }
+    }
+    
+    for ( i = 0; i < MAX_SEM_PER_PROCESS; i++){
         if (PCB[pcbIndex]->sems[i] == NULL){
             PCB[pcbIndex]->sems[i] = name;
-            PCB[pcbIndex]->lastSemOpen++;
+            //PCB[pcbIndex]->lastSemOpen++;
             return 0;
         }
     }
@@ -172,8 +180,8 @@ int deleteSemFromPCB(char * name, int pid){
     if (pcbIndex == -1){
         return -1;
     }
-    for (int i = 0; i < PCB[pcbIndex]->lastSemOpen; i++){
-        if (strCmp(PCB[pcbIndex]->sems[i], name) == 0){
+    for (int i = 0; i < MAX_SEM_PER_PROCESS; i++){
+        if ( PCB[pcbIndex]->sems[i]!=NULL && strCmp(PCB[pcbIndex]->sems[i], name) ){
             PCB[pcbIndex]->sems[i] = NULL;
             return 0;
         }
@@ -419,7 +427,6 @@ void * scheduler(void * stackPointer, unsigned lastTicks ){
     return PCB[lastSelected]->stackPointer;
 }
 
-//* con lista, paso puntero a nodo
 static void deadChild(uint16_t index){
     // obtengo padre
     int parent = searchProcessByPid( PCB[index]->parentPid );
@@ -458,7 +465,7 @@ int deleteFromScheduler(uint16_t pid){
                 closePipe(PCB[lastSelected]->fds[1]);
             }
             /* cierro semaforos */
-            for ( int j=0; j<PCB[lastSelected]->lastSemOpen; j++)
+            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
                 if ( PCB[lastSelected]->sems[j] != NULL)
                     closeSem( PCB[lastSelected]->sems[j] ); 
             
@@ -480,7 +487,7 @@ int deleteFromScheduler(uint16_t pid){
                 closePipe(PCB[i]->fds[1]);
             }
             /* cierro semaforos */
-            for ( int j=0; j<PCB[i]->lastSemOpen; j++)
+            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
                 if ( PCB[i]->sems[j] != NULL)
                     closeSem( PCB[i]->sems[j] );
             
@@ -528,6 +535,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             for (int j = 0; j < MAX_SEM_PER_PROCESS; j++){
                 PCB[i]->sems[j] = NULL;
             }
+            //PCB[i]->lastSemOpen = 0;
             PCB[i]->basePointer = basePointer;
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
