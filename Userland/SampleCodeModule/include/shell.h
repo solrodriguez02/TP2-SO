@@ -25,10 +25,13 @@ typedef struct {
 void startShell();
 void loadModule(char * name, char * description, void (*function)(char** params), int numParams);
 void * getFunctionPointer(int index);
+char * getFunctionName(int index);
+char * getFunctionDescription(int index);
+int getFunctionNumParams(int index);
 void loadAllModules();
-void runModule(const char * input[]);
+void runModule(char * input[]);
 void printHelp();
 void clear();
 int getIndexModule(char * name);
-
+void clearInput();
 #endif

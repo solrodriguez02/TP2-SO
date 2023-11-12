@@ -17,8 +17,7 @@
 #define EOFILE '\377'
 
 
-#define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
-#define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
+#define WAITTIME 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
 
 void getInput(char * buffer);
 

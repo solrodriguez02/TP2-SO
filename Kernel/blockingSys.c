@@ -38,7 +38,7 @@ int read(int fd, char * placeholder, int count){
  * @param BGColor Color de fondo del caracter deseado en el formato 0xRRGGBB, siendo RR el byte para el código de 
  * color rojo, GG el código de color verde, y BB el código de color azul.
  */
-void write(unsigned char c, int FGColor, int BGColor) { 
+void write(char c, int FGColor, int BGColor) { 
     if (getFdBuffer(0, STDOUT) == BASEDIRVIDEO){
         drawChar(c, FGColor, BGColor);
         return;

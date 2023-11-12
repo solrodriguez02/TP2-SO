@@ -37,12 +37,12 @@ int readPipe(pipeADT pipe, char * buffer, int size){
 int writePipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size){
-        waitSem(pipe->brokenPipe);
+        waitSem(pipe->mutexBrokenPipe);
         if (pipe->brokenPipe && !pipe->sendEOF){
-            postSem(pipe->brokenPipe);
+            postSem(pipe->mutexBrokenPipe);
             return -1;
         }
-        postSem(pipe->brokenPipe);
+        postSem(pipe->mutexBrokenPipe);
 
         waitSem(pipe->writesAvailable);
         waitSem(pipe->hasAccess);

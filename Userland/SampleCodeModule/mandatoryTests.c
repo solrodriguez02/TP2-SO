@@ -4,16 +4,17 @@
 #include <shell.h>
 #include <programs.h>
 #include <library.h>
+#include <loader.h>
 
 void loadAllTests(){
     loadModule("testPriority", "Parameters: none", &testPriority,0);
-    loadModule("test_prio", "Runs actual test", &test_prio, 0);
+    loadModule("testPriority", "Runs actual test", &test_prio, 0);
     loadModule("testMM", "Parameters: <max storage>", &testMM, 1);
-    loadModule("test_mm", "Runs test mm", &test_mm, 0);
+    loadModule("testMM", "Runs test mm", &test_mm, 0);
     loadModule("testSync", "Parameters: <number of iterations> <sync(1)/async(0)>", &testSync, 2);
-    loadModule("test_sync", "Runs test sync", &test_sync, 1);
+    loadModule("testSync", "Runs test sync", &test_sync, 1);
     loadModule("testProcesses", "Parameters: <number of processes>", &testProcess,0);
-    loadModule("test_process", "Runs actual test", &test_processes,0);
+    loadModule("testProcesses", "Runs actual test", &test_processes,0);
     loadModule("my_process_inc", "Increments a global variable", &my_process_inc, 3);
     loadModule("endless_loop", "Runs endless loop", &endless_loop,0);
     loadModule("bussy_wait", "Does busy waiting", &bussy_wait, 1);
