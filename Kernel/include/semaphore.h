@@ -7,5 +7,3 @@ void postSem(sem_ptr sem);
 void destroySem(sem_ptr sem);
 int getSemValue(sem_ptr sem);
 char * getSemName(sem_ptr sem);	
-void processConnected( sem_ptr sem );
-int disconnectProcess( sem_ptr sem );

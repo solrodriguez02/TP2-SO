@@ -386,6 +386,10 @@ int64_t my_sem_post(char *sem_id){
 int64_t my_sem_close(char *sem_id){
     return syscall_closeSem(sem_id);
 }
+
+int my_sem_destroy(char *sem_id){
+    return syscall_destroySem(sem_id);
+}
 int64_t my_yield(){
     syscall_yield();
     return 0;

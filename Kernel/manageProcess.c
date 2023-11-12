@@ -123,8 +123,6 @@ int openSem(char * name, int value){
     }
     
     if ( (i=addSemToPCB(name, RUNNING)) >= 0){
-        if ( i==0)
-            processConnected(sem);
         return 0; 
     }
     return -1;
@@ -132,24 +130,19 @@ int openSem(char * name, int value){
 
 int closeSemSyscall(char * name){
     sem_ptr sem = getSemByName(name);
-    if (sem){
-        if ( deleteSemFromPCB(name, RUNNING)==0 && disconnectProcess(sem) == 0 ){
-                destroySem(sem);
-                sems[ getSemIndex(sem) ] = NULL;           
-        }
+    if (sem && deleteSemFromPCB(name, RUNNING)==0 ){
         return 0;
     }
     return -1;
 }
 
-int closeSem(char * name){
+int destroySemSyscall(char * name){
     sem_ptr sem = getSemByName(name);
-    if (sem){
-        if ( disconnectProcess(sem) == 0 ){
-                destroySem(sem);
-                sems[ getSemIndex(sem) ] = NULL;           
-        }
-        return 0;
-    }
+
+    if ( sem ){
+        sems[ getSemIndex(sem) ] = NULL;           
+        destroySem(sem);
+        return 0; 
+    }       
     return -1;
 }
