@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <lib.h>
 
@@ -138,6 +140,12 @@ int strCmp(const char* s1, const char* s2){
     return 1;
 }
 
+/**
+ * @brief Retorna la longitud de una cadena de caracteres.
+ * 
+ * @param str cadena de caracteres a la que calcular su longitud.
+ * @return Valor booleano de si ambas cadenas son iguales en representación ASCII.
+ */
 int strlen(const char * str){
     int i=0;
     while(str[i]!='\0') {

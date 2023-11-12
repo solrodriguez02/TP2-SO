@@ -17,8 +17,7 @@
 #define EOFILE '\377'
 
 
-#define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
-#define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
+#define WAITTIME 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
 
 void getInput(char * buffer);
 
@@ -32,6 +31,7 @@ int strToNum(char* num);
 void * memcpy(void * destination, const void * source, uint64_t length);
 int strcmp (const char* s1, const char* s2);
 int strtok(char * s, char delim, char * array[], int arraySize);
+int strlen(const char * str);
 uint32_t GetUint();
 uint32_t GetUniform(uint32_t max);
 uint8_t memcheck(void *start, uint8_t value, uint32_t size);

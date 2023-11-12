@@ -1,6 +1,18 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <shellCommands.h>
 #include <library.h>
 #include <shell.h>
+#include <philosophers.h>
+struct statProcess{
+    uint8_t * name;
+    int16_t pid;
+    uint8_t state;
+    uint8_t priority;
+    uint8_t isForeground;
+    void * stackPointer;
+    void * basePointer;
+};
 
 void loadAllCommands(){
     loadModule("help", "Prints name and description for all the functionalities available for the user", &printHelp, 0);
@@ -9,13 +21,15 @@ void loadAllCommands(){
     loadModule("block", "Blocks a specific process", &blockProcess, 1);
     loadModule("nice", "Update priority from process", &updateProcessPriority, 2);
     loadModule("mem", "Prints the memory status", &mem, 0);
-    loadModule("ps", "List all processes in execution with their states", &ps, 0);
-    loadModule("philos", "Run philosophers", &initializePhiloWrapper,0);
+    loadModule("ps", "List all processes alive with their states", &ps, 0);
+    loadModule("philo", "Run philosophers", &initializePhiloWrapper,0);
 }
 
 void printHelp() {
     printf("The shell's functionalities are the following:\n");
-    for(int i=0; i<18; i++) {
+    for(int i=0; i<(TOTAL_MODULES-4); i++) {
+        if (i && strcmp(getFunctionName(i-1),getFunctionName(i)))
+            continue;
         printf("\n");
         print(" - ", GREEN);
         print(getFunctionName(i), GREEN);

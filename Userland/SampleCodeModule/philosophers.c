@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "philosophers.h"
 #include <library.h>
 
@@ -138,7 +140,7 @@ void philo(int argc, char ** argv){
         takeForks(i);
         eat();
         putForks(i);
-        bussy_wait(WAIT*(GetUint()%10+3 ));
+        bussy_wait(WAITTIME*(GetUint()%10+3 ));
     }
 }
 
@@ -154,7 +156,7 @@ void eat(){
     printf("\n");
     my_sem_post(SEM_MUTEX_ID);   
     
-    bussy_wait(WAIT*3 );
+    bussy_wait(WAITTIME*3 );
 }
 
 void takeForks(int i){

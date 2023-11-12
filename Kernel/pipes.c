@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <pipes.h>
 #include <semaphore.h>
 #include "MemoryManager.h"
@@ -35,12 +37,12 @@ int readPipe(pipeADT pipe, char * buffer, int size){
 int writePipe(pipeADT pipe, char * buffer, int size){
     int i = 0;
     while(i < size){
-        waitSem(pipe->brokenPipe);
+        waitSem(pipe->mutexBrokenPipe);
         if (pipe->brokenPipe && !pipe->sendEOF){
-            postSem(pipe->brokenPipe);
+            postSem(pipe->mutexBrokenPipe);
             return -1;
         }
-        postSem(pipe->brokenPipe);
+        postSem(pipe->mutexBrokenPipe);
 
         waitSem(pipe->writesAvailable);
         waitSem(pipe->hasAccess);

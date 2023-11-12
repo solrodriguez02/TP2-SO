@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <videodriver.h>
 #include <fonts.h>
@@ -5,11 +7,11 @@
 
 #define ENTRY_SIZE 8
 #define TOPBAR_HEIGHT 0x19
-#define START TOPBAR_HEIGHT + 0xA
+#define START (TOPBAR_HEIGHT + 0xA)
 #define DEFAULT_FONTSIZE PX_24
 #define SCREEN_HEIGHT 768
 #define SCREEN_WIDTH 1024
-#define FRAMEBUFFER_SIZE 3*SCREEN_WIDTH*SCREEN_HEIGHT
+#define FRAMEBUFFER_SIZE (3*SCREEN_WIDTH*SCREEN_HEIGHT)
 
 uint64_t horizontal_offset = 0x00;
 uint64_t previous_horizontal[SCREEN_HEIGHT/PX_32];
@@ -62,8 +64,8 @@ typedef struct vbe_mode_info_structure *VBEInfoPtr;
 
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
-#define LINE_SIZE 3*PX_32*VBE_mode_info->width
-#define TOPBAR_SIZE 3*(TOPBAR_HEIGHT+0xA)*VBE_mode_info->width
+#define LINE_SIZE (3*PX_32*VBE_mode_info->width)
+#define TOPBAR_SIZE (3*(TOPBAR_HEIGHT+0xA)*VBE_mode_info->width)
 
 // ----------------------------------- FONT ----------------------------------- //
 
@@ -102,9 +104,9 @@ uint32_t getFontSize() { return DEFAULT_FONTSIZE;}
  */
 void setScreenBuffer(int directly){
     if (directly) {
-		videoPtr = VBE_mode_info->framebuffer;
+		videoPtr = (uint8_t *) VBE_mode_info->framebuffer;
 	} else {
-		videoPtr = framebuffer_off_screen;
+		videoPtr = (uint8_t *) framebuffer_off_screen;
 	}
 }
 

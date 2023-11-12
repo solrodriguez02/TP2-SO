@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <shell.h>
 #include <library.h>
 #include <stdint.h>
@@ -9,19 +11,20 @@
 module modules[TOTAL_MODULES];
 int modulesCount = 0;
 int maxCantArg;
+char input[COMMAND_MAX_SIZE];
+char * command[MAX_NUM_ARGUMENTS];
 
 void startShell() {
     loadAllModules();
     printf("Welcome to the shell\n");
     //modules[0].function(0);
-    char input[COMMAND_MAX_SIZE];
-    char * command[MAX_NUM_ARGUMENTS];
     while(1){
         printf("\n");
         print("$ ", BLUE);
         getInput(input);
         maxCantArg = strtok(input,' ', command, MAX_NUM_ARGUMENTS);
         runModule(command);
+        clearInput();
     }
 }
 
@@ -32,6 +35,12 @@ void loadModule(char * name, char * description, void (*function)(char** params)
     modules[modulesCount].numParams = numparams;
     modulesCount++;
 }
+
+void clearInput(){
+    for (int i = 0; i < COMMAND_MAX_SIZE; i++){
+        input[i] = '\0';    
+    }
+} 
 
 void loadAllModules() {
     loadAllCommands();
@@ -45,12 +54,12 @@ void loadAllModules() {
  * 
  * @param input Nombre del módulo y parametros recibidos desde la consola.
  */
-void runModule(const char * input[]){
+void runModule(char * input[]){
     printf("\n");    
     for(int i=0;i<TOTAL_MODULES;i++){
         if (strcmp(modules[i].name,input[0])){
             if (!input[1]){
-                modules[i].function(1);
+                modules[i].function((char **) 1);
                 return;
             }
             int numParams1 = modules[i].numParams;
@@ -82,12 +91,11 @@ void runModule(const char * input[]){
                             syscall_createPipe(params1, params2);
      
                             if (!strcmp(input[numParams1 + 3], "&")){
-                                int pidHijos = (char) params1[1]; 
-                                printf("Pid hijo1: %d", pidHijos);
+                                int pidHijos = (char) params2[1]; 
                                 waitChild(pidHijos);
-                                printf("Pid hijo2: %d", pidHijos);
-                                pidHijos = (char) params2[1]; 
+                                pidHijos = (char) params1[1]; 
                                 waitChild(pidHijos);
+                                
                             }
                             return;
                         }

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <scheduler.h>
 #include <interrupts.h>
 #include <MemoryManager.h>
@@ -7,7 +9,9 @@
 #include <pipes.h>
 #include <semaphore.h>
 #include <sync.h>
+#include <lib.h>
 #include <blockingSys.h>
+#include <manageProcess.h>
 
 
 extern char buffer[MAX_SIZE_BUF];
@@ -213,7 +217,6 @@ void signalHandler(int signal){
             pipeADT pipe = (pipeADT) buf;
             char c = -1;
             writePipe(pipe, &c, 1);
-            return;
         }
         buf = getFdBuffer(RUNNING, STDOUT);
         if (buf != BASEDIRVIDEO) {
@@ -259,7 +262,7 @@ int updatePriority(int pid, int priority){
 }
 
 void createNewPipe(char ** params1, char ** params2){
-  
+
     void * ptrfunction1 = (void *) params1[0];
     char isForeground1 = (char) params1[1];
     int argc1 = (int) (params1[2]);
@@ -272,10 +275,19 @@ void createNewPipe(char ** params1, char ** params2){
     for (int i = 0; i < argc1; i++){
         memcpy(argv1[i], params1[3+i], strlen(params1[3+i]));
     }
-    void * ptrfunction2 = params2[0];
-    char isForeground2 = params2[1];
+
+    void * ptrfunction2 = (void *) params2[0];
+    char isForeground2 = (char) params2[1];
     int argc2 = params2[2];
     char ** argv2 ;
+    argv2 = allocMemory(argc2*sizeof(char *));
+    for (int i = 0; i < argc2; i++){
+        argv2[i] = allocMemory(strlen(params2[3+i]));
+    }
+
+    for (int i = 0; i < argc2; i++){
+        memcpy(argv2[i], params2[3+i], strlen(params2[3+i]));
+    }
 
     pipeADT pipe = createPipe();
     PCB[1]->fds[1] = (void *) pipe;
@@ -284,6 +296,7 @@ void createNewPipe(char ** params1, char ** params2){
     PCB[1]->fds[0] = pipe;
     int pid2 = execve(ptrfunction2, isForeground2, argc2, 0X0);
     PCB[1]->fds[0] = &buffer;
+    
     params1[1] = (char *) pid1;
     params2[1] = (char *) pid2;
     
@@ -372,8 +385,8 @@ static void deadChild(uint16_t index){
     if ( parent==-1 )
         return;
     PCB[parent]->countChildren--;
-    if ( PCB[parent]->state == BLOCKED && ( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
-    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid ) )
+    if ( PCB[parent]->state == BLOCKED && (( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
+    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid )) )
         PCB[parent]->state = READY;
     /* no fuerzo interrupt pues el hijo al morir la genera */
 }
@@ -498,15 +511,15 @@ int getStatus(int pid){
     return -1;
 }
 
-void * getFdBuffer(int pid, int i){
-    if ( i > MAX_FD_PER_PROCESS || i < 0 )
+void * getFdBuffer(int pid, int fd){
+    if ( fd > MAX_FD_PER_PROCESS || fd < 0 )
         return 0;
     if (pid == 0){
-        return PCB[lastSelected]->fds[i];   
+        return PCB[lastSelected]->fds[fd];   
     }
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
-            return PCB[i]->fds[i];
+            return PCB[i]->fds[fd];
         }
     }
     return NULL;

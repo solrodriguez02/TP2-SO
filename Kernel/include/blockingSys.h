@@ -4,7 +4,7 @@
 
 int read(char * placeholder, int count);
 
-void write(unsigned char c, int FGColor, int BGColor);
+void write(char c, int FGColor, int BGColor);
 
 void waitChildren();
 

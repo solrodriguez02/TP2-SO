@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <interrupts.h>
 #include <videodriver.h>
@@ -50,7 +52,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             beep(param1,param2);
             break;
         case 8:
-            return getAllProcessInfo(param1);
+            return getAllProcessInfo((stat) param1);
         case 9:
             loadScreen();         
             break;
@@ -72,7 +74,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
         case 17:
             return deleteFromScheduler(param1);
         case 18:
-            return execve((void *)param1, param2, param3, param4);
+            return execve((void *)param1, (char) param2, param3, (char **) param4);
         case 19:
             if (getStatus(param1) == BLOCKED){
                 unblockProcess(param1);

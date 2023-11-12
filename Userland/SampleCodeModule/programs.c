@@ -1,16 +1,18 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <programs.h>
 #include <library.h>
 #include <shell.h>
 
 void loadAllPrograms(){
     loadModule("cat", "program 'cat'", &catWrapper,0);
-    loadModule("cat_original", "program 'cat'", &cat,0);
+    loadModule("cat", "program 'cat'", &cat,0);
     loadModule("wc", "program 'wc'", &wcWrapper,0);
-    loadModule("wc_original", "program 'wc'", &wc,0);
+    loadModule("wc", "program 'wc'", &wc,0);
     loadModule("filter", "program 'filter'", &filterWrapper,0);
-    loadModule("filter_original", "program 'filter'", &filter,0);
+    loadModule("filter", "program 'filter'", &filter,0);
     loadModule("loop", "program 'loop'", &loopWrapper,0);
-    loadModule("loop_original", "Runs loop with print", &loop, 0);
+    loadModule("loop", "Runs loop with print", &loop, 0);
 }
 
 void execveNew( char ** params){
@@ -49,9 +51,8 @@ void loopWrapper(char ** param){
 }
 
 void loop(){
-    long int i = 0;
     while(1){
-        bussy_wait(WAIT* 5);
+        bussy_wait(WAITTIME* 5);
         printf("Soy el proceso con PID: %d\n", getPid());
     }
     exit();
