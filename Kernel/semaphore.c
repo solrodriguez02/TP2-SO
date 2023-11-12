@@ -9,7 +9,6 @@ typedef struct sem_t{
     int lockMutex;
     int value;
     char name[MAX_LEN_NAME];
-    int connectedProcesses;
 };
 
 sem_ptr createSem(char * name, int value){
