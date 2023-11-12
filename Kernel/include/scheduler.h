@@ -27,7 +27,7 @@
 #define MUTEX 0
 #define WAITING 1
 
-#define TICKETS_BEFORE_LOOSING_PRIOR QUANTUM*QUANTUM
+#define TICKETS_BEFORE_LOOSING_PRIOR (QUANTUM*QUANTUM)
 
 typedef struct pcbEntryCDT * pcbEntryADT;
 

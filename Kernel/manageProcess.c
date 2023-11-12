@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <scheduler.h>
 #include <MemoryManager.h>
 #include <manageProcess.h>
@@ -11,17 +13,17 @@
 #define RFLAGS 0x202
 #define CS 0x8
 
-#define SIZE_GPT SIZE_ADRESS * GPR 
-#define SIZE_INT_PUSHED_R SIZE_ADRESS * INT_PUSHED_R
-#define SIZE_INITIAL_STACK  SIZE_GPT + SIZE_INT_PUSHED_R
+#define SIZE_GPT (SIZE_ADRESS * GPR)
+#define SIZE_INT_PUSHED_R (SIZE_ADRESS * INT_PUSHED_R)
+#define SIZE_INITIAL_STACK  (SIZE_GPT + SIZE_INT_PUSHED_R)
 
 #define PROCESS_STACK_SIZE 4096  /* 4kb */
-#define POSTION_REL_STRUCT PROCESS_STACK_SIZE - SIZE_INT_PUSHED_R
+#define POSTION_REL_STRUCT (PROCESS_STACK_SIZE - SIZE_INT_PUSHED_R)
 
-#define RDI_REL_POSITION 6 * SIZE_ADRESS 
-#define RSI_REL_POSITION RDI_REL_POSITION - SIZE_ADRESS
+#define RDI_REL_POSITION (6 * SIZE_ADRESS)
+#define RSI_REL_POSITION (RDI_REL_POSITION - SIZE_ADRESS)
 
-#define SIZE_ARRAY_SEMS MAX_SEM_PER_PROCESS * MAX_SIZE_PCB
+#define SIZE_ARRAY_SEMS (MAX_SEM_PER_PROCESS * MAX_SIZE_PCB)
 
 
 typedef struct processStackCDT{

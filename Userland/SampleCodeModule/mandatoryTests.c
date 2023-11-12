@@ -1,5 +1,8 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <mandatoryTests.h>
 #include <shell.h>
+#include <programs.h>
 #include <library.h>
 
 void loadAllTests(){
@@ -50,7 +53,7 @@ void testSync(char ** params){
 void testMM(char** params){
     char * *argvExec;
     argvExec = (char**) malloc(5 * sizeof(char *));
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 5; i++){
         argvExec[i] = (char*) malloc(15 * sizeof(char));
     }
     int index = getIndexModule("test_mm");
@@ -154,21 +157,29 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     int8_t inc;
     int8_t use_sem;
     
-    if (argc != 3)
+    if (argc != 3){
+        exit();
         return -1;
-
-    if ((n = satoi(argv[1])) <= 0)
+    }
+    if ((n = satoi(argv[1])) <= 0){
+        exit();
         return -1;
-    if ((inc = satoi(argv[2])) == 0)
+    }
+    if ((inc = satoi(argv[2])) == 0){
+        exit();
         return -1;
-    if ((use_sem = satoi(argv[3])) < 0)
+    }
+    if ((use_sem = satoi(argv[3])) < 0){
+        exit();
         return -1;
+    }
     
     printf("entre al proceso\n");
     if (use_sem)
         if (my_sem_open(SEM_ID, 1) == -1) {
         printf("test_sync: ERROR opening semaphore\n");
         exit();
+        return -1;
         }
 
     uint64_t i;
@@ -185,6 +196,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     
     printf("salio todo ok\n");
     exit();
+    return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
@@ -219,6 +231,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     printf("Final value: %d\n", global);
 
     exit();
+    return 0;
 }
 
 //---------------------------------------------TEST PROCESSES---------------------------------------------//
@@ -321,6 +334,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     }
   }
   exit();
+  return 0;
 }
 
 //---------------------------------------------TEST PRIORITIES---------------------------------------------//

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <scheduler.h>
 #include <interrupts.h>
 #include <MemoryManager.h>
@@ -7,7 +9,9 @@
 #include <pipes.h>
 #include <semaphore.h>
 #include <sync.h>
+#include <lib.h>
 #include <blockingSys.h>
+#include <manageProcess.h>
 
 
 extern char buffer[MAX_SIZE_BUF];
@@ -213,7 +217,6 @@ void signalHandler(int signal){
             pipeADT pipe = (pipeADT) buf;
             char c = -1;
             writePipe(pipe, &c, 1);
-            return;
         }
         buf = getFdBuffer(RUNNING, STDOUT);
         if (buf != BASEDIRVIDEO) {
@@ -270,8 +273,8 @@ void createNewPipe(char ** params1, char ** params2){
     for (int i = 0; i < argc1; i++){
         memcpy(argv1[i], params1[3+i], strlen(params1[3+i]));
     }
-    void * ptrfunction2 = params2[0];//3+argc1
-    char isForeground2 = params2[1];
+    void * ptrfunction2 = (void *) params2[0];//3+argc1
+    char isForeground2 = (char) params2[1];
     int argc2 = params2[2];
     char ** argv2 ;
 /*
@@ -507,15 +510,15 @@ int getStatus(int pid){
     return -1;
 }
 
-void * getFdBuffer(int pid, int i){
-    if ( i > MAX_FD_PER_PROCESS || i < 0 )
+void * getFdBuffer(int pid, int fd){
+    if ( fd > MAX_FD_PER_PROCESS || fd < 0 )
         return 0;
     if (pid == 0){
-        return PCB[lastSelected]->fds[i];   
+        return PCB[lastSelected]->fds[fd];   
     }
     for (int i = 0; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->pid == pid){
-            return PCB[i]->fds[i];
+            return PCB[i]->fds[fd];
         }
     }
     return NULL;
