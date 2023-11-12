@@ -258,14 +258,17 @@ void createNewPipe(char ** params1, char ** params2){
 // params {ptrFunction, isForeground, argc, argv..., ptrFunction, isForeground, argc, argv..., }
     void * ptrfunction1 = (void *) params1[0];
     char isForeground1 = (char) params1[1];
-    int argc1 = (int) (params1[2])-1;
+    int argc1 = (int) (params1[2]);
     char ** argv1 ;
     argv1 = allocMemory(argc1*sizeof(char *));
+    for (int i = 0; i < argc1; i++){
+        argv1[i] = allocMemory(strlen(params1[3+i]));
+    }
 
 // => no estoy pasando como argum argv1 ni 2 a execve
 // pero en teoria con asignarles espacio con malloc va a funcionar
     for (int i = 0; i < argc1; i++){
-        argv1[i] = params1[4+i];
+        memcpy(argv1[i], params1[3+i], strlen(params1[3+i]));
     }
     void * ptrfunction2 = params2[0];//3+argc1
     char isForeground2 = params2[1];
@@ -392,6 +395,11 @@ int deleteFromScheduler(uint16_t pid){
             }
             if (PCB[lastSelected]->fds[1] != BASEDIRVIDEO){
                 closePipe(PCB[lastSelected]->fds[1]);
+                if (isBrokenPipe(PCB[lastSelected]->fds[1])){
+                    allowEOF(PCB[lastSelected]->fds[1]);
+                    char eof = EOF;
+                    writePipe(PCB[lastSelected]->fds[1], &eof, 1);
+                }
             }
             /* cierro semaforos */
             for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
@@ -415,6 +423,11 @@ int deleteFromScheduler(uint16_t pid){
         }
         if (PCB[i]->fds[1] != BASEDIRVIDEO){
             closePipe(PCB[i]->fds[1]);
+            if (isBrokenPipe(PCB[i]->fds[1])){
+                allowEOF(PCB[i]->fds[1]);
+                char eof = EOF;
+                writePipe(PCB[i]->fds[1], &eof, 1);
+            }
         }
         /* cierro semaforos */
         for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)

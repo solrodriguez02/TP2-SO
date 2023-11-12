@@ -11,6 +11,8 @@ typedef struct pipeCDT {
     sem_ptr writesAvailable;
     sem_ptr readsAvailable;
     sem_ptr hasAccess;
+    sem_ptr mutexBrokenPipe;
+    int sendEOF;
     int readPos;
     int writePos;
     int brokenPipe;
@@ -24,3 +26,6 @@ int writePipe(pipeADT pipe, char * buffer, int size);
 int readPipe(pipeADT pipe, char * buffer, int size);
 void closePipe(pipeADT pipe);
 void destroyPipe(pipeADT pipe);
+void connectToPipe(pipeADT pipe);
+int isBrokenPipe(pipeADT pipe);
+void allowEOF(pipeADT pipe);
