@@ -1,7 +1,6 @@
 GLOBAL syscall_write
 GLOBAL syscall_read
 GLOBAL syscall_nextLine
-GLOBAL syscall_wait
 GLOBAL syscall_time
 GLOBAL syscall_beep
 GLOBAL syscall_loadScreen
@@ -28,6 +27,7 @@ GLOBAL syscall_postSem
 GLOBAL syscall_closeSem
 GLOBAL syscall_mem
 GLOBAL syscall_getTotalMemory
+GLOBAL syscall_destroySem
 
 section .text
 
@@ -271,6 +271,14 @@ syscall_mem:
 	pushf
 	mov rsi, rdi
 	mov rdi, 31
+	int 80h
+	popf
+	ret
+
+syscall_destroySem:
+	pushf
+	mov rsi, rdi
+	mov rdi, 32
 	int 80h
 	popf
 	ret

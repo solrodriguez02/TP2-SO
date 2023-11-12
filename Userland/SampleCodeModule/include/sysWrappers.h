@@ -4,6 +4,9 @@
 #define STDIN 0
 #define STDOUT 1
 
+#define FREE 1
+#define BOUNDRY 3
+
 int getChar();
 
 int putCharAt(char c, int x, int y);
@@ -28,7 +31,7 @@ int execve(void* pointer, char isForeground, int argc, char ** argv);
 void block(int pid);
 void exit();
 void yield();
-void updatePriority(int pid, int priority );
+int updatePriority(int pid, int priority );
 int getPriority(int pid);
 void waitChildren();
 void waitChild(int pid);
@@ -42,5 +45,6 @@ int64_t my_sem_open(char *sem_id, uint64_t initialValue);
 int64_t my_sem_wait(char *sem_id);
 int64_t my_sem_post(char *sem_id);
 int64_t my_sem_close(char *sem_id);
+int my_sem_destroy(char *sem_id);
 int64_t my_yield();
 int64_t my_wait(int64_t pid);

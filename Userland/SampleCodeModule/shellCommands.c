@@ -44,7 +44,11 @@ void killProcess(char ** params){
 void updateProcessPriority(char ** params){
     int pid = strToNum(params[0]);
     int prior = strToNum(params[1]);
-    updatePriority(pid, prior);
+    if ( prior < 0 || pid < 1 || updatePriority(pid, prior) == -1 ){
+        printf("Invalid arguments, make sure pid and priority are valid");
+        return;
+    }
+        
     printf("Se actualizo la prioridad del proceso con pid %d a %d", pid, prior);
 }
 
@@ -79,7 +83,7 @@ void ps() {
     struct statProcess arrayStats[MAX_PROCESS];
     int end = getAllProcessInfo(arrayStats);
     for ( int i=0; i<end; i++ ){
-        print("PID ",0xEE00FF);
+        print("PID ",PINK);
         printf("%d: NAME: %s", arrayStats[i].pid, arrayStats[i].name);
         printf("\t PRIORITY: %d", arrayStats[i].priority);
         printf("\t FG: %s \n", (arrayStats[i].isForeground)? "YES":"NO" );
@@ -91,38 +95,33 @@ void ps() {
 
 }
 
-#define FREE 1
-#define USED 2
-#define BOUNDRY 3
 
 void mem(){
     char * state = malloc(257);
-    int blockIndex = 0, size, usedMem=0, allocations=0;
+    int blockIndex = 0, size, occupiedMem=0, allocations=0;
     size = getMemStatus(state);
     printf("MEMORY STATE:\n");
     while(state[blockIndex] != '\0'){
-        printf("|%s", (state[blockIndex] != FREE)? "1":"0");
+
+        print("|",PINK);
+        if ( state[blockIndex]!=FREE ){
+            printf("1");
+            occupiedMem++;
+            if ( state[blockIndex]==BOUNDRY )
+                allocations++; 
+        } else 
+            print("0",PINK);
         
-        if ( state[blockIndex]==USED )
-            usedMem++;
-        else if ( state[blockIndex]==BOUNDRY )
-            allocations++; 
         blockIndex++;
-        //printf("Bloque %d: %s", blockIndex+1, (state[blockIndex] != -1)? "Ocupado\n":"Libre\n");
-        
     }
     long unsigned totalMem = getTotalMemory();
 
-    printf("\nSIZE PER BLOCK: %d\n", size );
+    printf("\nSIZE PER BLOCK: %d bytes\n", size );
     printf("TOTAL MEM: %d bytes\n", totalMem);
-    printf("OCCUPIED MEM: %d bytes\n", size*usedMem );
-    printf("ALLOCATED MEM: %d bytes\n", size*allocations);
-    /*
+    printf("OCCUPIED MEM: %d bytes\n", size*occupiedMem );
+    printf("ALLOCATED MEM: %d \n", allocations);
     
-    printf("TOTAL OCCUPIED BLOCKS: %d", blockIndex);
-    
-    printf("TOTAL ALLOCATIONS: %d", blockIndex);
-*/
+    free( state );
 }
 
 void initializePhiloWrapper(){

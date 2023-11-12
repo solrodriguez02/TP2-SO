@@ -247,13 +247,18 @@ void updateRunningPriority(unsigned lastTicks){
     PCB[lastSelected]->ticketsBeforeLoosingPrior--;
 }
 
-void updatePriority(int pid, int priority){
+int updatePriority(int pid, int priority){
     int i = (pid != 0) ? searchProcessByPid(pid) : lastSelected;
     if ( i==-1)
-        return;
+        return i;
     
     PCB[i]->priority = priority;
+    if ( !priority )
+        priority = 5;
+    else if ( priority > MAX_PRIORITY )
+        priority = MAX_PRIORITY;
     PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
+    return 0;
 }
 
 void createNewPipe(char ** params1, char ** params2){
@@ -404,10 +409,6 @@ int deleteFromScheduler(uint16_t pid){
                     writePipe(PCB[lastSelected]->fds[1], &eof, 1);
                 }
             }
-            /* cierro semaforos */
-            for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
-                if ( PCB[lastSelected]->sems[j] != NULL)
-                    closeSem( PCB[lastSelected]->sems[j] ); 
             
             /* lo dejo al final por si hay una interrupcion => lo vuelve a agarrar */
             PCB[lastSelected]->state = TERMINATED;
@@ -432,10 +433,6 @@ int deleteFromScheduler(uint16_t pid){
                 writePipe(PCB[i]->fds[1], &eof, 1);
             }
         }
-        /* cierro semaforos */
-        for ( int j=0; j<MAX_SEM_PER_PROCESS; j++)
-            if ( PCB[i]->sems[j] != NULL)
-                closeSem( PCB[i]->sems[j] );
         
         freeMemory(PCB[i]->topMemAllocated);
         return 0;
@@ -534,10 +531,11 @@ int getPriority(int pid){
 }
 
 int getAllProcessInfo(stat arrayStats){
-    // no incluimos al halt
+    /* no se incluye al halt */
     int j=0,i;
-    
-    PCB[lastSelected]->priority = 2;
+    /*  se asigna arbitrariamente la prioridad para disminuir la posibilidad
+    de que el scheduler seleccione a otro proceso */
+    PCB[lastSelected]->priority = 1;
 
     for ( i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state != TERMINATED ) {

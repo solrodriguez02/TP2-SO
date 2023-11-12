@@ -11,7 +11,6 @@ typedef struct sem_t{
     int lockMutex;
     int value;
     char name[MAX_LEN_NAME];
-    int connectedProcesses;
 };
 
 sem_ptr createSem(char * name, int value){
@@ -44,7 +43,7 @@ void postSem(sem_ptr sem){
     tryToUnlockSem(&sem->lockMutex,WAITING);
 }
 
-void destroySem(sem_ptr sem){
+void destroySem(sem_ptr sem){    
     freeMemory(sem);
 }
 
@@ -54,16 +53,4 @@ int getSemValue(sem_ptr sem){
 
 char * getSemName(sem_ptr sem){
     return sem->name;
-}
-
-void processConnected( sem_ptr sem ){
-    ++sem->connectedProcesses;
-}
-
-/**
- * @return retorna la cantidad de procesos que
- * siguen conectados al semaforo
- */
-int disconnectProcess( sem_ptr sem ){
-    return --sem->connectedProcesses;
 }
