@@ -13,7 +13,7 @@ int maxCantArg;
 void startShell() {
     loadAllModules();
     printf("Welcome to the shell\n");
-    modules[0].function(0);
+    //modules[0].function(0);
     char input[COMMAND_MAX_SIZE];
     char * command[MAX_NUM_ARGUMENTS];
     while(1){

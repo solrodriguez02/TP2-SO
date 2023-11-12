@@ -43,6 +43,8 @@ void write(unsigned char c, int FGColor, int BGColor) {
     }
     int result = writePipe(getFdBuffer(0,STDOUT), &c, 1);
     if (result == -1){
+        char eof = EOF;
+        writePipe(getFdBuffer(0,STDOUT), &eof, 1);
         deleteFromScheduler(0);
     }
 }

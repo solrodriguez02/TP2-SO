@@ -133,7 +133,7 @@ int printf(const char * format, ...){
 
             } else { //format[i] == '//' -> barra de escape
                 if (format[i]=='\n'){
-                    syscall_nextLine();
+                    putChar('\n', FGCOLOR_WHITE);
                 } else if (format[i] == '\a') {
                     syscall_beep(1000,10);
                 } /* other options ?*/
