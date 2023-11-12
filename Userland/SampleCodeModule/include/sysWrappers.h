@@ -22,8 +22,6 @@ void free(void * ptr);
 unsigned getMemStatus(char * state);
 unsigned long getTotalMemory();
 
-extern int syscall_getpid();
-extern int syscall_getstatus(int pid);
 int getPid();
 int getStatus(int pid);
 int kill(int pid);

@@ -47,10 +47,6 @@ void destroySem(sem_ptr sem){
     freeMemory(sem);
 }
 
-int getSemValue(sem_ptr sem){
-    return sem->value;
-}
-
 char * getSemName(sem_ptr sem){
     return sem->name;
 }

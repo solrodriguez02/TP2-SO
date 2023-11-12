@@ -99,11 +99,6 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             break;
         case 25:
             return openSem((char *)param1, param2);
-        case 26:
-            sem = getSemByName((char *)param1);
-            if ( sem == NULL)
-                return -1;
-            return getSemValue(sem);
         case 27:
             sem = getSemByName((char *)param1);
             if ( sem == NULL)

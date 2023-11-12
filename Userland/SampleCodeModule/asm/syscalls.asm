@@ -21,7 +21,6 @@ GLOBAL syscall_waitChild
 GLOBAL syscall_getAllProcessInfo
 GLOBAL syscall_createPipe
 GLOBAL syscall_openSem
-GLOBAL syscall_getSemValue
 GLOBAL syscall_waitSem
 GLOBAL syscall_postSem
 GLOBAL syscall_closeSem
@@ -221,14 +220,6 @@ syscall_openSem:
 	mov rdx, rsi   ; el segundo argumento que se pasa (en rsi) es el 
 	mov rsi, rdi   ; en rsi hay que pasar la cadena de cracteres a imprimirse, la cual es el primer parametro que se encuentra en rdi
     mov rdi, 25     ; syscall for write	mov rdi, 25
-	int 80h
-	popf
-	ret
-
-syscall_getSemValue:
-	pushf
-	mov rsi, rdi
-	mov rdi, 26
 	int 80h
 	popf
 	ret

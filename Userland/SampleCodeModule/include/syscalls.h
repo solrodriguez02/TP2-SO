@@ -30,7 +30,6 @@ extern int syscall_get_priority(int pid);
 extern int syscall_getAllProcessInfo();
 extern int syscall_createPipe(char **params1, char ** params2);
 extern int syscall_openSem(char * name, int value);
-extern int syscall_getSemValue(char * name);
 extern int syscall_waitSem(char * name);
 extern int syscall_postSem(char * name);
 extern int syscall_closeSem(char * name);
