@@ -294,7 +294,7 @@ void createNewPipe(char ** params1, char ** params2){
     int pid1 = execve(ptrfunction1, isForeground1, argc1, argv1);
     PCB[1]->fds[1] = BASEDIRVIDEO;
     PCB[1]->fds[0] = pipe;
-    int pid2 = execve(ptrfunction2, isForeground2, argc2, 0X0);
+    int pid2 = execve(ptrfunction2, isForeground2, argc2, argv2);
     PCB[1]->fds[0] = &buffer;
     
     params1[1] = (char *) pid1;

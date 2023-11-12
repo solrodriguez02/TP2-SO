@@ -22,7 +22,7 @@ void loadAllCommands(){
     loadModule("nice", "Update priority from process", &updateProcessPriority, 2);
     loadModule("mem", "Prints the memory status", &mem, 0);
     loadModule("ps", "List all processes alive with their states", &ps, 0);
-    loadModule("philo", "Run philosophers", &initializePhiloWrapper,0);
+    loadModule("phylo", "Run philosophers", &initializePhiloWrapper,0);
 }
 
 void printHelp() {

@@ -45,7 +45,7 @@ void loopWrapper(char ** param){
     for (int i = 0; i < 2; i++){
         params[i] = malloc(2);
     }
-    numToStr(getIndexModule("loop_original"), 10, params[0]);
+    numToStr(getIndexModule("loop")+1, 10, params[0]);
     memcpy(params[1], (param != 1 && strcmp(param[0], "&")) ? "0": "1", 1);
     execveNew(params);
 }
@@ -63,7 +63,7 @@ void catWrapper(char ** param){
     for (int i = 0; i < 2; i++){
         params[i] = malloc(2);
     }
-    numToStr(getIndexModule("cat_original"), 10, params[0]);
+    numToStr(getIndexModule("cat")+1, 10, params[0]);
     memcpy(params[1], "1", 1);
     execveNew(params);
 }
@@ -81,7 +81,7 @@ void wcWrapper(char ** param){
     for (int i = 0; i < 2; i++){
         params[i] = malloc(2);
     }
-    numToStr(getIndexModule("wc_original"), 10, params[0]);
+    numToStr(getIndexModule("wc")+1, 10, params[0]);
     memcpy(params[1], "1", 1);
     execveNew(params);
 }
@@ -104,7 +104,7 @@ void filterWrapper(char ** param){
     for (int i = 0; i < 2; i++){
         params[i] = malloc(2);
     }
-    numToStr(getIndexModule("filter_original"), 10, params[0]);
+    numToStr(getIndexModule("filter")+1, 10, params[0]);
     memcpy(params[1], "1", 1);
     execveNew(params);
 }

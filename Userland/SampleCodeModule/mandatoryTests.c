@@ -11,7 +11,7 @@ void loadAllTests(){
     loadModule("testPriority", "Runs actual test", &test_prio, 0);
     loadModule("testMM", "Parameters: <max storage>", &testMM, 1);
     loadModule("testMM", "Runs test mm", &test_mm, 0);
-    loadModule("testSync", "Parameters: <number of iterations> <sync(1)/async(0)>", &testSync, 2);
+    loadModule("testSync", "Parameters: <num of iter> <sync(1)/async(0)>", &testSync, 2);
     loadModule("testSync", "Runs test sync", &test_sync, 1);
     loadModule("testProcesses", "Parameters: <number of processes>", &testProcess,0);
     loadModule("testProcesses", "Runs actual test", &test_processes,0);
@@ -29,7 +29,7 @@ void testProcess(char ** params){
     for (int i = 0; i < 5; i++){
         argvExec[i] = (char*) malloc(3 * sizeof(char));
     }
-    int index = getIndexModule("test_process");
+    int index = getIndexModule("testProcesses")+1;
     numToStr(index, 10, argvExec[0]);
     memcpy(argvExec[1], (strcmp(params[1], "&")) ? "0": "1", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
@@ -43,7 +43,7 @@ void testSync(char ** params){
     for (int i = 0; i < 5; i++){
         argvExec[i] = (char*) malloc(40 * sizeof(char));
     }
-    int index = getIndexModule("test_sync");
+    int index = getIndexModule("testSync")+1;
     numToStr(index, 10, argvExec[0]);
     memcpy(argvExec[1], (strcmp(params[2], "&")) ? "0": "1", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
@@ -57,7 +57,7 @@ void testMM(char** params){
     for (int i = 0; i < 5; i++){
         argvExec[i] = (char*) malloc(15 * sizeof(char));
     }
-    int index = getIndexModule("test_mm");
+    int index = getIndexModule("testMM")+1;
     numToStr(index, 10, argvExec[0]);
     memcpy(argvExec[1], (strcmp(params[1], "&")) ? "0": "1", 1);
     memcpy(argvExec[2], params[0], strlen(params[0]));
@@ -70,7 +70,7 @@ void testPriority(char** params){
     for (int i = 0; i < 3; i++){
         argvExec[i] = (char*) malloc(15 * sizeof(char));
     }
-    int index = getIndexModule("test_prio");
+    int index = getIndexModule("testPriority")+1;
     numToStr(index, 10, argvExec[0]);
     memcpy(argvExec[1], (params != 1 && strcmp(params[0], "&")) ? "0": "1", 1);
     execveNew(argvExec);

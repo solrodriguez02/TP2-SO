@@ -6,6 +6,7 @@
 
 #define WHITE 0xFF
 #define BACKGROUNG_COLOR 0x00
+#define RED 0xFF0000
 #define GREEN 0x00FFAA
 #define ORANGE 0xFFB366
 #define BLUE 0x4D4DFF

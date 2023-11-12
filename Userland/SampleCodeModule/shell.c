@@ -63,7 +63,12 @@ void runModule(char * input[]){
                 return;
             }
             int numParams1 = modules[i].numParams;
-            if (maxCantArg >= numParams1 + 1){
+            if (maxCantArg > numParams1 + 1){
+                if (i < 8){
+                    print("Invalid command: commands cannot be piped or run in bg", RED);
+                    printf("\n");
+                    return;
+                }
                 int numParams2;
                 if (strcmp(input[numParams1 + 1],"|")){
                             char ** params1;
@@ -84,7 +89,7 @@ void runModule(char * input[]){
                             params2[0] = (char *) modules[i+1].function;
                             params2[1] = (char *) 1;
                             params2[2] = numParams2 + 1;
-                            params2[3] = modules[i].name;
+                            params2[3] = modules[i+1].name;
                             for (int j = 0; j < numParams2; j++){
                                 params2[j+4] = input[j+numParams1+2];
                             }
