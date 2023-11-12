@@ -6,17 +6,17 @@
 
 extern char buffer[MAX_SIZE_BUF];
 /**
- * @brief Lee del buffer correspondiente al fd 
+ * @brief Lee del buffer correspondiente al stdin
  * 
  */
-int read(int fd, char * placeholder, int count){
-    
+int read(char * placeholder, int count){
+
     void * buf = getFdBuffer(0, STDIN);
 
     if ( buf == &buffer){
-        blockRunningProcess(BLOCKBYREAD,count, fd);
+        blockRunningProcess(BLOCKBYREAD,count, STDIN);
         while ( count--){
-            *placeholder++ = consumeKeyFromBuffer(fd);
+            *placeholder++ = consumeKeyFromBuffer(STDIN);
         }
     }
     else {

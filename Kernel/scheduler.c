@@ -259,8 +259,7 @@ int updatePriority(int pid, int priority){
 }
 
 void createNewPipe(char ** params1, char ** params2){
-//int execve(void * ptrFunction, char isForeground, int argc, char ** argv )
-// params {ptrFunction, isForeground, argc, argv..., ptrFunction, isForeground, argc, argv..., }
+  
     void * ptrfunction1 = (void *) params1[0];
     char isForeground1 = (char) params1[1];
     int argc1 = (int) (params1[2]);
@@ -270,20 +269,14 @@ void createNewPipe(char ** params1, char ** params2){
         argv1[i] = allocMemory(strlen(params1[3+i]));
     }
 
-// => no estoy pasando como argum argv1 ni 2 a execve
-// pero en teoria con asignarles espacio con malloc va a funcionar
     for (int i = 0; i < argc1; i++){
         memcpy(argv1[i], params1[3+i], strlen(params1[3+i]));
     }
-    void * ptrfunction2 = params2[0];//3+argc1
+    void * ptrfunction2 = params2[0];
     char isForeground2 = params2[1];
     int argc2 = params2[2];
     char ** argv2 ;
-/*
-    for (int i = 0; i < argc2; i++){
-        argv2[i] = params2[i+3];
-    }
-*/
+
     pipeADT pipe = createPipe();
     PCB[1]->fds[1] = (void *) pipe;
     int pid1 = execve(ptrfunction1, isForeground1, argc1, argv1);
@@ -291,8 +284,9 @@ void createNewPipe(char ** params1, char ** params2){
     PCB[1]->fds[0] = pipe;
     int pid2 = execve(ptrfunction2, isForeground2, argc2, 0X0);
     PCB[1]->fds[0] = &buffer;
-    //waitChild(pid1);
-    //waitChild(pid2);
+    params1[1] = (char *) pid1;
+    params2[1] = (char *) pid2;
+    
 }
 
 void initializeScheduler(){

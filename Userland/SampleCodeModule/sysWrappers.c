@@ -12,7 +12,7 @@ static char buf;
  * @return Valor ASCII de lecuta del teclado.
  */
 int getChar(){
-    syscall_read(STDIN, &buf, 1);
+    syscall_read(&buf, 1);
     return buf;
 }
 

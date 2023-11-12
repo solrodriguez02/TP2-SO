@@ -31,7 +31,7 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
 
     switch (syscall) {
 		case 0:
-            return read(param1,(char *) param2,param3);
+            return read((char *) param1,param2);
         case 1:
             if (param1==127)    
                 deleteChar();

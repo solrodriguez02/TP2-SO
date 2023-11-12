@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-extern unsigned char syscall_read(unsigned int fd, char * placeholder, unsigned char count);
+extern unsigned char syscall_read(char * placeholder, unsigned char count);
 extern void syscall_writeAt(unsigned char c, int x, int y, int FGColor, int BGColor);
 extern void syscall_write(unsigned char c, int FGColor, int BGColor);
 extern void syscall_nextLine();

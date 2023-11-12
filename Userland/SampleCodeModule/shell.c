@@ -66,6 +66,7 @@ void runModule(const char * input[]){
                             for (int j = 0; j < numParams1; j++){
                                 params1[j+4] = input[j+1];
                             }
+
                     for(int i=0;i<TOTAL_MODULES;i++){
                         if (strcmp(modules[i].name,input[numParams1 + 2])){
                             char ** params2;
@@ -81,7 +82,12 @@ void runModule(const char * input[]){
                             syscall_createPipe(params1, params2);
      
                             if (!strcmp(input[numParams1 + 3], "&")){
-                                waitChildren();
+                                int pidHijos = (char) params1[1]; 
+                                printf("Pid hijo1: %d", pidHijos);
+                                waitChild(pidHijos);
+                                printf("Pid hijo2: %d", pidHijos);
+                                pidHijos = (char) params2[1]; 
+                                waitChild(pidHijos);
                             }
                             return;
                         }

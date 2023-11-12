@@ -33,9 +33,8 @@ section .text
 
 syscall_read:
     pushf
-    mov rcx, rdx   ; count
-	mov rdx, rsi   ; &placeholder
-	mov rsi, rdi   ; fd
+	mov rdx, rsi   ; count
+	mov rsi, rdi   ; &placeholder
 	mov rdi,0      ; syscall for read
     int 80h
     popf
