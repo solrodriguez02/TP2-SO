@@ -4,6 +4,9 @@
 #define STDIN 0
 #define STDOUT 1
 
+#define FREE 1
+#define BOUNDRY 3
+
 int getChar();
 
 int putCharAt(char c, int x, int y);

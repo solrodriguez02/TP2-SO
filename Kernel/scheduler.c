@@ -517,10 +517,11 @@ int getPriority(int pid){
 }
 
 int getAllProcessInfo(stat arrayStats){
-    // no incluimos al halt
+    /* no se incluye al halt */
     int j=0,i;
-    
-    PCB[lastSelected]->priority = 2;
+    /*  se asigna arbitrariamente la prioridad para disminuir la posibilidad
+    de que el scheduler seleccione a otro proceso */
+    PCB[lastSelected]->priority = 1;
 
     for ( i=1; i<MAX_SIZE_PCB; i++){
         if ( PCB[i]->state != TERMINATED ) {

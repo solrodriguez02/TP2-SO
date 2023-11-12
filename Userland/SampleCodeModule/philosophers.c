@@ -5,6 +5,7 @@ int n;                          /* numero de filosofos */
 int state[MAX_NUM_PHILO];
 char ** semPhi;
 int pids[MAX_NUM_PHILO];
+char * argvsToFree[MAX_NUM_PHILO];
 
 #define LEFT(i,n) (i+n-1)%n
 #define RIGHT(i,n) (i+1)%n 
@@ -42,6 +43,7 @@ void initializePhilo(){
         argv[0] = PHILO_NAME;
         argv[1] = names[i];
         pids[i] = execve(&philo, 1, 2, argv );
+        argvsToFree[i] = argv;
     }
     
     char c; 
@@ -56,11 +58,13 @@ void initializePhilo(){
     for ( int i=0; i<n; i++ ){
         /* sem se cierran con el kill */
         kill(pids[i]);
+        free( argvsToFree[i] );    
     }
     my_sem_post(SEM_MUTEX_ID);
     
     my_sem_close(SEM_MUTEX_ID);
     free(space);
+
     printf("\nFin\n");
 }
 
@@ -75,6 +79,7 @@ void removePhilo(){
     kill(pids[n]);
     my_sem_post(SEM_MUTEX_ID);
     
+    free(argvsToFree[n]); 
 }
 
 void addPhilo(){
@@ -83,6 +88,8 @@ void addPhilo(){
         return;
     }
     char ** argv = malloc( ARGV_SIZE );
+    argvsToFree[n] = argv;
+    
     argv[0] = PHILO_NAME;
     argv[1] = semPhi[n];
     my_sem_wait(SEM_MUTEX_ID);

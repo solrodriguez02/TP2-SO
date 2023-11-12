@@ -9,6 +9,7 @@
 #define GREEN 0x00FFAA
 #define ORANGE 0xFFB366
 #define BLUE 0x4D4DFF
+#define PINK 0xEE00FF 
 #define MID_SCREEN_X 512
 #define SCREEN_HEIGHT 768
 #define SCREEN_WIDTH 1018
