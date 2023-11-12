@@ -31,7 +31,7 @@ int execve(void* pointer, char isForeground, int argc, char ** argv);
 void block(int pid);
 void exit();
 void yield();
-void updatePriority(int pid, int priority );
+int updatePriority(int pid, int priority );
 int getPriority(int pid);
 void waitChildren();
 void waitChild(int pid);

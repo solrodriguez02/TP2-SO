@@ -129,8 +129,8 @@ void exit(){
 void yield(){
     syscall_yield();   
 }
-void updatePriority(int pid, int priority ){
-    syscall_update_priority(pid, priority);
+int updatePriority(int pid, int priority ){
+    return syscall_update_priority(pid, priority);
 }
 
 int getPriority(int pid){

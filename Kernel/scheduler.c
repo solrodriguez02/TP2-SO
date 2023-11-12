@@ -244,13 +244,18 @@ void updateRunningPriority(unsigned lastTicks){
     PCB[lastSelected]->ticketsBeforeLoosingPrior--;
 }
 
-void updatePriority(int pid, int priority){
+int updatePriority(int pid, int priority){
     int i = (pid != 0) ? searchProcessByPid(pid) : lastSelected;
     if ( i==-1)
-        return;
+        return i;
     
     PCB[i]->priority = priority;
+    if ( !priority )
+        priority = 5;
+    else if ( priority > MAX_PRIORITY )
+        priority = MAX_PRIORITY;
     PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
+    return 0;
 }
 
 void createNewPipe(char ** params1, char ** params2){

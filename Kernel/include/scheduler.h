@@ -28,6 +28,7 @@
 #define WAITING 1
 
 #define TICKETS_BEFORE_LOOSING_PRIOR QUANTUM*QUANTUM
+#define MAX_PRIORITY 25
 
 typedef struct pcbEntryCDT * pcbEntryADT;
 
@@ -44,7 +45,7 @@ void blockProcess(int pid, uint16_t blockReason);
 
 void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf );
 void * getFdBuffer(int pid, int i);
-void updatePriority(int pid, int priority);
+int updatePriority(int pid, int priority);
 void updateRunningPriority(unsigned lastTicks);
 int getPriority(int pid);
 void tryToUnlockRead(int dim );

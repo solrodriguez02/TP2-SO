@@ -392,8 +392,8 @@ int64_t my_yield(){
 }
 
 int64_t my_nice(uint64_t pid, uint64_t newPrio) {
-  syscall_update_priority(pid, newPrio);
-  return 0;
+  return syscall_update_priority(pid, newPrio);
+  
 }
 
 int64_t my_create_process(char *name, uint64_t argc, char *argv[]){
