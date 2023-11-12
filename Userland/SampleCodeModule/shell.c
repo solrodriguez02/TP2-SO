@@ -94,12 +94,12 @@ void runModule(char * input[]){
                                 params2[j+4] = input[j+numParams1+2];
                             }
                             syscall_createPipe(params1, params2);
-     
+                            
                             if (!strcmp(input[numParams1 + 3], "&")){
-                                int pidHijos = (char) params2[1]; 
-                                waitChild(pidHijos);
-                                pidHijos = (char) params1[1]; 
-                                waitChild(pidHijos);
+                                int pidChildren = (char) params2[1]; 
+                                waitChild(pidChildren);
+                                pidChildren = (char) params1[1]; 
+                                waitChild(pidChildren);
                                 
                             }
                             return;

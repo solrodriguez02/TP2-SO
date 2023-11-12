@@ -78,7 +78,7 @@ void testPriority(char** params){
 
 //---------------------------------------------TEST MM---------------------------------------------//
 
-uint64_t test_mm(uint64_t argc, char *argv[]) {
+void test_mm(uint64_t argc, char *argv[]) {
     mm_rq mm_rqs[MAX_BLOCKS];
     uint8_t rq;
     uint32_t total;
@@ -88,12 +88,10 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
 
     if (argc != 1){
         exit();
-        return -1;
     }
 
     if ((max_memory = satoi(argv[1])) <= 0){
         exit();
-        return -1;
     }
 
     while (1) {
@@ -128,7 +126,7 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
         if (mm_rqs[i].address)
             if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
             printf("test_mm ERROR\n");
-            return -1;
+                exit();
             }
 
         bussy_wait(WAIT);
@@ -153,26 +151,22 @@ void slowInc(int64_t *p, int64_t inc) {
     *p = aux;
 }
 
-uint64_t my_process_inc(uint64_t argc, char *argv[]) {
+void my_process_inc(uint64_t argc, char *argv[]) {
     uint64_t n ;
     int8_t inc;
     int8_t use_sem;
     
     if (argc != 3){
         exit();
-        return -1;
     }
     if ((n = satoi(argv[1])) <= 0){
         exit();
-        return -1;
     }
     if ((inc = satoi(argv[2])) == 0){
         exit();
-        return -1;
     }
     if ((use_sem = satoi(argv[3])) < 0){
         exit();
-        return -1;
     }
     
     printf("entre al proceso\n");
@@ -180,7 +174,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
         if (my_sem_open(SEM_ID, 1) == -1) {
         printf("test_sync: ERROR opening semaphore\n");
         exit();
-        return -1;
         }
 
     uint64_t i;
@@ -197,10 +190,10 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     
     printf("salio todo ok\n");
     exit();
-    return 0;
+    
 }
 
-uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+void test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
     
@@ -232,7 +225,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     printf("Final value: %d\n", global);
 
     exit();
-    return 0;
+
 }
 
 //---------------------------------------------TEST PROCESSES---------------------------------------------//
@@ -242,7 +235,7 @@ void endless_loop() {
     ;
 }
 
-int64_t test_processes(uint64_t argc, char *argv[]) {
+void test_processes(uint64_t argc, char *argv[]) {
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
@@ -251,12 +244,10 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
   if (argc != 1){
     exit();
-    return -1;
   }
 
  if ((max_processes = satoi(argv[1])) <= 0){
     exit();
-    return -1; 
  }
 
   p_rq p_rqs[max_processes];
@@ -276,7 +267,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         if (p_rqs[rq].pid == -1) {
         printf("test_processes: ERROR creating process\n");
         exit();
-        return -1;
+        
         } else {
         printf("Se creo el proceso con pid: %d\n", p_rqs[rq].pid);
         p_rqs[rq].state = RUN;
@@ -296,7 +287,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
               if (my_kill(p_rqs[rq].pid) == -1) {
                 printf("test_processes: ERROR killing process\n");
                 exit();//agregado para asegurarse que muere
-                return -1;
               }
               bussy_wait(WAIT);
               printf("murio el proceso con pid: %d\n", p_rqs[rq].pid);
@@ -310,7 +300,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
               if (my_block(p_rqs[rq].pid) == -1) {
                 printf("test_processes: ERROR blocking process\n");
                 exit();
-                return -1;
               }
               bussy_wait(WAIT);
               printf("bloqueo el proceso con pid: %d\n", p_rqs[rq].pid);
@@ -326,7 +315,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           if (my_unblock(p_rqs[rq].pid) == -1) {
             printf("test_processes: ERROR unblocking process\n");
             exit();
-            return -1;
           }
           bussy_wait(WAIT);
           printf("desbloqueo el proceso con pid: %d\n", p_rqs[rq].pid);
@@ -335,7 +323,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     }
   }
   exit();
-  return 0;
 }
 
 //---------------------------------------------TEST PRIORITIES---------------------------------------------//
@@ -352,6 +339,7 @@ void endless_loop_print(uint64_t wait) {
 
     while (1) {
         printf("%d ", pid);
+        print("|",PINK+pid*1000);
         bussy_wait(wait);
     }
 }

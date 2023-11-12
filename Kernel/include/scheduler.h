@@ -29,6 +29,7 @@
 #define TICKETS_BEFORE_LOOSING_PRIOR (QUANTUM*QUANTUM)
 #define MAX_PRIORITY 25
 
+#define SHELL_PID 1
 typedef struct pcbEntryCDT * pcbEntryADT;
 
 typedef struct statProcess * stat;

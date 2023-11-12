@@ -97,7 +97,7 @@ void tryToUnlockRead(int dim ){
             
                 if ( PCB[i]->blockedReasonCDT.size == dim ){
                     PCB[i]->state = READY;
-                    //PCB[i]->priority = 1;
+                    PCB[i]->priority = 1;
                 }
                 return;
         }
@@ -386,8 +386,10 @@ static void deadChild(uint16_t index){
         return;
     PCB[parent]->countChildren--;
     if ( PCB[parent]->state == BLOCKED && (( PCB[parent]->blockedReasonCDT.blockReason== BLOCKBYWAITCHILDREN && PCB[parent]->countChildren==0) || 
-    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid )) )
+    ( PCB[parent]->blockedReasonCDT.blockReason==BLOCKBYWAITCHILD && PCB[parent]->blockedReasonCDT.size == PCB[lastSelected]->pid )) ){
         PCB[parent]->state = READY;
+    }
+        
     /* no fuerzo interrupt pues el hijo al morir la genera */
 }
 
@@ -472,7 +474,7 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
     }
 
     PCB[lastSelected]->countChildren++;
-
+    
     for (int i = 1; i < MAX_SIZE_PCB; i++){
         if (PCB[i]->state == TERMINATED){
             PCB[i]->name = name;
@@ -490,6 +492,8 @@ int addToScheduler(void * stackPointer, char * name, void * topMemAllocated, voi
             PCB[i]->topMemAllocated = topMemAllocated;
             PCB[i]->isForeground = isForeground;
             PCB[i]->state = READY;
+            if ( !isForeground && lastSelected==SHELL_PID)
+                updatePriority(RUNNING,5);
             forceTimerInt();
             return PCB[i]->pid;
         }
@@ -552,6 +556,6 @@ int getAllProcessInfo(stat arrayStats){
             arrayStats[j++].isForeground = PCB[i]->isForeground;
         }
     }
-    
+       
     return j; 
 }
