@@ -9,7 +9,6 @@ int getChar();
 int putCharAt(char c, int x, int y);
 int putChar(char c, int FGColor);
 
-void sleep(int seconds);
 void loadScreen();
 void enableDoubleBuffer(int enable);
 
@@ -17,6 +16,8 @@ void getTime(char * timeStr);
 
 void * malloc(unsigned int size); 
 void free(void * ptr);
+unsigned getMemStatus(char * state);
+unsigned long getTotalMemory();
 
 extern int syscall_getpid();
 extern int syscall_getstatus(int pid);

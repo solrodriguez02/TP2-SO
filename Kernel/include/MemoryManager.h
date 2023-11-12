@@ -25,9 +25,11 @@ void freeMemory(void *const restrict memoryToFree );
 
 unsigned int getOccupiedMemory();
 
-unsigned int getTotalMemory();
+unsigned long getTotalMemory();
 
 unsigned int getFreeMemory();
 
-void getState(char * state);
+unsigned getState(char * state);
+
+unsigned int getSizeMemBlock();
 #endif
