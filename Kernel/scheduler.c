@@ -270,18 +270,15 @@ void createNewPipe(char ** params1, char ** params2){
 // params {ptrFunction, isForeground, argc, argv..., ptrFunction, isForeground, argc, argv..., }
     void * ptrfunction1 = (void *) params1[0];
     char isForeground1 = (char) params1[1];
-    int argc1 = (int) params1[2];
+    int argc1 = (int) (params1[2])-1;
     char ** argv1 ;
-//! argv1 y argv2 no tienen espacio reservado
+    argv1 = allocMemory(argc1*sizeof(char *));
 
-//! este for es el q genera la invalid operation
 // => no estoy pasando como argum argv1 ni 2 a execve
 // pero en teoria con asignarles espacio con malloc va a funcionar
-  /*
     for (int i = 0; i < argc1; i++){
-        argv1[i] = params1[3+i];
+        argv1[i] = params1[4+i];
     }
-*/
     void * ptrfunction2 = params2[0];//3+argc1
     char isForeground2 = params2[1];
     int argc2 = params2[2];
@@ -293,13 +290,13 @@ void createNewPipe(char ** params1, char ** params2){
 */
     pipeADT pipe = createPipe();
     PCB[1]->fds[1] = (void *) pipe;
-    int pid1 = execve(ptrfunction1, isForeground1, argc1, 0x0);
+    int pid1 = execve(ptrfunction1, isForeground1, argc1, argv1);
     PCB[1]->fds[1] = BASEDIRVIDEO;
     PCB[1]->fds[0] = pipe;
     int pid2 = execve(ptrfunction2, isForeground2, argc2, 0X0);
     PCB[1]->fds[0] = &buffer;
-    //pipe->writePid = pid1;
-    //pipe->readPid = pid2;
+    //waitChild(pid1);
+    //waitChild(pid2);
 }
 
 void initializeScheduler(){
@@ -472,6 +469,10 @@ int deleteFromScheduler(uint16_t pid){
 void copyFdFromParent(int index){
     for (int i = 0; i < MAX_FD_PER_PROCESS; i++){
         PCB[index]->fds[i] = PCB[getPCBIndex(PCB[index]->parentPid)]->fds[i];
+        if (PCB[index]->fds[i] != &buffer && PCB[index]->fds[i] != BASEDIRVIDEO){
+            pipeADT pipe = (pipeADT) PCB[index]->fds[i];
+            connectToPipe(pipe);
+        }
     }
 }
 
