@@ -64,6 +64,11 @@ void runModule(char * input[]){
             }
             int numParams1 = modules[i].numParams;
             if (maxCantArg >= numParams1 + 1){
+                if (i < 8){
+                    print("Invalid command: commands cannot be piped or run in bg", RED);
+                    printf("\n");
+                    return;
+                }
                 int numParams2;
                 if (strcmp(input[numParams1 + 1],"|")){
                             char ** params1;
