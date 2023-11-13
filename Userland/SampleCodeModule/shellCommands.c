@@ -56,12 +56,12 @@ void killProcess(char ** params){
 void updateProcessPriority(char ** params){
     int pid = strToNum(params[0]);
     int prior = strToNum(params[1]);
-    if ( prior < 0 || pid < 1 || updatePriority(pid, prior) == -1 ){
+    if ( prior < 0 || pid < 1 || prior > MAX_PRIORITY || updatePriority(pid, prior) == -1 ){
         printf("Invalid arguments, make sure pid and priority are valid");
         return;
     }
         
-    printf("Se actualizo la prioridad del proceso con pid %d a %d", pid, prior);
+    printf("The priority of the process with pid %d was updated to %d", pid, prior);
 }
 
 void blockProcess(char ** params){

@@ -128,14 +128,13 @@ void blockRunningProcess(uint8_t blockReason, uint16_t size, void * waitingBuf )
     } else if ( blockReason == BLOCKBYWAITCHILDREN && !PCB[lastSelected]->countChildren )
         return;
 
-    PCB[lastSelected]->state = BLOCKED;
-    
     PCB[lastSelected]->blockedReasonCDT.blockReason = blockReason;
     if (blockReason == BLOCKBYSYNC){
         leave_region(waitingBuf);
     } 
     PCB[lastSelected]->blockedReasonCDT.size = size;
     PCB[lastSelected]->blockedReasonCDT.waitingBuf = waitingBuf;
+    PCB[lastSelected]->state = BLOCKED;
     forceTimerInt();
 }
 
@@ -252,12 +251,13 @@ int updatePriority(int pid, int priority){
     if ( i==-1)
         return i;
     
-    PCB[i]->priority = priority;
     if ( !priority )
         priority = 5;
     else if ( priority > MAX_PRIORITY )
         priority = MAX_PRIORITY;
+
     PCB[i]->ticketsBeforeLoosingPrior = TICKETS_BEFORE_LOOSING_PRIOR*(priority+1);
+    PCB[i]->priority = priority;
     return 0;
 }
 
