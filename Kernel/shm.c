@@ -39,6 +39,7 @@ void * openShm(void * name, int size ) {
         if ( i==lastShmCreated && shms[i]!=0x0)
             return 0x0; 
         lastShmCreated = i;
+        newShm = allocMemory(sizeof(struct shm));
         newShm->ptr = allocMemory(size);
         memcpy(newShm->name, name, strlen(name));
         shms[i] = newShm;
