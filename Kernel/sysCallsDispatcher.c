@@ -13,7 +13,7 @@
 #include <manageProcess.h>
 #include <blockingSys.h>
 #include <scheduler.h>
-
+#include <shm.h>
 sem_ptr sem;
 
 
@@ -121,6 +121,8 @@ long int syscallsDispatcher (uint64_t syscall, uint64_t param1, uint64_t param2,
             return getState((char *) param1);
         case 32:
             return destroySemSyscall((char *) param1);
+        case 33:
+            return openShm((char *)param1,param2);
     }
 	return 0;
 }
