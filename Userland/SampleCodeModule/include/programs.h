@@ -19,3 +19,11 @@ void wc();
 void filterWrapper();
 
 void filter();
+
+void readShmWrapper();
+
+void processReadShm();
+
+void writeShmWrapper();
+
+void processWriteShm();
