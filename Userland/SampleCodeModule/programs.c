@@ -13,6 +13,10 @@ void loadAllPrograms(){
     loadModule("filter", "program 'filter'", &filter,0);
     loadModule("loop", "program 'loop'", &loopWrapper,0);
     loadModule("loop", "Runs loop with print", &loop, 0);
+    loadModule("readShm", "test read shm", &readShmWrapper, 0);
+    loadModule("readShm", "test read shm", &processReadShm, 0);
+    loadModule("writeShm", "test read shm", &writeShmWrapper, 0);
+    loadModule("writeShm", "test write shm", &processWriteShm, 0);
 }
 
 void execveNew( char ** params){
@@ -117,4 +121,44 @@ void filter(){
         }
     }
     exit();
+}
+
+void readShmWrapper(){
+    char * params[2];
+    for (int i = 0; i < 2; i++){
+        params[i] = malloc(2);
+    }
+    numToStr(getIndexModule("readShm")+1, 10, params[0]);
+    memcpy(params[1], "1", 1);
+    execveNew(params);
+}
+
+void processReadShm(){
+    char * shm = (char *) syscall_openShm("shm", 20);
+    while(*shm != 0){
+        printf("%c", *shm);
+        shm++;
+    }
+    printf("El proceso %d termino de leer la shm", getPid());
+    exit();
+}
+
+void processWriteShm(){
+    char * shm = (char *) syscall_openShm("shm", 20);
+    for (int i = 0; i < 15; i++, shm++){
+        *shm = ('a'+i);
+    }
+    *shm = 0;
+    printf("El proceso %d termino de escribir la shm", getPid());
+    exit();
+}
+
+void writeShmWrapper(){
+    char * params[2];
+    for (int i = 0; i < 2; i++){
+        params[i] = malloc(2);
+    }
+    numToStr(getIndexModule("writeShm")+1, 10, params[0]);
+    memcpy(params[1], "1", 1);
+    execveNew(params);
 }

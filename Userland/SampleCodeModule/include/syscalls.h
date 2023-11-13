@@ -36,4 +36,5 @@ extern int syscall_closeSem(char * name);
 extern int syscall_mem(char * buffer);
 extern int syscall_getTotalMemory();
 extern int syscall_destroySem(char * name);
+extern void * syscall_openShm(char * name, int size);
 #endif

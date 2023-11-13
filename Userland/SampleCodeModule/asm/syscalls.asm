@@ -27,6 +27,7 @@ GLOBAL syscall_closeSem
 GLOBAL syscall_mem
 GLOBAL syscall_getTotalMemory
 GLOBAL syscall_destroySem
+GLOBAL syscall_openShm
 
 section .text
 
@@ -269,6 +270,15 @@ syscall_destroySem:
 	pushf
 	mov rsi, rdi
 	mov rdi, 32
+	int 80h
+	popf
+	ret
+
+syscall_openShm:
+	pushf
+	mov rdx, rsi	
+	mov rsi, rdi
+	mov rdi, 33
 	int 80h
 	popf
 	ret
