@@ -7,6 +7,8 @@
 #define FREE 1
 #define BOUNDRY 3
 
+#define MAX_PRIORITY 25
+
 int getChar();
 
 int putCharAt(char c, int x, int y);

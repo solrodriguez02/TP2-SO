@@ -88,8 +88,8 @@ int main() {
 	createMemoryManager();
 	
 	initializeScheduler();
-//	initializeSems();
-	//Elige escribir directo en pantalla.
+
+	/* Elige escribir directo en pantalla. */
 	setScreenBuffer(1);	
 	drawTopLine();
 
@@ -105,38 +105,9 @@ int main() {
 	load_idt(); 	
 	
 	
-	//! para forzar int 0x20 para syscalls
+	/*! para forzar int 0x20 para syscalls */
 	forceTimerInt();
 	
-	// LAS SYS ESTAN DESACTIVADAASS
-	// sin PushState
-	// mem 
-
-	char * space = allocMemory(20);
-
-	// Escribe en la heapppp
-	// cheq ultima direccion kernel
-	void * ans = getStackBase();
-	//ans = ;
-	numToStr((uint64_t)&ans ,16,space);
-	drawString( space, 0XFF00FF, 0X000000 );
-	
-	numToStr((uint64_t)&bss ,16,space);
-	drawString( space, 0X0000FF, 0X000000 );
-	space[10]='a';
-	space[11]='b';
-	space[12]=0;
-
-	drawString( space+10, 0XFF00FF, 0X000000 );
-	// Libera	
-	freeMemory(space);
-	space = allocMemory(20);
-	drawString( space+10, 0XFF00FF, 0X000000 );
-
-
-	space = allocMemory(2000);
-	drawString( space+10, 0XFF00FF, 0X000000 );
-
 	
 	return 0;
 	
