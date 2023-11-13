@@ -276,8 +276,9 @@ syscall_destroySem:
 
 syscall_openShm:
 	pushf
+	mov rdx, rsi	
 	mov rsi, rdi
-	mov rdi, 32
+	mov rdi, 33
 	int 80h
 	popf
 	ret
