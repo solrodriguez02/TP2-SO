@@ -13,6 +13,8 @@ void loadAllPrograms(){
     loadModule("filter", "program 'filter'", &filter,0);
     loadModule("loop", "program 'loop'", &loopWrapper,0);
     loadModule("loop", "Runs loop with print", &loop, 0);
+    loadModule("readShm", "test read shm", &processReadShm, 0);
+    loadModule("writeShm", "test write shm", &processWriteShm, 0);
 }
 
 void execveNew( char ** params){
@@ -116,5 +118,25 @@ void filter(){
             printf("%c", read);
         }
     }
+    exit();
+}
+
+void processReadShm(){
+    char * shm = (char *) syscall_openShm("shm", 20);
+    while(*shm != 0){
+        printf("%c", *shm);
+        shm++;
+    }
+    printf("El proceso %d termino de leer la shm", getPid());
+    exit();
+}
+
+void processWriteShm(){
+    char * shm = (char *) syscall_openShm("shm", 20);
+    for (int i = 0; i < 15; i++, shm++){
+        *shm = ('a'+i);
+    }
+    *shm = 0;
+    printf("El proceso %d termino de escribir la shm", getPid());
     exit();
 }
