@@ -139,7 +139,7 @@ void processReadShm(){
         printf("%c", *shm);
         shm++;
     }
-    printf("El proceso %d termino de leer la shm", getPid());
+    printf("\nEl proceso %d termino de leer la shm", getPid());
     exit();
 }
 
@@ -147,9 +147,10 @@ void processWriteShm(){
     char * shm = (char *) syscall_openShm("shm", 20);
     for (int i = 0; i < 15; i++, shm++){
         *shm = ('a'+i);
+        printf("%c", 'a'+i);
     }
     *shm = 0;
-    printf("El proceso %d termino de escribir la shm", getPid());
+    printf("\nEl proceso %d termino de escribir la shm", getPid());
     exit();
 }
 
